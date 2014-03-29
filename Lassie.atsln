@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Atmel Studio Solution File, Format Version 11.00
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Communication", "Communication\Communication.cproj", "{8D3E9D69-539C-405E-A804-0CF0E35F8279}"
 EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Sensor", "Sensor\Sensor.cproj", "{B5A1A395-81B9-4E41-9E36-4CB0F07875A1}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Steering", "Steering\Steering.cproj", "{165CF793-4DA2-46ED-954C-3F44F68615CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
@@ -13,6 +17,14 @@ Global
 		{8D3E9D69-539C-405E-A804-0CF0E35F8279}.Debug|AVR.Build.0 = Debug|AVR
 		{8D3E9D69-539C-405E-A804-0CF0E35F8279}.Release|AVR.ActiveCfg = Release|AVR
 		{8D3E9D69-539C-405E-A804-0CF0E35F8279}.Release|AVR.Build.0 = Release|AVR
+		{B5A1A395-81B9-4E41-9E36-4CB0F07875A1}.Debug|AVR.ActiveCfg = Debug|AVR
+		{B5A1A395-81B9-4E41-9E36-4CB0F07875A1}.Debug|AVR.Build.0 = Debug|AVR
+		{B5A1A395-81B9-4E41-9E36-4CB0F07875A1}.Release|AVR.ActiveCfg = Release|AVR
+		{B5A1A395-81B9-4E41-9E36-4CB0F07875A1}.Release|AVR.Build.0 = Release|AVR
+		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Debug|AVR.ActiveCfg = Debug|AVR
+		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Debug|AVR.Build.0 = Debug|AVR
+		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Release|AVR.ActiveCfg = Release|AVR
+		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
