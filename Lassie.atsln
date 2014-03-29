@@ -7,6 +7,8 @@ Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Sensor", "Sensor\Sensor.cpr
 EndProject
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Steering", "Steering\Steering.cproj", "{165CF793-4DA2-46ED-954C-3F44F68615CF}"
 EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "CommonLibrary", "CommonLibrary\CommonLibrary.cproj", "{5EF259FE-F683-4182-BCD4-04D6E9B66357}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
@@ -25,6 +27,10 @@ Global
 		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Debug|AVR.Build.0 = Debug|AVR
 		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Release|AVR.ActiveCfg = Release|AVR
 		{165CF793-4DA2-46ED-954C-3F44F68615CF}.Release|AVR.Build.0 = Release|AVR
+		{5EF259FE-F683-4182-BCD4-04D6E9B66357}.Debug|AVR.ActiveCfg = Debug|AVR
+		{5EF259FE-F683-4182-BCD4-04D6E9B66357}.Debug|AVR.Build.0 = Debug|AVR
+		{5EF259FE-F683-4182-BCD4-04D6E9B66357}.Release|AVR.ActiveCfg = Release|AVR
+		{5EF259FE-F683-4182-BCD4-04D6E9B66357}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
