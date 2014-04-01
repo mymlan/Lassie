@@ -23,15 +23,22 @@ int main(void)
     }
 }
 
-int Send_data_to_sensor(unsigned char address_byte, unsigned char data_byte) //hur göra om det är flera bytes vi vill skicka?
+int Send_data_to_sensor(unsigned char address_byte, unsigned char data) //hur göra om det är flera bytes vi vill skicka?
 {
-	PORTB = (1<<PB3); //sätter SS låg
+	PORTB = (1<<PB4); //sätter SS låg
 	Master_transmit_data(address_byte); //Skickar adressbyten till sensor
 	//vänta på att sensor läst adressbiten och lagt in den info som sensor vill skicka i sitt SPDR
-	Master_transmit_data(data_byte); 
-	PORTB = (0<<PB3);
+	int number_of_bytes_in_data = 1; // räkna anta bytes, alt 
+	while(!(number_of_bytes_in_data == 0))
+	{
+		Master_transmit_data(data_byte);	
+		number_of_bytes_in_data = number_of_bytes_in_data - 1;
+	}
+	PORTB = (0<<PB4);
 	return 0;
 }
+
+//funktion som översätter map adress_byte vad int number_of_bytes_in_data blir
 
 void Master_transmit_data(unsigned char data_to_transmitt) //int eller void?
 {
