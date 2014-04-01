@@ -49,22 +49,30 @@ pwm = tid1 /(tid1+tid2)
 */	
 	long int COUNTER_MAX = 65535;
 	double BASE_SPEED = 32768; // Halvfart
-	double LEFT_SPEED_FACTOR = 2; // Mellan 0 och 2
+	double LEFT_SPEED_FACTOR = 1; // Mellan 0 och 2
 	double RIGHT_SPEED_FACTOR = 2; // Mellan 0 och 2
 
 	ICR1 = COUNTER_MAX; // Räknarens tak
 	OCR1A = BASE_SPEED * LEFT_SPEED_FACTOR; // Höger motor gräns
 	OCR1B = BASE_SPEED * RIGHT_SPEED_FACTOR; // Vänster motor gräns
 	
-	OCR2A = 70;//70-90 bra siffror; // Gripklo gränd
+	//OCR2A = 70;//70-90 bra siffror; // Gripklo gränd
 	// Högt OCR1x ger långsammare hastighet
 	
 	TCCR1A |= (1<< COM1A1) | (1<< COM1A0) | (1<< COM1B0) | (1<< COM1B1) | (1<< WGM11) | (0<< WGM10); // Nödvändiga grejor för PWM - motor
 	TCCR1B |= (1<< WGM13) | (1<< WGM12) | (0<< CS12) | (0<< CS11) | (1<< CS10); // Nödvändiga grejor för PWM - motor
 	
-	TCCR2A |= (1<< WGM21) | (1<< WGM20) | (1<< COM2B1) | (0<< COM2B0);//COM2B 11 el 10 förrikting
-	TCCR2B |= (1<< WGM22) | (1<< CS22) | (0<< CS21) | (1<< CS20);
-	DDRD |= (1<< DDD4) | (1<< DDD5) | (1<< DDD6); //  Gör PD4.5.6 till utgångar för PWM ut	
+	/*ICR3 = 20000; // Räknarens tak
+	OCR3A = 5000;
+	OCR3B = 10000; // Vänster motor gräns
+	
+	TCCR3A |= (1<< COM3A1) | (1<< COM3A0) | (1<< COM3B1) | (1<< COM3B0) | (1<< WGM31) | (0<< WGM30); // Gripklo
+	TCCR3B |= (1<< WGM33) | (1<< WGM32) | (0<< CS32) | (0<< CS31) | (1<< CS30); // Gripklo	
+	*/
+	//TCCR2A |= (1<< WGM21) | (1<< WGM20) | (1<< COM2B1) | (0<< COM2B0);//COM2B 11 el 10 förrikting
+	//TCCR2B |= (1<< WGM22) | (1<< CS22) | (0<< CS21) | (1<< CS20);
+	DDRD |= (1<< DDD4) | (1<< DDD5) | (1<< DDD6); //  Gör PD4.5.6 till utgångar för PWM ut
+	//DDRB |= (1<< DDB6) | (1<< DDB7); // Pinne ut till gripklo
 	// Ett problem som finns är att gripklon griper ihop hela tiden..
 	
 
@@ -89,7 +97,7 @@ pwm = tid1 /(tid1+tid2)
 	*/
 	while (1)
 	{
-			for(int x = 0; x<10000; x++)
+/*			for(int x = 0; x<10000; x++)
 			{
 				_delay_ms(1);
 			}
@@ -100,7 +108,8 @@ pwm = tid1 /(tid1+tid2)
 				_delay_ms(1);
 			}
 			OCR2A = 70;
-			TCCR2A |= (1<< COM2B1) | (0<< COM2B0);//COM2B 11 el 10 för rikting	
+			TCCR2A |= (1<< COM2B1) | (0<< COM2B0);//COM2B 11 el 10 för rikting
+	*/			
 	/*TCCR2A |= (1<< COM2B1) | (0<< COM2B1);
 	OCR2A = 70;
 	_delay_ms(100);
