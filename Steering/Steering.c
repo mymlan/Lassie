@@ -26,20 +26,29 @@ PORTD4: Vänster styrka
 PORTD3: Höger riktning
 PORTD2: Vänster riktning
 */
-//Stanna
-void Stop()
+// Pausning / Delay
+void Delay_seconds(int seconds)
 {
-	left_speed_factor = 2;
-	right_speed_factor = 2;
-	OCR1A = BASE_SPEED * left_speed_factor; // Uppdatera hastigheten 
-	OCR1B = BASE_SPEED * right_speed_factor;  
+	for (int i = 0; i < seconds; i++)
+	{
+		for (int j = 0; j < 10000; j++)
+		{
+			_delay_ms(1);
+		}
+	}
 }
 
+//Stanna
+void Stop() // Fungerar
+{
+	OCR1A = COUNTER_MAX;
+	OCR1B = COUNTER_MAX;
+}
 
 //Åk Framåt
 void Forward()
 {	
-	//PORTD |= (1<<PORTD2) | (1<<PORTD3);// Vänster - Höger
+	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
 	left_speed_factor = 1.5; // Mellan 0 och 2
 	right_speed_factor = 1.5; // Mellan 0 och 2
 	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
@@ -49,51 +58,49 @@ void Forward()
 //Åk Bakåt
 void Back()
 {
-	PORTD |= (0<<PORTD2) | (0<<PORTD3);// Vänster  - Höger
-	left_speed_factor = 1.6; // Sätts efter reglering senare
-	right_speed_factor = 1.6;
-	OCR1A = BASE_SPEED * left_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * right_speed_factor;
+	PORTD = (0<< PORTD2) | (0<< PORTD3);
+	OCR1A = BASE_SPEED * 1.6; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * 1.6;
 }
 
 //Rotera Höger
 void Rotate_right()
 {
-	PORTD |= (1<<PORTD2) | (0<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.6;
-	right_speed_factor = 1.6;
-	OCR1A = BASE_SPEED * left_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * right_speed_factor;
+	PORTD = (1<<PORTD2) | (0<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1.5;
+	right_speed_factor = 1.5;
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
 }
 
 //Rotera Vänster
 void Rotate_left()
 {
-	PORTD |= (0<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.6;
-	right_speed_factor = 1.6;
-	OCR1A = BASE_SPEED * left_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * right_speed_factor;
+	PORTD = (0<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1.5;
+	right_speed_factor = 1.5;
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
 }
 
 //Sväng Höger
 void Turn_right()
 {
-	PORTD |= (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 0;
-	right_speed_factor = 1.6; // Ska prövas fram, 1.8 så länge
-	OCR1A = BASE_SPEED * left_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * right_speed_factor;
+	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1;
+	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge*/
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
 }
 
 //Sväng Vänster
 void Turn_left()
 {
-	PORTD |= (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.6;
-	right_speed_factor = 0; // Ska prövas fram, 1.8 så länge
-	OCR1A = BASE_SPEED * left_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * right_speed_factor;
+	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1.5;
+	right_speed_factor = 1; // Ska prövas fram, 1.8 så länge
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
 }
 
 //Öppna Gripklo
@@ -112,13 +119,17 @@ void Close()
 void Test()
 {
 	Rotate_left();
-	_delay_ms(5000);
+	Delay_seconds(2);
+	
 	Rotate_right();
-	_delay_ms(5000);
+	Delay_seconds(2);
+	
 	Open();
-	_delay_ms(5000);
+	Delay_seconds(2);
+	
 	Close();
-	_delay_ms(5000);
+	Delay_seconds(2);
+	
 	Stop();
 }
 
@@ -159,7 +170,8 @@ ISR(INT2_vect) // TRYCKKNAPP på PB3
 //----------------MAIN--------------//
 int main(void)
 {
-
+	double left_speed_factor = 2; // Mellan 0 och 2
+	double right_speed_factor = 2; // Mellan 0 och 2
 
 	EIMSK |= (1<<INT2); //tillåter avbrott1
 	EICRA |= (0<<ISC20) | (1<<ISC21); //Ger avbrott på låg flank
@@ -172,7 +184,9 @@ int main(void)
 	//BASE_SPEED = 32768; // Halvfart, högre värde ger lägre hastighet
 	//left_speed_factor = 2; // Mellan 0 och 2
 	//right_speed_factor = 2; // Mellan 0 och 2
-	PORTD |= (1<<PORTD2) | (1<<PORTD3); // Motorernas riktning
+	//PORTD |= (1<< PORTD2) | (1<< PORTD3); // Motorernas riktning
+	//DDRD = (1<< DDD2) | (1<< DDD3);
+	PORTD = (1<< PORTD2) | (1<< PORTD3);
 	ICR1 = COUNTER_MAX; // Räknarens tak
 	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
 	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
@@ -187,15 +201,48 @@ int main(void)
 	DDRD |= (1<< DDD4) | (1<< DDD5) | (1<< DDD6); //  Gör PD4.5.6 till utgångar för PWM ut
 	
 	
-	// Programm
+	// Testrogram
+	Open();
 	Forward();
-	for(int x = 1; x<1000; x++)
-	{
-		_delay_ms(1);
-	}
-	Turn_left();
+	Delay_seconds(1); // 1 sekund delay
 	Close();
+	Stop();
+	Delay_seconds(1); // 1 sekund delay
+
+	Open();
+	Back();
+	Delay_seconds(1); // 1 sekund delay
+	Close();
+	Stop();
+	Delay_seconds(1); // 1 sekund delay
 	
+	Open();
+	Rotate_left();
+	Delay_seconds(1); // 1 sekund delay
+	Close();
+	Stop();
+	Delay_seconds(1); // 1 sekund delay
+
+	Open();
+	Rotate_right();
+	Delay_seconds(1); // 1 sekund delay
+	Close();
+	Stop();
+	Delay_seconds(1); // 1 sekund delay
+	
+	Open();
+	Turn_left();
+	Delay_seconds(1); // 1 sekund delay
+	Close();
+	Stop();
+	Delay_seconds(1); // 1 sekund delay
+
+	Open();
+	Turn_right();
+	Delay_seconds(1); // 1 sekund delay
+	Close();
+	Stop();
+	Delay_seconds(1); // 1 sekund delay
 	
 	while (1)
 	{
