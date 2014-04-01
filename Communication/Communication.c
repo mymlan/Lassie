@@ -22,3 +22,22 @@ int main(void)
         //TODO:: Please write your application code 
     }
 }
+
+int Send_data_to_sensor(unsigned char address_byte, unsigned char data_byte) //hur göra om det är flera bytes vi vill skicka?
+{
+	PORTB = (1<<PB3); //sätter SS låg
+	Master_transmit_data(address_byte); //Skickar adressbyten till sensor
+	//vänta på att sensor läst adressbiten och lagt in den info som sensor vill skicka i sitt SPDR
+	Master_transmit_data(data_byte); 
+	PORTB = (0<<PB3);
+	return 0;
+}
+
+void Master_transmit_data(unsigned char data_to_transmitt) //int eller void?
+{
+	SPDR = data_to_transmitt; //startar överföringen
+	while(!(SPSR & (1<<SPIF))) //vänta på att överföringen ska bli klar
+	{
+		;
+	}
+}
