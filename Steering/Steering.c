@@ -13,17 +13,19 @@
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
-double BASE_SPEED = 32000; // Halvfart, högre värde ger lägre hastighet
-double left_speed_factor = 2; // Mellan 0 och 2
-double right_speed_factor = 2; // Mellan 0 och 2
+double BASE_SPEED = 32000; // Halvfart, HÖGRE värde ger HÖGRE hastighet
+double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 	
-//-----------------FUNKTIONSDEFINITIONER----------------//
+//-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
 PORTD5: Höger styrka
 PORTD4: Vänster styrka
 PORTD3: Höger riktning
 PORTD2: Vänster riktning
 */
+
+//-----------------INITIERINGSFUNKTIONER----------------//
 void Initialize_interrupt()
 {	
 	sei(); // Tillåter globala interrupt
@@ -41,7 +43,7 @@ void Initialize_pwm()
 	ICR1 = COUNTER_MAX; // Räknarens tak
 	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
 	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
-	TCCR1A |= (1<< COM1A1) | (1<< COM1A0) | (1<< COM1B0) | (1<< COM1B1) | (1<< WGM11) | (0<< WGM10); // PWM-inställningar motor
+	TCCR1A |= (1<< COM1A1) | (0<< COM1A0) | (1<< COM1B1) | (0<< COM1B0) | (1<< WGM11) | (0<< WGM10); // PWM-inställningar motor
 	TCCR1B |= (1<< WGM13) | (1<< WGM12) | (0<< CS12) | (0<< CS11) | (1<< CS10); // PWM-inställningar motor
 	
 	//Gripklo init, kommer starta öppen
@@ -53,31 +55,20 @@ void Initialize_pwm()
 	DDRD |= (1<< DDD4) | (1<< DDD5) | (1<< DDD6); // Gör PD4.5.6 till utgångar för PWM ut	
 }
 
-// Pausning / Delay
-void Delay_seconds(int seconds)
-{
-	for (int i = 0; i < seconds; i++)
-	{
-		for (int j = 0; j < 10000; j++)
-		{
-			_delay_ms(1);
-		}
-	}
-}
-
+//----------------MANUELLA KOMMANDOFUNKTIONER-----------//
 // Stanna
-void Stop() // Fungerar
+void Stop()
 {
-	OCR1A = COUNTER_MAX;
-	OCR1B = COUNTER_MAX;
+	OCR1A = 0;
+	OCR1B = 0;
 }
 
 // Åk Framåt
 void Forward()
 {	
 	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 1.5; // Mellan 0 och 2
-	right_speed_factor = 1.5; // Mellan 0 och 2
+	left_speed_factor = 0.5; // Mellan 0 och 2
+	right_speed_factor = 0.5; // Mellan 0 och 2
 	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
 	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
 }
@@ -86,8 +77,8 @@ void Forward()
 void Back()
 {
 	PORTD = (0<< PORTD2) | (0<< PORTD3);
-	OCR1A = BASE_SPEED * 1.5; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * 1.5;
+	OCR1A = BASE_SPEED * 0.5; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * 0.5;
 }
 
 // Rotera Höger
@@ -114,8 +105,8 @@ void Rotate_left()
 void Turn_right()
 {
 	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1;
-	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge*/
+	left_speed_factor = 1.5;
+	right_speed_factor = 0.5; // Ska prövas fram, 1.8 så länge
 	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
 	OCR1B = BASE_SPEED * left_speed_factor;
 }
@@ -124,8 +115,8 @@ void Turn_right()
 void Turn_left()
 {
 	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.5;
-	right_speed_factor = 1; // Ska prövas fram, 1.8 så länge
+	left_speed_factor = 0.5;
+	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
 	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
 	OCR1B = BASE_SPEED * left_speed_factor;
 }
@@ -142,26 +133,50 @@ void Close()
 	OCR2B = 20;
 }
 
+//----------------AUTONOMA REGLERFUNKTIONER-----------//
+void Forward_regulated()
+{
+	// reglering efter sensorvärden
+}
+
+void Back_regulated()
+{
+	// reglering efter sensorvärden
+}
+
+//-----------------DIVERSE FUNKTIONER----------------//
+// Pausning / Delay
+void Delay_seconds(int seconds)
+{
+	for (int i = 0; i < seconds; i++)
+	{
+		for (int j = 0; j < 10000; j++)
+		{
+			_delay_ms(1);
+		}
+	}
+}
+
 // Test
 void Testprogram()
 {
-	Open();
-	Delay_seconds(1); // 1 sekund delay
-	
-	Close();
-	Delay_seconds(1); // 1 sekund delay
-	
 	Forward();
 	Delay_seconds(1);
 	
 	Back();
-	Delay_seconds(2);
-	
-	Stop();
 	Delay_seconds(1);
 	
 	Rotate_left();
-	Delay_seconds(3);
+	Delay_seconds(1);
+	
+	Rotate_right();
+	Delay_seconds(1);
+	
+	Turn_left();
+	Delay_seconds(1);
+	
+	Turn_right();
+	Delay_seconds(1);
 	
 	Stop();
 }
@@ -174,7 +189,6 @@ void Loop()
 }
 
 //-------------AVBROTTSRUTIN---------------------//
-
 ISR(INT2_vect) // TRYCKKNAPP på PB3
 {
 	//TODO: en case(styrbeslut)
