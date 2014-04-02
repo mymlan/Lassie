@@ -14,6 +14,7 @@ void SPI_init()
 		DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
 		SPCR = 0xD0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master.
 		SPSR = 0x01; //Sätter SCK till fosc/2
+		
 }
 
 /*//hur göra om det är flera bytes vi vill skicka?
@@ -34,6 +35,21 @@ void Master_transmit_data_byte(unsigned char data_byte)
 	{
 		;
 	}
+}
+
+
+/* int Master_recieve_data_byte()
+* Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
+* Retunerar SPDR
+*/
+int Master_recieve_data_byte()
+{
+	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
+	while(!(SPSR & (1<<SPIF)))
+	{
+		;
+	}
+	return SPDR;
 }
 
 /* Send_address_to_slave(unsigned char address_byte)
