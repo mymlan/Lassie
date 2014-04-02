@@ -8,6 +8,13 @@
 #include <avr/io.h>
 #include "../CommonLibrary/Common.h"
 
+void SPI_init()
+{
+		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
+		DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
+		SPCR = 0xD0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master.
+		SPSR = 0x01; //Sätter SCK till fosc/2
+}
 
 /*//hur göra om det är flera bytes vi vill skicka?
 int number_of_bytes_in_data = 1; // räkna anta bytes, alt
@@ -62,11 +69,8 @@ int Send_data_byte_to_steering(unsigned char address_byte, unsigned char data_by
 int main(void)
 {
 	COMMON_SET_PIN(PORTA, PORTA0);
-	DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
-	DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
-	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 
-	SPSR = 0x01; //Sätter SCK till fosc/2
-	
+
+	SPI_init();
 	Send_address_to_sensor(0x02);
 	Send_data_byte_to_steering(0x07,0x01);
     while(1)
