@@ -18,3 +18,5 @@
 
 #define COMMON_CLEAR_BIT(REGISTER, BIT) (REGISTER &= (~(1 << BIT)))
 // and med ettor och en nolla, på rätt plats
+
+#define START_CALC_ANGLE 0x04
