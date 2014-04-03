@@ -5,24 +5,41 @@
  *  Author: HuGu
  */ 
 
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-
 uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
+unsigned char byte_from_SPI = 0x00;
+volatile int new_byte_arrived_SPI = 0;
 
 void init_ports(){
 	DDRA = 0xFF;
-	PORTB = 0xff;
-}
-
-void Slave_SPI_init()
-{
+	PORTB = 0xFF;
 	DDRB = 0x40; //Sätter MISO till utgång
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
 }
+
+int Interprete_address_byte(unsigned char address_byte)
+{
+	if(address_byte == 0x02) //komm vill ha avverkat avstånd
+	{
+		return 1;
+	}
+	else if(address_byte == 0x04) //starta vinkelhastighetssensorn
+	{
+		return 2;
+	}
+	else if(address_byte == 0x05) //Komm vill ha vriden vinkel
+	{
+		return 3;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
@@ -74,14 +91,9 @@ int main(void)
 	ADCSRA |= 1<<ADIE;
 	ADCSRA |= 1<<ADEN;
 	
-	Slave_SPI_init();
-	
 	sei();
 	
 	ADCSRA | 1<<ADSC;
-	
-	unsigned char byte_from_SPI = 0x00;
-	volatile int new_byte_arrived_SPI = 0;
 	
 	while(1)
 	{
