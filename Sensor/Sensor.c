@@ -101,7 +101,7 @@ int main(void)
 	{
 		if(new_byte_arrived_SPI == 1)
 		{
-			if(byte_from_SPI == ADDRESS_BYTE_GIVE_DISTANCE)
+			if(byte_from_SPI == ID_BYTE_GIVE_DISTANCE)
 			{
 				//request_new_distance = 1;
 			}
