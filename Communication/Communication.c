@@ -33,7 +33,7 @@ void Master_transmit_data_byte(unsigned char data_byte)
 
 /* int Master_recieve_data_byte()
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
-* Retunerar SPDR
+* Retunerar SPDR MISO
 */
 unsigned char Master_recieve_data_byte()
 {
@@ -45,7 +45,16 @@ unsigned char Master_recieve_data_byte()
 	return SPDR;
 }
 
-/* Send_address_to_slave(unsigned char address_byte)
+void Delay(void)
+{
+	volatile int delay = 0;
+	while(delay<100) //fördröjnig så att sensor hinner spara byten, siffran 100 är taget ur luften
+	{
+		delay = delay + 1;
+	}
+}
+
+/* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
 */
 int Send_address_to_sensor(unsigned char address_byte) 
@@ -53,14 +62,11 @@ int Send_address_to_sensor(unsigned char address_byte)
 	PORTB = (0<<PB4); //sätter SS låg,
 	Master_transmit_data_byte(address_byte); //Skickar adressbyten till sensor
 	PORTB = (1<<PB4);
-	
-	volatile int delay = 0;
-	while(delay<100) //fördröjnig så att styr hinner tolka adressbyten, siffran 100 är taget ur luften
-	{
-		delay = delay + 1;
-	}
+	Delay();
 	return 0;
 }
+
+
 
 
 int main(void)

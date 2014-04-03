@@ -7,6 +7,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "../CommonLibrary/Common.h"
 
 uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 unsigned char byte_from_SPI = 0x00;
@@ -94,16 +95,25 @@ int main(void)
 	sei();
 	
 	ADCSRA | 1<<ADSC;
+	//unsigned char distance = 0x00;
 	
 	while(1)
 	{
 		if(new_byte_arrived_SPI == 1)
 		{
-			Dumfunk(byte_from_SPI);
+			if(byte_from_SPI == ADDRESS_BYTE_GIVE_DISTANCE)
+			{
+				//request_new_distance = 1;
+			}
+			new_byte_arrived_SPI = 0;
 		}
 	}
 	
 }
 
-
+void Send_distance(unsigned char distance)
+{
+	SPDR = distance;
+	//SENSOR_READY_TO_TRANSMITT;
+}
 
