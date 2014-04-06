@@ -9,9 +9,9 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 
-uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
-unsigned char byte_from_SPI = 0x00;
-volatile int new_byte_arrived_SPI = 0;
+static uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
+static uint8_t byte_from_SPI = 0x00;
+static volatile uint8_t new_byte_arrived_SPI = 0;
 
 void init_ports(){
 	DDRA = 0xFF;
@@ -20,7 +20,7 @@ void init_ports(){
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
 }
-
+/*
 int Interprete_address_byte(unsigned char address_byte)
 {
 	if(address_byte == 0x02) //komm vill ha avverkat avstånd
@@ -40,7 +40,7 @@ int Interprete_address_byte(unsigned char address_byte)
 		return 0;
 	}
 }
-
+*/
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
