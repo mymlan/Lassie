@@ -9,9 +9,10 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 
-static uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
-static uint8_t byte_from_SPI = 0x00;
-static volatile uint8_t new_byte_arrived_SPI = 0;
+static volatile uint8_t has_recieved_give_sensor_data = 0;
+static volatile uint8_t has_recieved_give_distance = 0;
+static volatile uint8_t has_recieved_start_calc_angle = 0;
+static volatile uint8_t has_recieved_give_angle = 0;
 
 void init_ports(){
 	DDRA = 0xFF;
@@ -20,100 +21,89 @@ void init_ports(){
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
 }
-/*
-int Interprete_address_byte(unsigned char address_byte)
-{
-	if(address_byte == 0x02) //komm vill ha avverkat avstånd
-	{
-		return 1;
-	}
-	else if(address_byte == 0x04) //starta vinkelhastighetssensorn
-	{
-		return 2;
-	}
-	else if(address_byte == 0x05) //Komm vill ha vriden vinkel
-	{
-		return 3;
-	}
-	else
-	{
-		return 0;
-	}
-}
-*/
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
 	cli();
 	byte_from_SPI = SPDR;
-	new_byte_arrived_SPI = 1;
+	switch (byte_from_SPI)
+	{
+		case ID_BYTE_GIVE_SENSOR_DATA:
+			has_recieved_give_sensor_data = 1;
+			break;
+		case ID_BYTE_GIVE_DISTANCE:
+			has_recieved_give_distance = 1;
+			break;
+		case ID_BYTE_START_CALC_ANGLE:
+			has_recieved_start_calc_angle = 1;
+			break;
+		case ID_BYTE_GIVE_ANGLE:
+			has_recieved_give_angle = 1;
+			break;
+		default:
+			break;
+	}
 	sei();
 }
 
-ISR(ADC_vect)
+uint8_t SPI_should_give_sensor_data(void)
 {
-	switch(ADMUX)
-	{
-		case 0xE0:
-		sensor1 = ADCH;
-		ADMUX = 0xE1;
-		break;
-		case 0xE1:
-		sensor2 = ADCH;
-		ADMUX = 0xE2;
-		break;
-		case 0xE2:
-		sensor3 = ADCH;
-		ADMUX = 0xE3;
-		break;
-		case 0xE3:
-		sensor4 = ADCH;
-		ADMUX = 0xE4;
-		break;
-		case 0xE4:
-		sensor5 = ADCH;
-		ADMUX = 0xE0;
-		break;
-	}
-	ADCSRA | 1<<ADSC;
+	uint8_t result = has_recieved_give_sensor_data;
+	has_recieved_give_sensor_data = 0;
+	return result;
 }
 
-unsigned char Dumfunk(unsigned char useless)
+uint8_t SPI_should_give_distance(void)
 {
+	uint8_t result = has_recieved_give_distance;
+	has_recieved_give_distance = 0;
+	return result;
+}
+
+uint8_t SPI_should_start_calc_angle(void)
+{
+	uint8_t result = has_recieved_start_calc_angle;
+	has_recieved_start_calc_angle = 0;
+	return result;
+}
+
+uint8_t SPI_should_give_angle(void)
+{
+	uint8_t result = has_recieved_give_angle;
+	has_recieved_give_angle = 0;
+	return result;
+}
+
+void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
+{
+	uint8_t number_of_bytes_in_data;
+	switch (id_byte)
+	{
+		case ID_BYTE_SENSOR_DATA:
+			number_of_bytes_in_data = 6;
+			break;
+		case ID_BYTE_DISTANCE:
+		case ID_BYTE_ANGLE:
+			number_of_bytes_in_data = 1;
+			break;
+	}
+	cli(); //Borde hitta den som stänger av avbrott för SPI!!
+	SPI_send_byte(id_byte);
 	
-	return useless;
+	
+}
+
+static void SPI_send_byte(uint8_t byte)
+{
+	SPDR = byte;
+	COMMON_SET_PIN(PORTB, PB0); //Avbrott till komm
 }
 
 int main(void)
 {
-	init_ports();
-	ADCSRA |= 1<<ADPS2;
-	ADMUX |= 1<<REFS0 | 1<<REFS1 | 1<<ADLAR | 2;
-	ADCSRA |= 1<<ADIE;
-	ADCSRA |= 1<<ADEN;
-	
-	sei();
-	
-	ADCSRA | 1<<ADSC;
-	//unsigned char distance = 0x00;
-	
 	while(1)
 	{
-		if(new_byte_arrived_SPI == 1)
-		{
-			if(byte_from_SPI == ID_BYTE_GIVE_DISTANCE)
-			{
-				//request_new_distance = 1;
-			}
-			new_byte_arrived_SPI = 0;
-		}
 	}
 	
-}
-
-void Send_distance(unsigned char distance)
-{
-	SPDR = distance;
-	//SENSOR_READY_TO_TRANSMITT;
 }
 

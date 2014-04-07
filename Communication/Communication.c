@@ -22,7 +22,7 @@ void Master_SPI_init()
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 *  MOSI
 */
-void Master_transmit_data_byte(unsigned char data_byte)
+static void Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
 	while(!(SPSR & (1<<SPIF))){}
@@ -32,7 +32,7 @@ void Master_transmit_data_byte(unsigned char data_byte)
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 * Retunerar SPDR MISO
 */
-unsigned char Master_recieve_data_byte()
+static uint8_t Master_recieve_data_byte()
 {
 	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
 	while(!(SPSR & (1<<SPIF))){}
@@ -42,13 +42,12 @@ unsigned char Master_recieve_data_byte()
 /* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
 */
-int Send_address_to_sensor(unsigned char address_byte) 
+void Master_send_to_sensor(uint8_t address_byte) 
 {
-	PORTB = (0<<PB4); //sätter SS låg,
+	COMMON_CLEAR_PIN(PORTB, PB4);
 	Master_transmit_data_byte(address_byte); //Skickar adressbyten till sensor
-	PORTB = (1<<PB4);
+	COMMON_SET_PIN(PORTB, PB4);
 	_delay_us(10);
-	return 0;
 }
 
 int main(void)
@@ -56,7 +55,7 @@ int main(void)
 	COMMON_SET_PIN(PORTA, PORTA0);
 
 	Master_SPI_init();
-	Send_address_to_sensor(0x02);
+	Master_send_to_sensor(0x02);
 
     while(1)
     {

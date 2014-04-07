@@ -28,6 +28,7 @@
 #define ID_BYTE_ANGLE 0x06
 #define ID_BYTE_GUIDED_DECISIONS 0x07
 #define ID_BYTE_AUTO_DECISIONS 0x08
+#define ID_BYTE_GIVE_SENSOR_DATA 0x09
 
 //Kommando till styrmodulen
 #define COMMAND_STOP 0x00
