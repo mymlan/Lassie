@@ -181,6 +181,39 @@ void Testprogram()
 	Stop();
 }
 
+//gustavs testfunktion
+void gusfunk()
+{
+	//full fart framåt:
+	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
+	left_speed_factor = 2; // Mellan 0 och 2
+	right_speed_factor = 2; // Mellan 0 och 2
+	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
+	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
+	
+	Delay_seconds(1);
+	
+	//medelfart
+	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
+	left_speed_factor = 1; // Mellan 0 och 2
+	right_speed_factor = 1; // Mellan 0 och 2
+	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
+	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
+	
+	Delay_seconds(2);
+	
+	//långsamt
+	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
+	left_speed_factor = 0.2; // Mellan 0 och 2
+	right_speed_factor = 0.2; // Mellan 0 och 2
+	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
+	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
+	
+	Delay_seconds(4);
+	Stop();
+	
+}
+
 // Tom loop
 void Loop()
 {
@@ -193,7 +226,7 @@ ISR(INT2_vect) // TRYCKKNAPP på PB3
 {
 	//TODO: en case(styrbeslut)
 
-	int styrbeslut = 42;
+	int styrbeslut = 123;
 	switch(styrbeslut)
 	{
 		case 0: Stop();
@@ -216,6 +249,8 @@ ISR(INT2_vect) // TRYCKKNAPP på PB3
 		break;
 		case 42: Testprogram();
 		break;
+		case 123: gusfunk();
+		break;
 		default: Stop();
 		break;
 	}
@@ -229,9 +264,9 @@ int main(void)
 	Initialize_pwm();
 	
 	// Dessa 3 rader är till för att kolla att RESET fungerar
-	Open();
-	Delay_seconds(1);
-	Close();
+	//Open();
+	//Delay_seconds(1);
+	//Close();
 	
 	// Använd avborttsknappen för att starta testprogram
 	// Koden skrivs Testprogram()
