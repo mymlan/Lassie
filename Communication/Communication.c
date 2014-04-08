@@ -8,6 +8,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 
 void Master_SPI_init()
@@ -32,12 +33,14 @@ static void Master_transmit_data_byte(uint8_t data_byte)
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 * Retunerar SPDR MISO
 */
+/*
 static uint8_t Master_recieve_data_byte()
 {
 	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
 	while(!(SPIF == 1)){}
 	return SPDR;
 }
+*/
 
 /* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
@@ -52,10 +55,11 @@ void Master_send_to_sensor(uint8_t address_byte)
 
 int main(void)
 {
-	COMMON_SET_PIN(PORTA, PORTA0);
+	COMMON_SET_PIN(PORTA, PORTA1);
 
 	Master_SPI_init();
-	Master_send_to_sensor(0x02);
+	sei();
+	Master_send_to_sensor(ID_BYTE_GIVE_ANGLE);
 
     while(1)
     {

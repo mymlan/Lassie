@@ -13,9 +13,10 @@ static volatile uint8_t has_recieved_give_sensor_data = 0;
 static volatile uint8_t has_recieved_give_distance = 0;
 static volatile uint8_t has_recieved_start_calc_angle = 0;
 static volatile uint8_t has_recieved_give_angle = 0;
-static volatile uint8_t is_slave_ready = 0;
+//static volatile uint8_t is_slave_ready = 0;
+static volatile uint8_t test = 0x00;	
 
-void init_ports(){
+void Init_ports(){
 	DDRA = 0xFF;
 	PORTB = 0xFF;
 	DDRB = 0x40; //Sätter MISO till utgång
@@ -25,7 +26,7 @@ void init_ports(){
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
-	byte_from_SPI = SPDR;
+	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_GIVE_SENSOR_DATA:
@@ -73,6 +74,7 @@ uint8_t SPI_should_give_angle(void)
 	return result;
 }
 
+/*
 void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 {
 	uint8_t number_of_bytes_in_data;
@@ -97,17 +99,26 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 		}
 	}	
 }
+*/
 
+/*
 static void SPI_send_byte(uint8_t byte)
 {
 	SPDR = byte;
 	COMMON_SET_PIN(PORTB, PORTB0); //Avbrott till komm
 }
+*/
 
 int main(void)
 {
+	Init_ports();
+	sei();
 	while(1)
 	{
+		if(SPI_should_give_angle())
+		{
+			test = 0xFF;
+		}
 	}
 	
 }
