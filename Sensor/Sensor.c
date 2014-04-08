@@ -13,8 +13,9 @@ static volatile uint8_t has_recieved_give_sensor_data = 0;
 static volatile uint8_t has_recieved_give_distance = 0;
 static volatile uint8_t has_recieved_start_calc_angle = 0;
 static volatile uint8_t has_recieved_give_angle = 0;
-//static volatile uint8_t is_slave_ready = 0;
-static volatile uint8_t test = 0x00;	
+static volatile uint8_t error = 0;
+static volatile uint8_t byte_from_SPI = 0x00;
+static volatile uint8_t SPI_test = 0x00;	
 
 void Init_ports(){
 	DDRA = 0xFF;
@@ -23,7 +24,7 @@ void Init_ports(){
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
 }
-
+/*
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
 	uint8_t byte_from_SPI = SPDR;
@@ -43,6 +44,31 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 			break;
 		default:
 			break;
+	}
+}*/
+ISR(SPI_STC_vect) //Den avbrottsrutin som sensorn går in i då komm skickat data.
+{
+	byte_from_SPI = SPDR;
+	
+	if(byte_from_SPI == 0x09)
+	{	
+		has_recieved_give_sensor_data = 1;
+	}
+	else if(byte_from_SPI == 0x02)
+	{
+		has_recieved_give_distance = 1;
+	}
+	else if(byte_from_SPI == 0x04)
+	{
+		has_recieved_start_calc_angle = 1;
+	}
+	else if(byte_from_SPI == 0x05)
+	{
+		has_recieved_give_angle = 1;
+	}
+	else
+	{
+		error = 1;
 	}
 }
 
@@ -117,7 +143,7 @@ int main(void)
 	{
 		if(SPI_should_give_angle())
 		{
-			test = 0xFF;
+			SPI_test = 0xff;
 		}
 	}
 	
