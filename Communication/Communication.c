@@ -25,7 +25,7 @@ void Master_SPI_init()
 static void Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
-	while(!(SPSR & (1<<SPIF))){}
+	while(!(SPIF == 1)){}
 }
 
 /* int Master_recieve_data_byte()
@@ -35,7 +35,7 @@ static void Master_transmit_data_byte(uint8_t data_byte)
 static uint8_t Master_recieve_data_byte()
 {
 	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
-	while(!(SPSR & (1<<SPIF))){}
+	while(!(SPIF == 1)){}
 	return SPDR;
 }
 
@@ -44,9 +44,9 @@ static uint8_t Master_recieve_data_byte()
 */
 void Master_send_to_sensor(uint8_t address_byte) 
 {
-	COMMON_CLEAR_PIN(PORTB, PB4);
+	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	Master_transmit_data_byte(address_byte); //Skickar adressbyten till sensor
-	COMMON_SET_PIN(PORTB, PB4);
+	COMMON_SET_PIN(PORTB, PORTB4);
 	_delay_us(10);
 }
 

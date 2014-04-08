@@ -13,6 +13,7 @@ static volatile uint8_t has_recieved_give_sensor_data = 0;
 static volatile uint8_t has_recieved_give_distance = 0;
 static volatile uint8_t has_recieved_start_calc_angle = 0;
 static volatile uint8_t has_recieved_give_angle = 0;
+static volatile uint8_t is_slave_ready = 0;
 
 void init_ports(){
 	DDRA = 0xFF;
@@ -87,14 +88,20 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	}
 	cli(); //Borde hitta den som stänger av avbrott för SPI!!
 	SPI_send_byte(id_byte);
-	
-	
+	if(is_slave_ready)
+	{
+		while(!(number_of_bytes_in_data == 0))
+		{
+			SPI_send_byte();
+			number_of_bytes_in_data = number_of_bytes_in_data - 1;
+		}
+	}	
 }
 
 static void SPI_send_byte(uint8_t byte)
 {
 	SPDR = byte;
-	COMMON_SET_PIN(PORTB, PB0); //Avbrott till komm
+	COMMON_SET_PIN(PORTB, PORTB0); //Avbrott till komm
 }
 
 int main(void)
