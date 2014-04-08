@@ -24,7 +24,6 @@ void init_ports(){
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
-	cli();
 	byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
@@ -43,7 +42,6 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 		default:
 			break;
 	}
-	sei();
 }
 
 uint8_t SPI_should_give_sensor_data(void)
