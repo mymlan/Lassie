@@ -15,8 +15,9 @@ void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
 		DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
-		SPCR = 0xD0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master.
-		SPSR = 0x01; //Sätter SCK till fosc/2	
+		SPCR = 0x50; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master.
+		SPSR = 0x01; //Sätter SCK till fosc/2
+		COMMON_SET_PIN(PORTB, PORTB4);	
 }
 
 /* void Master_transmit_data_byte(unsigned char data_byte)
@@ -26,7 +27,7 @@ void Master_SPI_init()
 static void Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
-	while(!(SPIF == 1)){}
+	while(!(SPSR & (1<<SPIF))){}
 }
 
 /* int Master_recieve_data_byte()
@@ -55,11 +56,11 @@ void Master_send_to_sensor(uint8_t address_byte)
 
 int main(void)
 {
-	COMMON_SET_PIN(PORTA, PORTA1);
+	COMMON_SET_PIN(PORTA, PORTA7);
 
 	Master_SPI_init();
 	sei();
-	Master_send_to_sensor(ID_BYTE_GIVE_ANGLE);
+	Master_send_to_sensor(0x09);
 
     while(1)
     {
