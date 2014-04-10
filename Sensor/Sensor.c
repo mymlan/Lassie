@@ -23,11 +23,16 @@ void Init_ports(){
 	DDRB = 0x40; //Sätter MISO till utgång
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
+	DDRD = 0x30;
+	PORTD = 0;
+	PORTD = 0x20;
+	PORTD = 0;
+	SPDR = 0x22;
 }
-/*
+
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 {
-	uint8_t byte_from_SPI = SPDR;
+	byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_GIVE_SENSOR_DATA:
@@ -43,22 +48,26 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 			has_recieved_give_angle = 1;
 			break;
 		default:
+			error = 1;
 			break;
 	}
-}*/
+}
+/*
 ISR(SPI_STC_vect) //Den avbrottsrutin som sensorn går in i då komm skickat data.
 {
 	byte_from_SPI = SPDR;
-	
+	PORTD = 0;
+	PORTD = 0x10;
+	PORTD = 0;
 	if(byte_from_SPI == 0x09)
 	{	
 		has_recieved_give_sensor_data = 1;
 	}
-	else if(byte_from_SPI == 0x02)
+	else if(byte_from_SPI == ID_BYTE_GIVE_DISTANCE)
 	{
 		has_recieved_give_distance = 1;
 	}
-	else if(byte_from_SPI == 0x04)
+	else if(byte_from_SPI == ID_BYTE_START_CALC_ANGLE)
 	{
 		has_recieved_start_calc_angle = 1;
 	}
@@ -68,9 +77,12 @@ ISR(SPI_STC_vect) //Den avbrottsrutin som sensorn går in i då komm skickat data.
 	}
 	else
 	{
+		PORTD = 0;
+		PORTD = 0x20;
+		PORTD = 0;
 		error = 1;
 	}
-}
+}*/
 
 uint8_t SPI_should_give_sensor_data(void)
 {
@@ -141,7 +153,7 @@ int main(void)
 	sei();
 	while(1)
 	{
-		if(SPI_should_give_angle())
+		if(SPI_should_give_sensor_data())
 		{
 			SPI_test = 0xff;
 		}
