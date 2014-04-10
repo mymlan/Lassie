@@ -15,9 +15,9 @@ void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
 		DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
-		SPCR = 0x50; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master.
-		SPSR = 0x01; //Sätter SCK till fosc/2
-		COMMON_SET_PIN(PORTB, PORTB4);	
+		SPCR = 0x50; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
+		SPSR = 0x00; //Sätter SCK till fosc/2 0x01
+		COMMON_SET_PIN(PORTB, PORTB4); //initierar SS till hög
 }
 
 /* void Master_transmit_data_byte(unsigned char data_byte)
