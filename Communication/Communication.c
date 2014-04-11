@@ -36,8 +36,10 @@ void Master_SPI_init()
 */
 static uint8_t Master_recieve_data_byte()
 {
-	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
+	COMMON_CLEAR_PIN(PORTB, PORTB4);
+	SPDR = 0x0A; //Master måste lägga något i SPDR för att starta överföringen
 	while(!(SPIF == 1)){}
+	COMMON_SET_PIN(PORTB, PORTB4);
 	return SPDR;
 }
 
