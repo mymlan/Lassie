@@ -11,6 +11,11 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 
+static volatile uint8_t has_recieved_sensor_data = 0;
+static volatile uint8_t has_recieved_distance = 0;
+static volatile uint8_t has_recieved_angle = 0;
+static volatile uint8_t error = 0;
+
 void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
@@ -18,7 +23,49 @@ void Master_SPI_init()
 		SPCR = 0x50; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
 		SPSR = 0x00; //Sätter SCK till fosc/2 0x01
 		COMMON_SET_PIN(PORTB, PORTB4); //initierar SS till hög
+		
+		//Register för att möjliggöra PCINT5
+		PCMSK0 = 0x20;
+		PCICR = 0x01;
+		PCIFR = 0x01;
 }
+
+/* int Master_recieve_data_byte()
+* Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
+* Retunerar SPDR MISO
+*/
+static uint8_t Master_recieve_data_byte()
+{
+	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
+	while(!(SPIF == 1)){}
+	return SPDR;
+}
+
+ISR(PCINT0_vect)
+{
+	uint8_t byte_from_SPI = 0;
+	byte_from_SPI = Master_recieve_data_byte();
+	
+	switch (byte_from_SPI)
+	{
+		case ID_BYTE_SENSOR_DATA:
+		has_recieved_sensor_data = 1;
+		break;
+		case ID_BYTE_DISTANCE:
+		has_recieved_distance = 1;
+		break;
+		case ID_BYTE_ANGLE:
+		has_recieved_angle = 1;
+		default:
+		error = 1;
+		PORTD = 0;
+		PORTD = 0x20;
+		PORTD = 0;
+		break;
+	}
+		
+}
+
 
 /* void Master_transmit_data_byte(unsigned char data_byte)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
@@ -30,18 +77,7 @@ static void Master_transmit_data_byte(uint8_t data_byte)
 	while(!(SPSR & (1<<SPIF))){}
 }
 
-/* int Master_recieve_data_byte()
-* Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
-* Retunerar SPDR MISO
-*/
-/*
-static uint8_t Master_recieve_data_byte()
-{
-	SPDR = 0x00; //Master måste lägga något i SPDR för att starta överföringen
-	while(!(SPIF == 1)){}
-	return SPDR;
-}
-*/
+
 
 /* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
