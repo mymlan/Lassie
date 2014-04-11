@@ -14,12 +14,14 @@
 static volatile uint8_t has_recieved_sensor_data = 0;
 static volatile uint8_t has_recieved_distance = 0;
 static volatile uint8_t has_recieved_angle = 0;
+static volatile uint8_t byte_from_SPI = 0;
 static volatile uint8_t error = 0;
 
 void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
 		DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
+		DDRD = 0x30;
 		SPCR = 0x50; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
 		SPSR = 0x00; //Sätter SCK till fosc/2 0x01
 		COMMON_SET_PIN(PORTB, PORTB4); //initierar SS till hög
@@ -34,6 +36,7 @@ void Master_SPI_init()
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 * Retunerar SPDR MISO
 */
+
 static uint8_t Master_recieve_data_byte()
 {
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
@@ -45,10 +48,8 @@ static uint8_t Master_recieve_data_byte()
 
 ISR(PCINT0_vect)
 {
-	uint8_t byte_from_SPI = 0;
-	byte_from_SPI = Master_recieve_data_byte();
-	
-	switch (byte_from_SPI)
+	byte_from_SPI = Master_recieve_data_byte(); //byte_from_SPI = Master...();
+	switch (byte_from_SPI) 
 	{
 		case ID_BYTE_SENSOR_DATA:
 		has_recieved_sensor_data = 1;
@@ -73,24 +74,26 @@ ISR(PCINT0_vect)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 *  MOSI
 */
+/*
 static void Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
 	while(!(SPSR & (1<<SPIF))){}
 }
-
+*/
 
 
 /* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
 */
+/*
 void Master_send_to_sensor(uint8_t address_byte) 
 {
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	Master_transmit_data_byte(address_byte); //Skickar adressbyten till sensor
 	COMMON_SET_PIN(PORTB, PORTB4);
 	_delay_us(10);
-}
+}*/
 
 int main(void)
 {
@@ -98,8 +101,8 @@ int main(void)
 
 	Master_SPI_init();
 	sei();
-	Master_send_to_sensor(0x09);
 
+	
     while(1)
     {
         ;
