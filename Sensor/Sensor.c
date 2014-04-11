@@ -20,7 +20,7 @@ static volatile uint8_t SPI_test = 0x00;
 void Init_ports(){
 	DDRA = 0xFF;
 	PORTB = 0xFF;
-	DDRB = 0x40; //Sätter MISO till utgång
+	
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
 	DDRD = 0x30;
@@ -28,6 +28,9 @@ void Init_ports(){
 	PORTD = 0x20;
 	PORTD = 0;
 	SPDR = 0x22;
+	
+	//sätter MISO till  utgång och även PB0 till utgång, flagga SPI
+	DDRB = 0x41;
 }
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
@@ -109,17 +112,17 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	}	
 }
 */
+
+static void SPI_slave_send_byte(uint8_t byte)
+{
+	SPDR = byte;
+	COMMOM_TOGGLE_PIN(PORTB, PORTB0);
+}
 void SPI_send(uint8_t id_byte)
 {
 	cli(); //Borde hitta den som stänger av avbrott för SPI!!
-	SPI_send_byte(id_byte);
+	SPI_slave_send_byte(id_byte);
 
-}
-
-static void SPI_send_byte(uint8_t byte)
-{
-	SPDR = byte;
-	COMMON_SET_PIN(PORTB, PORTB0); //Avbrott till komm
 }
 
 int main(void)
