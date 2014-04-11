@@ -8,7 +8,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
-
+static volatile uint8_t master_has_recieved_byte = 0;
 static volatile uint8_t has_recieved_give_sensor_data = 0;
 static volatile uint8_t has_recieved_give_distance = 0;
 static volatile uint8_t has_recieved_start_calc_angle = 0;
@@ -38,6 +38,9 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 	byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
+		case MASTER_RECIEVED_BYTE:
+			master_has_recieved_byte = 1;
+			break;
 		case ID_BYTE_GIVE_SENSOR_DATA:
 			has_recieved_give_sensor_data = 1;
 			break;
@@ -57,6 +60,13 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 			PORTD = 0;
 			break;
 	}
+}
+
+uint8_t SPI_master_have_recieved_byte(void)
+{
+	uint8_t result = master_has_recieved_byte;
+	master_has_recieved_byte = 0;
+	return result;
 }
 
 uint8_t SPI_should_give_sensor_data(void)
@@ -116,20 +126,15 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 static void SPI_slave_send_byte(uint8_t byte)
 {
 	SPDR = byte;
-	COMMOM_TOGGLE_PIN(PORTB, PORTB0);
-}
-void SPI_send(uint8_t id_byte)
-{
-	cli(); //Borde hitta den som stänger av avbrott för SPI!!
-	SPI_slave_send_byte(id_byte);
-
+	COMMON_TOGGLE_PIN(PORTB, PORTB0); // Hissa flagga
+	while(!(SPI_master_have_recieved_byte())){}
 }
 
 int main(void)
 {
 	Init_ports();
 	sei();
-	SPI_send(0x03);
+	SPI_slave_send_byte(0x03);
 	
 	while(1)
 	{
