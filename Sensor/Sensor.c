@@ -49,40 +49,12 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 			break;
 		default:
 			error = 1;
+			PORTD = 0;
+			PORTD = 0x20;
+			PORTD = 0;
 			break;
 	}
 }
-/*
-ISR(SPI_STC_vect) //Den avbrottsrutin som sensorn går in i då komm skickat data.
-{
-	byte_from_SPI = SPDR;
-	PORTD = 0;
-	PORTD = 0x10;
-	PORTD = 0;
-	if(byte_from_SPI == 0x09)
-	{	
-		has_recieved_give_sensor_data = 1;
-	}
-	else if(byte_from_SPI == ID_BYTE_GIVE_DISTANCE)
-	{
-		has_recieved_give_distance = 1;
-	}
-	else if(byte_from_SPI == ID_BYTE_START_CALC_ANGLE)
-	{
-		has_recieved_start_calc_angle = 1;
-	}
-	else if(byte_from_SPI == 0x05)
-	{
-		has_recieved_give_angle = 1;
-	}
-	else
-	{
-		PORTD = 0;
-		PORTD = 0x20;
-		PORTD = 0;
-		error = 1;
-	}
-}*/
 
 uint8_t SPI_should_give_sensor_data(void)
 {
@@ -111,7 +83,6 @@ uint8_t SPI_should_give_angle(void)
 	has_recieved_give_angle = 0;
 	return result;
 }
-
 /*
 void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 {
@@ -138,25 +109,31 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	}	
 }
 */
+void SPI_send(uint8_t id_byte)
+{
+	cli(); //Borde hitta den som stänger av avbrott för SPI!!
+	SPI_send_byte(id_byte);
 
-/*
+}
+
 static void SPI_send_byte(uint8_t byte)
 {
 	SPDR = byte;
 	COMMON_SET_PIN(PORTB, PORTB0); //Avbrott till komm
 }
-*/
 
 int main(void)
 {
 	Init_ports();
 	sei();
+	SPI_send(0x03);
+	
 	while(1)
 	{
-		if(SPI_should_give_sensor_data())
+		/*if(SPI_should_give_sensor_data())
 		{
 			SPI_test = 0xff;
-		}
+		}*/
 	}
 	
 }
