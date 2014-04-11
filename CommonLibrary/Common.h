@@ -19,7 +19,7 @@
 #define COMMON_CLEAR_BIT(REGISTER, BIT) (REGISTER &= (~(1 << BIT)))
 // and med ettor och en nolla, på rätt plats
 
-#define COMMOM_TOGGLE_PIN(PORT, PIN) (PORT ^= (1 << PIN))
+#define COMMON_TOGGLE_PIN(PORT, PIN) (PORT ^= (1 << PIN))
 
 //ID-bytes:
 #define ID_BYTE_SENSOR_DATA 0x01
@@ -31,6 +31,8 @@
 #define ID_BYTE_GUIDED_DECISIONS 0x07
 #define ID_BYTE_AUTO_DECISIONS 0x08
 #define ID_BYTE_GIVE_SENSOR_DATA 0x09
+
+#define MASTER_RECIEVED_BYTE 0x0A
 
 //Kommando till styrmodulen
 #define COMMAND_STOP 0x00
