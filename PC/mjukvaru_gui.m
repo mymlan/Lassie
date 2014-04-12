@@ -22,7 +22,7 @@ function varargout = mjukvaru_gui(varargin)
 
 % Edit the above text to modify the response to help mjukvaru_gui
 
-% Last Modified by GUIDE v2.5 11-Apr-2014 18:51:11
+% Last Modified by GUIDE v2.5 12-Apr-2014 16:30:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -78,15 +78,58 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+IR1_tid = [5.3 5.6 5.8 5.8 6.7 6.5];
+IR2_tid = [2.1 2.2 2.8 2.8 2.7 3.2];
+IR3_tid = [2.3 2.6 2.8 3.8 2.7 3.5];
+IR4_tid = [2.3 2.6 2.8 1.8 2.7 3.7];
+IR5_tid = [2.3 2.6 2.8 1.5 2.7 2.5];
 
+hold on
+plot(IR1_tid,'yellow')
+plot(IR2_tid,'red')
+plot(IR3_tid,'green')
+plot(IR4_tid,'blue')
+plot(IR5_tid,'black')
 
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set(handles.ir_f,'String',0.1)
+axes(handles.axes1)
+set(handles.ir_f,'String',20.7)
 set(handles.ir_v_f,'String',3.1)
-set(handles.ir_h_f,'String',15.2)
+set(handles.ir_h_f,'String',5.2)
 set(handles.ir_v_b,'String',8.0)
 set(handles.ir_h_b,'String',4.4)
+
+
+% --- Executes on key press with focus on figure1 and none of its controls.
+function figure1_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see FIGURE)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+switch eventdata.Key
+    case 'uparrow'
+        set(handles.kommando,'String','Fram')
+    case 'downarrow'
+        set(handles.kommando,'String','Back')
+    case 'leftarrow'
+        set(handles.kommando,'String','Rotera vänster')
+    case 'rightarrow'
+        set(handles.kommando,'String','Rotera höger')
+end
+
+
+% --- Executes on key release with focus on figure1 and none of its controls.
+function figure1_KeyReleaseFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see FIGURE)
+%	Key: name of the key that was released, in lower case
+%	Character: character interpretation of the key(s) that was released
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) released
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.kommando,'String','Stop')
