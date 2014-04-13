@@ -20,5 +20,9 @@ IR3_tid = [2.3 2.6 2.8 3.8 2.7 3.5];
 IR4_tid = [2.3 2.6 2.8 1.8 2.7 3.7];
 IR5_tid = [2.3 2.6 2.8 1.5 2.7 2.5];
 
+coord1 = [0 0 2 2 5 5 6 3 5 5 1];
+coord2 = [0 3 3 1 1 5 5 5 5 1 1];
+
+save('mjukvaruvariabler')
 %%%%%%%%%%%%%%%%% ÖPPNAR GUI %%%%%%%%%%%%%%%%%%
-mjukvaru_gui
+mjukvaru_gui()

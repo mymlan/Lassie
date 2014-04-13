@@ -78,18 +78,16 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-IR1_tid = [5.3 5.6 5.8 5.8 6.7 6.5];
-IR2_tid = [2.1 2.2 2.8 2.8 2.7 3.2];
-IR3_tid = [2.3 2.6 2.8 3.8 2.7 3.5];
-IR4_tid = [2.3 2.6 2.8 1.8 2.7 3.7];
-IR5_tid = [2.3 2.6 2.8 1.5 2.7 2.5];
-
-hold on
-plot(IR1_tid,'yellow')
-plot(IR2_tid,'red')
-plot(IR3_tid,'green')
-plot(IR4_tid,'blue')
-plot(IR5_tid,'black')
+load('mjukvaruvariabler') % Laddar variabler
+handles.IR1_tid = IR1_tid; % Lägger till variabel i handles
+handles.IR2_tid = IR2_tid;
+handles.IR3_tid = IR3_tid;
+handles.IR4_tid = IR4_tid;
+handles.IR5_tid = IR5_tid;
+handles.coord1 = coord1;
+handles.coord2 = coord2;
+% Övriga variabler från mjukvara.m skrivs här
+guidata(hObject, handles); % Typ uppdaterar hObject med handles
 
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)
@@ -97,11 +95,33 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 axes(handles.axes1)
+title('IR-värden över tid')
+hold on
 set(handles.ir_f,'String',20.7)
 set(handles.ir_v_f,'String',3.1)
 set(handles.ir_h_f,'String',5.2)
 set(handles.ir_v_b,'String',8.0)
 set(handles.ir_h_b,'String',4.4)
+
+plot(handles.IR1_tid,'yellow')
+plot(handles.IR2_tid,'red')
+plot(handles.IR3_tid,'green')
+plot(handles.IR4_tid,'blue')
+plot(handles.IR5_tid,'black')
+
+axes(handles.axes2)
+title('Representation av labyrint')
+hold on
+
+min_c1 = min(handles.coord1);
+min_c2 = min(handles.coord2);
+max_c1 = max(handles.coord1);
+max_c2 = max(handles.coord2);
+axis([min_c1(1,1)-1 max_c1(1,1)+1 min_c2(1,1)-1 max_c2(1,1)+1]);
+
+line(handles.coord1, handles.coord2)
+robot_coord = [handles.coord1(end) handles.coord2(end)];
+plot(robot_coord, 'o')
 
 
 % --- Executes on key press with focus on figure1 and none of its controls.
