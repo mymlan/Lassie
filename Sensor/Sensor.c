@@ -8,29 +8,34 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
-static volatile uint8_t master_has_recieved_byte = 0;
-static volatile uint8_t has_recieved_give_sensor_data = 0;
-static volatile uint8_t has_recieved_give_distance = 0;
-static volatile uint8_t has_recieved_start_calc_angle = 0;
-static volatile uint8_t has_recieved_give_angle = 0;
-static volatile uint8_t error = 0;
-static volatile uint8_t byte_from_SPI = 0x00;
-static volatile uint8_t SPI_test = 0x00;	
+static volatile uint8_t master_has_recieved_byte;
+static volatile uint8_t has_recieved_give_sensor_data;
+static volatile uint8_t has_recieved_give_distance;
+static volatile uint8_t has_recieved_start_calc_angle;
+static volatile uint8_t has_recieved_give_angle;
+static volatile uint8_t error;
+static volatile uint8_t byte_from_SPI;
+static volatile uint8_t SPI_test;
 
-void Init_ports(){
-	DDRA = 0xFF;
-	PORTB = 0xFF;
-	
+static void Init_ports()
+{
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	SPSR = 0x01; //Sätter SCK till fosc/2
 	DDRD = 0x30; //utgångar på PD4 och PD5
-	PORTD = 0;
-	PORTD = 0x20;
-	PORTD = 0;
-	SPDR = 0x22;
+	PORTD = 0; //test
+	PORTD = 0x20; //test
+	PORTD = 0; //test
 	
-	//sätter MISO till  utgång och även PB0 till utgång, flagga SPI
-	DDRB = 0x41;
+	DDRB = 0x41; //sätter MISO till  utgång och även PB0 till utgång, flagga SPI
+	
+	master_has_recieved_byte = 0; //initera variabler
+	has_recieved_give_sensor_data = 0;
+	has_recieved_give_distance = 0;
+	has_recieved_start_calc_angle = 0;
+	has_recieved_give_angle = 0;
+	error = 0;
+	byte_from_SPI = 0;
+	SPI_test = 0;
 }
 
 ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
@@ -40,6 +45,9 @@ ISR(SPI_STC_vect) //Den avbrotsrutin som sensorn går in i då komm skickat data.
 	{
 		case MASTER_RECIEVED_BYTE:
 			master_has_recieved_byte = 1;
+			PORTD = 0;
+			PORTD = 0x20;
+			PORTD = 0;
 			break;
 		case ID_BYTE_GIVE_SENSOR_DATA:
 			has_recieved_give_sensor_data = 1;
@@ -134,14 +142,15 @@ int main(void)
 {
 	Init_ports();
 	sei();
-	SPI_slave_send_byte(0x03);
+	
 	
 	while(1)
 	{
-		/*if(SPI_should_give_sensor_data())
+		if(SPI_should_give_sensor_data())
 		{
 			SPI_test = 0xff;
-		}*/
+			SPI_slave_send_byte(0x03);
+		}
 	}
 	
 }

@@ -120,9 +120,6 @@
     <Compile Include="Steering.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Steering_SPI.c">
-      <SubType>compile</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.cproj">
