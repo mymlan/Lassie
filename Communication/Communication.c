@@ -17,7 +17,7 @@ static volatile uint8_t has_recieved_angle;
 static volatile uint8_t byte_from_SPI;
 static volatile uint8_t error;
 
-void Master_SPI_init()
+static void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
 		DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
