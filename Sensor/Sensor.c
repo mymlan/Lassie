@@ -20,7 +20,7 @@ static volatile uint8_t SPI_test;
 static void Init_ports()
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
-	SPSR = 0x01; //Sätter SCK till fosc/2
+
 	DDRD = 0x30; //utgångar på PD4 och PD5
 	PORTD = 0; //test
 	PORTD = 0x20; //test
