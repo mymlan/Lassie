@@ -16,11 +16,11 @@ static volatile uint8_t has_recieved_distance;
 static volatile uint8_t has_recieved_angle;
 static volatile uint8_t byte_from_SPI;
 static volatile uint8_t error;
-
+/*
 static volatile uint8_t test1 = 0;
 static volatile uint8_t test2 = 0;
 static volatile uint8_t test[2] = {0,0};
-
+*/
 static void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
@@ -114,7 +114,7 @@ int main(void)
 	sei();
 	//Master_send_to_sensor(0x09);
 
-	
+	/*
 	test1 = 4;
 	test2 = 5;
 	test[0] = test1;
@@ -122,7 +122,7 @@ int main(void)
 	int *test_ptr;
 	test_ptr = &test[0];
 	error = test_ptr->test2;
-	
+	*/
     while(1)
     {
         ;
