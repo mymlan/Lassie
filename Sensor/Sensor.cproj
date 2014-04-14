@@ -120,6 +120,12 @@
     <Compile Include="Sensor.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Sensor_SPI.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Sensor_SPI.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.cproj">
