@@ -11,11 +11,11 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 
-static volatile uint8_t has_recieved_sensor_data = 0;
-static volatile uint8_t has_recieved_distance = 0;
-static volatile uint8_t has_recieved_angle = 0;
-static volatile uint8_t byte_from_SPI = 0;
-static volatile uint8_t error = 0;
+static volatile uint8_t has_recieved_sensor_data;
+static volatile uint8_t has_recieved_distance;
+static volatile uint8_t has_recieved_angle;
+static volatile uint8_t byte_from_SPI;
+static volatile uint8_t error;
 
 void Master_SPI_init()
 {
@@ -30,6 +30,12 @@ void Master_SPI_init()
 		PCMSK0 = 0x20;
 		PCICR = 0x01;
 		PCIFR = 0x01;
+		
+		has_recieved_sensor_data = 0;
+		has_recieved_distance = 0;
+		has_recieved_angle = 0;	
+		byte_from_SPI = 0;	
+		error = 0;
 }
 
 /* int Master_recieve_data_byte()
@@ -41,7 +47,7 @@ static uint8_t Master_recieve_data_byte()
 {
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	SPDR = 0x0A; //Master måste lägga något i SPDR för att starta överföringen
-	while(!(SPIF == 1)){}
+	while(!(SPSR & (1<<SPIF))){}
 	COMMON_SET_PIN(PORTB, PORTB4);
 	return SPDR;
 }
@@ -74,26 +80,26 @@ ISR(PCINT0_vect)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 *  MOSI
 */
-/*
+
 static void Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
 	while(!(SPSR & (1<<SPIF))){}
 }
-*/
+
 
 
 /* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
 */
-/*
+
 void Master_send_to_sensor(uint8_t address_byte) 
 {
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	Master_transmit_data_byte(address_byte); //Skickar adressbyten till sensor
 	COMMON_SET_PIN(PORTB, PORTB4);
 	_delay_us(10);
-}*/
+}
 
 int main(void)
 {
@@ -101,6 +107,7 @@ int main(void)
 
 	Master_SPI_init();
 	sei();
+	Master_send_to_sensor(0x09);
 
 	
     while(1)
