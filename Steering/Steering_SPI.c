@@ -35,6 +35,7 @@ ISR(SPI_STC_vect)
 		PORTD = 0;
 		PORTD = 0x20;
 		PORTD = 0;
+		Handle_recieved_sensor_data();
 		break;
 		default:
 		break;
