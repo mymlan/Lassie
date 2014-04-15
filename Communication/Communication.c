@@ -48,6 +48,20 @@ static uint8_t Master_recieve_data_byte()
 	return SPDR;
 }
 
+//Nedan är funk som Lina skrivit för att ta emot flera byte från sensor.
+/*
+void Recieve_sensor_data()
+{	
+	_delay_us(10);
+	uint8_t number_of_bytes_in_data = 6;
+	while(!(number_of_bytes_in_data == 0))
+	{
+		sensor_data[(number_of_bytes_in_data - 1)] = Master_recieve_data_byte();
+		_delay_us(10);
+		number_of_bytes_in_data = number_of_bytes_in_data - 1;
+	}
+}*/
+
 ISR(PCINT0_vect)
 {
 	byte_from_SPI = Master_recieve_data_byte(); //byte_from_SPI = Master...();
@@ -137,7 +151,6 @@ int main(void)
 	sensor_data[5] = 5;
 	
 	Master_send(0x01, sensor_data);
-	
     while(1)
     {
         ;
