@@ -1,9 +1,4 @@
-/*
- * Communication.c
- *
- * Created: 2014-03-29 14:10:04
- *  Author: MikaLina
- */ 
+
 #define F_CPU (16000000L) //definerar klockfrekvens för att _delay_us ska funka
 
 #include <avr/io.h>
@@ -16,11 +11,7 @@ static volatile uint8_t has_recieved_distance;
 static volatile uint8_t has_recieved_angle;
 static volatile uint8_t byte_from_SPI;
 static volatile uint8_t error;
-/*
-static volatile uint8_t test1 = 0;
-static volatile uint8_t test2 = 0;
-static volatile uint8_t test[2] = {0,0};
-*/
+
 static void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
@@ -46,7 +37,6 @@ static void Master_SPI_init()
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 * Retunerar SPDR MISO
 */
-
 static uint8_t Master_recieve_data_byte()
 {
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
@@ -84,7 +74,6 @@ ISR(PCINT0_vect)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 *  MOSI
 */
-
 static void Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
@@ -96,7 +85,6 @@ static void Master_transmit_data_byte(uint8_t data_byte)
 /* Send_address_to_sensor(unsigned char address_byte)
 *  Skickar adress-byte från master till sensor_slave
 */
-
 void Master_send_to_sensor(uint8_t address_byte) 
 {
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
@@ -114,17 +102,9 @@ int main(void)
 	sei();
 	//Master_send_to_sensor(0x09);
 
-	/*
-	test1 = 4;
-	test2 = 5;
-	test[0] = test1;
-	test[1] = test2;
-	int *test_ptr;
-	test_ptr = &test[0];
-	error = test_ptr->test2;
-	*/
     while(1)
     {
         ;
     }
+	return 0;
 }
