@@ -25,6 +25,22 @@ void SPI_steering_init()
 	byte_from_SPI = 0;
 }
 
+void Handle_recieved_sensor_data()
+{
+	cli();
+	uint8_t number_of_bytes_in_data = 6;
+	while(!(number_of_bytes_in_data == 0))
+	{
+		if (SPSR & (1<<SPIF))
+		{
+			sensor_data[(number_of_bytes_in_data - 1)] = SPDR;
+			number_of_bytes_in_data = number_of_bytes_in_data - 1;
+		}
+	}
+	sei();
+	has_recieved_sensor_data = 1;
+}
+
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
@@ -40,22 +56,6 @@ ISR(SPI_STC_vect)
 		default:
 		break;
 	}
-}
-
-void Handle_recieved_sensor_data()
-{
-	cli();
-	uint8_t number_of_bytes_in_data = 6;
-	while(!(number_of_bytes_in_data == 0))
-	{
-		if (SPSR & (1<<SPIF))
-		{
-			sensor_data[(number_of_bytes_in_data - 1)] = SPDR;
-			number_of_bytes_in_data = number_of_bytes_in_data - 1;
-		}
-	}
-	sei();
-	has_recieved_sensor_data = 1;
 }
 
 uint8_t SPI_have_recieved_sensor_data(void)
