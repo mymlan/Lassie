@@ -9,6 +9,7 @@
 
 static volatile uint8_t has_recieved_sensor_data;
 static volatile uint8_t byte_from_SPI;
+volatile uint8_t sensor_data[6];
 
 void SPI_steering_init()
 {
@@ -31,7 +32,6 @@ ISR(SPI_STC_vect)
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_SENSOR_DATA:
-		has_recieved_sensor_data = 1;
 		PORTD = 0;
 		PORTD = 0x20;
 		PORTD = 0;
@@ -39,6 +39,22 @@ ISR(SPI_STC_vect)
 		default:
 		break;
 	}
+}
+
+void Handle_recieved_sensor_data()
+{
+	cli();
+	uint8_t number_of_bytes_in_data = 6;
+	while(!(number_of_bytes_in_data == 0))
+	{
+		if (SPSR & (1<<SPIF))
+		{
+			sensor_data[(number_of_bytes_in_data - 1)] = SPDR;
+			number_of_bytes_in_data = number_of_bytes_in_data - 1;
+		}
+	}
+	sei();
+	has_recieved_sensor_data = 1;
 }
 
 uint8_t SPI_have_recieved_sensor_data(void)
