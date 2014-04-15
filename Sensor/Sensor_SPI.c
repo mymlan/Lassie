@@ -12,6 +12,10 @@ static volatile uint8_t has_recieved_give_angle;
 static volatile uint8_t error;
 static volatile uint8_t byte_from_SPI;
 
+static volatile uint8_t error1;
+static volatile uint8_t error2;
+
+
 void SPI_sensor_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
@@ -21,6 +25,8 @@ void SPI_sensor_init(void)
 	PORTD = 0; //test
 	PORTD = 0x20; //test
 	PORTD = 0; //test
+	
+	SPDR = 0x22;
 
 	master_has_recieved_byte = 0; //initera variabler
 	has_recieved_give_sensor_data = 0;
@@ -29,6 +35,9 @@ void SPI_sensor_init(void)
 	has_recieved_give_angle = 0;
 	error = 0;
 	byte_from_SPI = 0;
+	
+	error1 = 0;
+	error2 = 0;
 }
 
 //Avbrottsrutin SPI transmission complete
@@ -105,6 +114,44 @@ void SPI_slave_send_byte(uint8_t byte)
 	COMMON_TOGGLE_PIN(PORTB, PORTB0); // Hissa flagga
 	while(!(SPI_master_have_recieved_byte())){}
 }
+
+//Nedan är funk som Lina skrivit för att skicka bytes slave-master
+/*
+void SPI_sensor_send(uint8_t id_byte, volatile uint8_t *data)
+{
+	uint8_t number_of_bytes_in_data = 0;
+	error1 = 1;
+	switch (id_byte)
+	{
+		case ID_BYTE_SENSOR_DATA:
+			number_of_bytes_in_data = 6;
+			error2 = 1;
+			break;
+		case ID_BYTE_DISTANCE:
+			number_of_bytes_in_data = 1;
+		case ID_BYTE_ANGLE:
+			number_of_bytes_in_data = 1;
+			break;
+		default:
+			error = 1;
+			break;	
+	}
+	
+	cli(); //Borde hitta den som stänger av avbrott för SPI!!
+	SPI_slave_send_byte(id_byte);
+	
+	while(!(number_of_bytes_in_data == 0))
+	{
+		if (SPSR & (1<<SPIF))
+		{
+			SPDR = data[(number_of_bytes_in_data - 1)];
+			number_of_bytes_in_data = number_of_bytes_in_data - 1;
+		}
+	}
+	sei();
+}*/
+
+//Nedan är funk som mika har skrivit för att skicka byte slave-master
 /*
 void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 {
@@ -112,12 +159,12 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	switch (id_byte)
 	{
 		case ID_BYTE_SENSOR_DATA:
-			number_of_bytes_in_data = 6;
-			break;
+		number_of_bytes_in_data = 6;
+		break;
 		case ID_BYTE_DISTANCE:
 		case ID_BYTE_ANGLE:
-			number_of_bytes_in_data = 1;
-			break;
+		number_of_bytes_in_data = 1;
+		break;
 	}
 	cli(); //Borde hitta den som stänger av avbrott för SPI!!
 	SPI_send_byte(id_byte);
@@ -128,6 +175,5 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 			SPI_send_byte();
 			number_of_bytes_in_data = number_of_bytes_in_data - 1;
 		}
-	}	
-}
-*/
+	}
+}*/

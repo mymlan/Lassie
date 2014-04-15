@@ -12,4 +12,6 @@ uint8_t SPI_should_give_angle(void);
 
 void SPI_slave_send_byte(uint8_t byte);
 
+void SPI_sensor_send(uint8_t id_byte,volatile uint8_t *data);
+
 #endif
