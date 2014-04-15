@@ -12,6 +12,8 @@ static volatile uint8_t has_recieved_angle;
 static volatile uint8_t byte_from_SPI;
 static volatile uint8_t error;
 
+static volatile uint8_t sensor_data[6];//pekaren heter sensor_data
+
 static void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
@@ -93,6 +95,31 @@ void Master_send_to_sensor(uint8_t address_byte)
 	_delay_us(10);
 }
 
+void Master_send(uint8_t id_byte, volatile uint8_t *data_ptr)
+{
+	uint8_t number_of_bytes_in_data;
+	
+	switch (id_byte)
+	{
+		case ID_BYTE_SENSOR_DATA:
+			number_of_bytes_in_data = 6;
+			break;
+		default:
+			break;
+	}
+	
+	COMMON_CLEAR_PIN(PORTB, PORTB4);
+	Master_transmit_data_byte(id_byte);
+	_delay_us(10);
+	while(!(number_of_bytes_in_data == 0))
+	{
+		Master_transmit_data_byte(data_ptr[(number_of_bytes_in_data - 1)]);
+		_delay_us(10);
+		number_of_bytes_in_data = number_of_bytes_in_data - 1;
+	}
+	
+	COMMON_SET_PIN(PORTB, PORTB4);
+}
 
 int main(void)
 {
@@ -100,11 +127,21 @@ int main(void)
 
 	Master_SPI_init();
 	sei();
-	//Master_send_to_sensor(0x09);
-
+	
+	
+	sensor_data[0] = 0;//plockar ut värdet, alt stoppar in. 0-5
+	sensor_data[1] = 1;
+	sensor_data[2] = 2;
+	sensor_data[3] = 3;
+	sensor_data[4] = 4;
+	sensor_data[5] = 5;
+	
+	Master_send(0x01, sensor_data);
+	
     while(1)
     {
         ;
     }
 	return 0;
 }
+
