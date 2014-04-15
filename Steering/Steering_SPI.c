@@ -23,6 +23,7 @@ void SPI_steering_init()
 	
 	has_recieved_sensor_data = 0;
 	byte_from_SPI = 0;
+	
 }
 
 void Handle_recieved_sensor_data()
@@ -64,3 +65,4 @@ uint8_t SPI_have_recieved_sensor_data(void)
 	has_recieved_sensor_data = 0;
 	return result;
 }
+

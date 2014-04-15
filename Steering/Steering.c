@@ -21,6 +21,8 @@ int main(void)
 	//behöver inte vara volatile, loopar aldrig över den*/
 	test = 0;
 	
+	SPI_steering_init();
+	sei();
 	while(1)
 	{
 		if(SPI_have_recieved_sensor_data())
