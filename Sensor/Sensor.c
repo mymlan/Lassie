@@ -39,7 +39,7 @@ int main(void)
 		if(SPI_should_give_sensor_data())
 		{
 			test = 0xff;
-			SPI_sensor_send(0x01, sensor_data);
+			//SPI_sensor_send(0x01, sensor_data);
 		}
 	}
 	return 0;
