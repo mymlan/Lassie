@@ -30,7 +30,7 @@ void init_interrupts(){
 		ADCSRA = (1<<ADIE)|(1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); //Set Prescaler to 128, Set ADCSRA to enable interrupts
 		
 		ADCSRA |= (1<<ADSC); //Start ADC
-		//DIDR1 = (1<<AIN1D)|(1<<AIN0D);
+		//DIDR1 = (1<<AIN1D)|(1<<AIN0D); //
 }
 
 /*void USART_init(){
