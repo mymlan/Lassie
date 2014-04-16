@@ -8,10 +8,12 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "Sensor_cm_converter.h"
+
 volatile unsigned char reflex_count = 0;
 volatile unsigned char test;
 int baud;
-volatile unsigned char sensor1, sensor2, sensor3, sensor4, sensor5;
+volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 
 volatile uint8_t count=0;
 
@@ -45,176 +47,7 @@ void init_interrupts(){
 	//test = PIND;
 //}
 
-float S1_sensor_value_front(float n)
-{
-	float cm_value;
-	
-	if (n <= 146 && n >= 105)
-	{
-		cm_value = ((n-228)/-20.5);
-	}
-	else if (n <=105 && n >= 93)
-	{
-		cm_value = ((n - 186)/-13.5);
-	}
-	else if (n <= 93 && n >= 66)
-	{
-		cm_value = ((n-156)/-9);
-	}
-	else if (n <= 66 && n >= 40)
-	{
-		cm_value = ((n-112)/-4.8);
-	}
-	else if (n <= 40 && n >= 34)
-	{
-		cm_value = ((n-58)/-1.2);
-	}
-	else
-	{
-		cm_value = 25;
-	}
-	return cm_value;
-}
 
-float S2_sensor_value_front(float n) 
-{
-	float cm_value;
-	
-	if (n <= 148 && n >= 125)
-	{
-		cm_value = ((n-240)/-23);
-	}
-	else if (n <=125 && n >= 109)
-	{
-		cm_value = ((n-205)/-16);
-	}
-	else if (n <= 109 && n >= 94)
-	{
-		cm_value = ((n-199)/-15);
-	}
-	else if (n <= 94 && n >= 70)
-	{
-		cm_value = ((n-150)/-8);
-	}
-	else if (n <= 70 && n >= 49)
-	{
-		cm_value = ((n-111)/-4.1);
-	}
-	else if (n <= 49 && n >= 34)
-	{
-		cm_value = ((n-94)/-3);
-	}
-	else
-	{
-		cm_value = 25;
-	}
-	return cm_value;
-}
-
-float S3_sensor_value_front(float n)
-{
-	float cm_value;
-	
-	if (n <= 148 && n >= 125)
-	{
-		cm_value = ((n-240)/-23);
-	}
-	else if (n <=125 && n >= 109)
-	{
-		cm_value = ((n-205)/-16);
-	}
-	else if (n <= 109 && n >= 94)
-	{
-		cm_value = ((n-199)/-15);
-	}
-	else if (n <= 94 && n >= 70)
-	{
-		cm_value = ((n-150)/-8);
-	}
-	else if (n <= 70 && n >= 49)
-	{
-		cm_value = ((n-111)/-4.1);
-	}
-	else if (n <= 49 && n >= 34)
-	{
-		cm_value = ((n-94)/-3);
-	}
-	else
-	{
-		cm_value = 25;
-	}
-	return cm_value;
-}
-
-float S4_sensor_value_front(float n)
-{
-	float cm_value;
-	
-	if (n <= 149 && n >= 124)
-	{
-		cm_value = ((n-249)/-25);
-	}
-	else if (n <=124 && n >= 107)
-	{
-		cm_value = ((n-209)/-17);
-	}
-	else if (n <= 107 && n >= 94)
-	{
-		cm_value = ((n-185)/-13);
-	}
-	else if (n <= 94 && n >= 68)
-	{
-		cm_value = ((n-154.66)/-8.66);
-	}
-	else if (n <= 68 && n >= 48)
-	{
-		cm_value = ((n-108)/-4);
-	}
-	else if (n <= 48 && n >= 36)
-	{
-		cm_value = ((n-84)/-2.4);
-	}
-	else
-	{
-		cm_value = 25;
-	}
-	return cm_value;
-}
-
-float S5_sensor_value_LONG(float n)
-{
-	float cm_value;
-	
-	if (n <= 130 && n >= 92)
-	{
-		cm_value = ((n-206)/-7.6);
-	}
-	else if (n <= 92 && n >= 72)
-	{
-		cm_value = ((n-152)/-4);
-	}
-	else if (n <= 72 && n >= 60)
-	{
-		cm_value = ((n-117)/-2.4);
-	}
-	else if (n <= 60 && n >= 53)
-	{
-		cm_value = ((n-95)/-1.4);
-	}
-	else if (n <= 53 && n >= 35)
-	{
-		cm_value = ((n-86)/-1.1);
-	}
-	else if (n <= 35 && n >= 30)
-	{
-		cm_value = ((n-50)/-0.25);
-	}
-	else
-	{
-		cm_value = 100;
-	}
-	return cm_value;
-}
 
 ISR (ADC_vect)
 {
@@ -230,7 +63,7 @@ ISR (ADC_vect)
 		break;
 		case(1):
 		
-		sensor2 = ADCH; //Set sensor2 to the converted ADCH value
+		sensor2 = S2_sensor_value_front(ADCH); //Set sensor2 to the converted ADCH value
 		count++; //add 1 to count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Set ADMUX to PA5
 		break;
@@ -248,7 +81,7 @@ ISR (ADC_vect)
 		break;
 		case(4):
 		
-		sensor5 = S5_sensor_value_LONG(ADCH); //Set sensor5 to the converted ADCH value
+		sensor5 = S5_sensor_value_long(ADCH); //Set sensor5 to the converted ADCH value
 		count = 0; //clear count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA3
 		break;
