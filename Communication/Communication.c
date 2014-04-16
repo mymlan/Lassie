@@ -21,6 +21,9 @@ static volatile uint8_t test1 = 0;
 static volatile uint8_t test2 = 0;
 static volatile uint8_t test[2] = {0,0};
 */
+
+int Map_main(); // Bara vi som lovar att denna funktion kommer att finnas (för map)
+
 static void Master_SPI_init()
 {
 		DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamprona)
@@ -109,7 +112,9 @@ void Master_send_to_sensor(uint8_t address_byte)
 int main(void)
 {
 	COMMON_SET_PIN(PORTA, PORTA7);
-
+	
+	Map_main(); // Mainfunktoin för map (kommentera bort om map ej är intressant)
+	
 	Master_SPI_init();
 	sei();
 	//Master_send_to_sensor(0x09);
