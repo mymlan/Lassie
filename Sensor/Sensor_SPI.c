@@ -40,6 +40,7 @@ void SPI_sensor_init(void)
 	error2 = 0;
 }
 
+
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
@@ -115,65 +116,35 @@ void SPI_slave_send_byte(uint8_t byte)
 	while(!(SPI_master_have_recieved_byte())){}
 }
 
-//Nedan är funk som Lina skrivit för att skicka bytes slave-master
-/*
 void SPI_sensor_send(uint8_t id_byte, volatile uint8_t *data)
 {
 	uint8_t number_of_bytes_in_data = 0;
-	error1 = 1;
 	switch (id_byte)
 	{
 		case ID_BYTE_SENSOR_DATA:
-			number_of_bytes_in_data = 6;
-			error2 = 1;
-			break;
+		number_of_bytes_in_data = 6;
+		error2 = 1;
+		break;
 		case ID_BYTE_DISTANCE:
-			number_of_bytes_in_data = 1;
+		number_of_bytes_in_data = 1;
 		case ID_BYTE_ANGLE:
-			number_of_bytes_in_data = 1;
-			break;
+		number_of_bytes_in_data = 1;
+		break;
 		default:
-			error = 1;
-			break;	
+		error = 1;
+		break;
 	}
-	
-	cli(); //Borde hitta den som stänger av avbrott för SPI!!
+		
+	cli();
 	SPI_slave_send_byte(id_byte);
-	
+		
 	while(!(number_of_bytes_in_data == 0))
 	{
-		if (SPSR & (1<<SPIF))
+		if(SPSR & (1<<SPIF))
 		{
 			SPDR = data[(number_of_bytes_in_data - 1)];
 			number_of_bytes_in_data = number_of_bytes_in_data - 1;
 		}
 	}
-	sei();
-}*/
-
-//Nedan är funk som mika har skrivit för att skicka byte slave-master
-/*
-void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
-{
-	uint8_t number_of_bytes_in_data;
-	switch (id_byte)
-	{
-		case ID_BYTE_SENSOR_DATA:
-		number_of_bytes_in_data = 6;
-		break;
-		case ID_BYTE_DISTANCE:
-		case ID_BYTE_ANGLE:
-		number_of_bytes_in_data = 1;
-		break;
-	}
-	cli(); //Borde hitta den som stänger av avbrott för SPI!!
-	SPI_send_byte(id_byte);
-	if(is_slave_ready)
-	{
-		while(!(number_of_bytes_in_data == 0))
-		{
-			SPI_send_byte();
-			number_of_bytes_in_data = number_of_bytes_in_data - 1;
-		}
-	}
-}*/
+	sei();	
+}
