@@ -55,58 +55,52 @@ ISR (ADC_vect)
 	switch (count) 
 	{
 		
-		case(0):
-		
+		case(0):		
 		sensor1 = S1_sensor_value_front(ADCH); //Set sensor1 to the converted ADCH value
 		count++; //add 1 to count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //Set ADMUX to PA4
 		break;
-		case(1):
 		
+		case(1):		
 		sensor2 = S2_sensor_value_front(ADCH); //Set sensor2 to the converted ADCH value
 		count++; //add 1 to count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Set ADMUX to PA5
 		break;
-		case(2):
 		
+		case(2):		
 		sensor3 = S3_sensor_value_front(ADCH); //Set sensor3 to the converted ADCH value
 		count++; //add 1 to count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Set ADMUX to PA6
 		break;
-		case(3):
 		
+		case(3):
 		sensor4 = S4_sensor_value_front(ADCH); //Set sensor4 to the converted ADCH value
 		count++; //add 1 to count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA7
 		break;
-		case(4):
 		
+		case(4):		
 		sensor5 = S5_sensor_value_long(ADCH); //Set sensor5 to the converted ADCH value
 		count = 0; //clear count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA3
 		break;
-		/*case(5):
 		
-		angle();
-		
-		if {-90 > angle < 90}
-		
-		angular_value = ADCH;
-		
-		angular_diff = (angular_value - offset) * sensitivity;
-		
-		angle += angular_diff/1664;
-		
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // PA2
-		
+		case(5):				
+		if ((-90 < angle) & (angle < 90))
+		{
+			angular_value = ADCH;
+			angular_diff = (angular_value - offset) * sensitivity;
+			angle += angular_diff/1664;
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // PA2
 		} else 
-		{   angle=0;
+		{  
+			angle=0;
 			count=0;
 			reflex_count=0;
-			send_angle(OK)}
-			
+			//send_angle(OK)}
+		}
 		
-		break;*/
+		break;
 	}
 	
 	ADCSRA |= (1<<ADSC); //startar omvandling
