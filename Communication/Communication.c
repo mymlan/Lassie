@@ -13,6 +13,8 @@ static volatile uint8_t byte_from_SPI;
 static volatile uint8_t error;
 
 static volatile uint8_t sensor_data[6];//pekaren heter sensor_data
+static volatile uint8_t distance;
+static volatile uint8_t angle;
 
 static void SPI_Master_init()
 {
@@ -33,9 +35,13 @@ static void SPI_Master_init()
 		has_recieved_angle = 0;	
 		byte_from_SPI = 0;	
 		error = 0;
+		
+		// sensor_data = ?;
+		distance = 0;
+		angle = 0;
 }
 
-/* int Master_recieve_data_byte()
+/* static uint8_t SPI_Master_recieve_data_byte_from_sensor()
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 * Retunerar SPDR, MISO
 */
@@ -48,7 +54,7 @@ static uint8_t SPI_Master_recieve_data_byte_from_sensor()
 	return SPDR;
 }
 
-void SPI_Master_recieve_sensor_data()
+static void SPI_Master_recieve_sensor_data()
 {
 	_delay_us(10);
 	uint8_t number_of_bytes_in_data = 6;
@@ -59,10 +65,16 @@ void SPI_Master_recieve_sensor_data()
 		number_of_bytes_in_data = number_of_bytes_in_data - 1;		
 	}
 }
-void SPI_Master_recieve_distance()
+static void SPI_Master_recieve_distance()
 {
 	_delay_us(10);
 	distance = SPI_Master_recieve_data_byte_from_sensor();
+	_delay_us(10);
+}
+static void SPI_Master_recieve_angle()
+{
+	_delay_us(10);
+	angle = SPI_Master_recieve_data_byte_from_sensor();
 	_delay_us(10);
 }
 
@@ -77,9 +89,11 @@ ISR(PCINT0_vect)
 		has_recieved_sensor_data = 1;
 		break;
 		case ID_BYTE_DISTANCE:
+		SPI_Master_recieve_distance();
 		has_recieved_distance = 1;
 		break;
 		case ID_BYTE_ANGLE:
+		SPI_Master_recieve_angle();
 		has_recieved_angle = 1;
 		default:
 		error = 1;
@@ -90,7 +104,6 @@ ISR(PCINT0_vect)
 	}
 		
 }
-
 
 /* void SPI_Master_transmit_data_byte(unsigned char data_byte)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
