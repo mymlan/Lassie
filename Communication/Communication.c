@@ -64,23 +64,27 @@ static void SPI_Master_recieve_sensor_data()
 		_delay_us(10);
 		number_of_bytes_in_data = number_of_bytes_in_data - 1;		
 	}
+	sei();
 }
 static void SPI_Master_recieve_distance()
 {
 	_delay_us(10);
 	distance = SPI_Master_recieve_data_byte_from_sensor();
 	_delay_us(10);
+	sei();
 }
 static void SPI_Master_recieve_angle()
 {
 	_delay_us(10);
 	angle = SPI_Master_recieve_data_byte_from_sensor();
 	_delay_us(10);
+	sei();
 }
 
 // Avbrottsvektor som går hög då sensor har något att skicka. (röd flagga)
 ISR(PCINT0_vect)
 {
+	cli(); // Avaktiverar avbrott under skickning
 	byte_from_SPI = SPI_Master_recieve_data_byte_from_sensor();
 	switch (byte_from_SPI) 
 	{
@@ -105,6 +109,25 @@ ISR(PCINT0_vect)
 		
 }
 
+uint8_t SPI_Master_has_new_sensor_data(void)
+{
+	uint8_t result = has_recieved_sensor_data;
+	has_recieved_sensor_data = 0;
+	return result;
+}
+uint8_t SPI_Master_has_new_distance(void)
+{
+	uint8_t result = has_recieved_distance;
+	has_recieved_distance = 0;
+	return result;
+}
+uint8_t SPI_Master_has_new_angle(void)
+{
+	uint8_t result = has_recieved_angle;
+	has_recieved_angle = 0;
+	return result;
+}
+
 /* void SPI_Master_transmit_data_byte(unsigned char data_byte)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 *  MOSI
@@ -115,33 +138,40 @@ static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 	while(!(SPSR & (1<<SPIF))){}
 }
 
-
-
-/* Send_address_to_sensor(unsigned char address_byte)
-*  Skickar adress-byte från master till sensor_slave
+/* void SPI_Master_send_to_sensor(uint8_t id_byte)
+*  Skickar id_byte från Master till sensor Slave.
+*  Då endast meddelanden om 1 byte ska till sensor.
 */
-void SPI_Master_send_to_sensor(uint8_t address_byte)
+void SPI_Master_send_to_sensor(uint8_t id_byte)
 {
+	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
-	SPI_Master_transmit_data_byte(address_byte); //Skickar adressbyten till sensor
+	SPI_Master_transmit_data_byte(id_byte); //Skickar adressbyten till sensor
 	COMMON_SET_PIN(PORTB, PORTB4);
-	_delay_us(10);
+	_delay_us(10); //ger tid till sensor att spara undan SPDR
+	sei();
 }
 
-void Master_send(uint8_t id_byte, volatile uint8_t *data_ptr)
+void SPI_Master_send_to_steering(uint8_t id_byte, volatile uint8_t *data_ptr)
 {
-	uint8_t number_of_bytes_in_data;
+	volatile uint8_t number_of_bytes_in_data = 0;
 	
 	switch (id_byte)
 	{
 		case ID_BYTE_SENSOR_DATA:
-			number_of_bytes_in_data = 6;
-			break;
+		number_of_bytes_in_data = 6;
+		break;
+		case ID_BYTE_GUIDED_DECISIONS:
+		case ID_BYTE_AUTO_DECISIONS:
+		number_of_bytes_in_data = 1;
+		break;
 		default:
-			break;
+		error = 1;
+		break;
 	}
 	
-	COMMON_CLEAR_PIN(PORTB, PORTB4);
+	cli();
+	COMMON_CLEAR_PIN(PORTB, PORTB3);
 	SPI_Master_transmit_data_byte(id_byte);
 	_delay_us(10);
 	while(!(number_of_bytes_in_data == 0))
@@ -150,8 +180,8 @@ void Master_send(uint8_t id_byte, volatile uint8_t *data_ptr)
 		_delay_us(10);
 		number_of_bytes_in_data = number_of_bytes_in_data - 1;
 	}
-	
-	COMMON_SET_PIN(PORTB, PORTB4);
+	COMMON_SET_PIN(PORTB, PORTB3);
+	sei();
 }
 
 int main(void)
@@ -169,7 +199,7 @@ int main(void)
 	sensor_data[4] = 4;
 	sensor_data[5] = 5;
 	
-	Master_send(0x01, sensor_data);
+	SPI_Master_send_to_steering(0x01, sensor_data);
     while(1)
     {
         ;

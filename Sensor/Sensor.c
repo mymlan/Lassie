@@ -36,7 +36,7 @@ int main(void)
 	
 	while(1)
 	{
-		if(SPI_should_give_sensor_data())
+		if(SPI_sensor_should_give_sensor_data())
 		{
 			test = 0xff;
 			//SPI_sensor_send(0x01, sensor_data);
