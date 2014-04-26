@@ -10,8 +10,6 @@ uint8_t SPI_sensor_should_give_distance(void);
 uint8_t SPI_sensor_should_start_calc_angle(void);
 uint8_t SPI_sensor_should_give_angle(void);
 
-void SPI_sensor_slave_send_id_byte(uint8_t byte);
-
-void SPI_sensor_send(uint8_t id_byte,volatile uint8_t *data);
+void SPI_sensor_send(uint8_t id_byte,uint8_t *data);
 
 #endif
