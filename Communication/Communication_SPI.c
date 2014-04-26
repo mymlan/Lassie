@@ -26,7 +26,7 @@ void SPI_Master_init(void)
 	error = 0;
 }
 
-/* uint8_t SPI_Master_recieve_data_byte_from_sensor()
+/* static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
 * Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 * Retunerar SPDR, MISO
 */
@@ -88,7 +88,7 @@ ISR(PCINT0_vect)
 	
 }
 
-/* void SPI_Master_transmit_data_byte(unsigned char data_byte)
+/* static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 *  Skiftar en byte i register mellan master och slave. Väntar på att överföring blir klar.
 *  MOSI
 */
@@ -96,6 +96,7 @@ static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
 	while(!(SPSR & (1<<SPIF))){}
+	_delay_us(10);
 }
 
 /* void SPI_Master_send_to_sensor(uint8_t id_byte)
@@ -114,8 +115,7 @@ void SPI_Master_send_to_sensor(uint8_t id_byte)
 
 void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 {
-	volatile uint8_t number_of_bytes_in_data = 0;
-	
+	uint8_t number_of_bytes_in_data = 0;
 	switch (id_byte)
 	{
 		case ID_BYTE_SENSOR_DATA:
@@ -133,12 +133,9 @@ void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB3);
 	SPI_Master_transmit_data_byte(id_byte);
-	_delay_us(10);
-	while(!(number_of_bytes_in_data == 0))
+	for(int8_t i = (number_of_bytes_in_data - 1); i >= 0; i--)
 	{
-		SPI_Master_transmit_data_byte(data_ptr[(number_of_bytes_in_data - 1)]);
-		_delay_us(10);
-		number_of_bytes_in_data = number_of_bytes_in_data - 1;
+		SPI_Master_transmit_data_byte(data_ptr[i]);
 	}
 	COMMON_SET_PIN(PORTB, PORTB3);
 	sei();
