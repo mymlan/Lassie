@@ -16,6 +16,8 @@ long int COUNTER_MAX = 65535;
 double BASE_SPEED = 32000; // Halvfart, HÖGRE värde ger HÖGRE hastighet
 double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double K_P = 0.01; // Proportionella konstanten
+double K_D = 0.01; // Deriveringskonstanten
 	
 //-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
@@ -137,11 +139,20 @@ void Close()
 void Forward_regulated()
 {
 	// reglering efter sensorvärden
+	double e = 20; // Felet e i mm (exempelvis)
+	double theta = 0; // Vinkeln theta i rad
+	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
+	double adjusted_speed = K_P * e + K_D * tan(theta);
+	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
+	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
+	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
 }
 
 void Back_regulated()
 {
 	// reglering efter sensorvärden
+	PORTD = (0<< PORTD2) | (0<< PORTD3); // Vänster - Höger riktning
+	// copy-paste när Forward_regulated() slutgiltigt klar
 }
 
 //-----------------DIVERSE FUNKTIONER----------------//
@@ -160,23 +171,8 @@ void Delay_seconds(int seconds)
 // Test
 void Testprogram()
 {
-	Forward();
-	Delay_seconds(1);
-	
-	Back();
-	Delay_seconds(1);
-	
-	Rotate_left();
-	Delay_seconds(1);
-	
-	Rotate_right();
-	Delay_seconds(1);
-	
-	Turn_left();
-	Delay_seconds(1);
-	
-	Turn_right();
-	Delay_seconds(1);
+	Forward_regulated();
+	Delay_seconds(2);
 	
 	Stop();
 }
@@ -226,7 +222,7 @@ ISR(INT2_vect) // TRYCKKNAPP på PB3
 {
 	//TODO: en case(styrbeslut)
 
-	int styrbeslut = 123;
+	int styrbeslut = 42;
 	switch(styrbeslut)
 	{
 		case 0: Stop();
