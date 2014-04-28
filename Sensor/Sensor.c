@@ -18,7 +18,7 @@ volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 volatile uint8_t count=0;
 
 volatile unsigned char sensitivity = 1.28;
-volatile unsigned char offset = 134;
+volatile unsigned char offset = 133;
 volatile unsigned char angular_value;
 volatile float angle = 0;
 volatile float angular_diff;
@@ -51,53 +51,54 @@ void init_interrupts(){
 
 ISR (ADC_vect)
 {
+	//count = 5;
 	
 	switch (count) 
 	{
 		
 		case(0):		
-		sensor1 = S1_sensor_value_front(ADCH); //Set sensor1 to the converted ADCH value
-		count++; //add 1 to count
+		sensor1 = S1_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet 
+		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //Set ADMUX to PA4
 		break;
 		
 		case(1):		
-		sensor2 = S2_sensor_value_front(ADCH); //Set sensor2 to the converted ADCH value
-		count++; //add 1 to count
+		sensor2 = S2_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet 
+		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Set ADMUX to PA5
 		break;
 		
 		case(2):		
-		sensor3 = S3_sensor_value_front(ADCH); //Set sensor3 to the converted ADCH value
-		count++; //add 1 to count
+		sensor3 = S3_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet 
+		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Set ADMUX to PA6
 		break;
 		
 		case(3):
-		sensor4 = S4_sensor_value_front(ADCH); //Set sensor4 to the converted ADCH value
-		count++; //add 1 to count
+		sensor4 = S4_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet 
+		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA7
 		break;
 		
 		case(4):		
-		sensor5 = S5_sensor_value_long(ADCH); //Set sensor5 to the converted ADCH value
-		count = 0; //clear count
+		sensor5 = S5_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet 
+		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA3
 		break;
 		
 		case(5):				
-		if ((-90 < angle) & (angle < 90))
+		if ((-20 < angle) & (angle < 20))
 		{
 			angular_value = ADCH;
 			angular_diff = (angular_value - offset) * sensitivity;
-			angle += angular_diff/1664;
+			angle += angular_diff/10000;
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // PA2
 		} else 
 		{  
 			angle=0;
-			count=0;
+			//count=5;
 			reflex_count=0;
-			//send_angle(OK)}
+			//send_angle(OK)
 		}
 		
 		break;
@@ -140,6 +141,7 @@ int main(void)
 			elseif {ir_req}
 				{
 			send_IR (vec(s1,s2,s3,s4,s5))
+			send_angle (angle)
 		         }
 	
 	USART_check //function Alt. av man aktiverar RFID här också
@@ -148,3 +150,5 @@ int main(void)
 	*/
 			}
 			}
+			
+			//angle = (atan((sensor1-sensor2)/dist)+ atan((sensor3-sesor4)/dist2))/2

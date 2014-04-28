@@ -5,7 +5,7 @@
  *  Author: Hugo
  */ 
 
- int S1_sensor_value_front(int n)
+ int S1_sensor_value_left_front(int n)
 {
 	int cm_value;
 	
@@ -36,7 +36,7 @@
 	return cm_value;
 }
 
-int S2_sensor_value_front(int n) 
+int S2_sensor_value__left_back(int n) 
 {
 	int cm_value;
 	
@@ -71,7 +71,7 @@ int S2_sensor_value_front(int n)
 	return cm_value;
 }
 
-int S3_sensor_value_front(int n)
+int S3_sensor_value_right_front(int n)
 {
 	int cm_value;
 	
@@ -106,7 +106,7 @@ int S3_sensor_value_front(int n)
 	return cm_value;
 }
 
-int S4_sensor_value_front(int n)
+int S4_sensor_value_right_back(int n)
 {
 	int cm_value;
 	
@@ -141,7 +141,7 @@ int S4_sensor_value_front(int n)
 	return cm_value;
 }
 
-int S5_sensor_value_long(int n)
+int S5_sensor_value_front_long(int n)
 {
 	int cm_value;
 	
