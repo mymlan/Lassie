@@ -21,6 +21,8 @@ uint8_t sensor3 = 1;
 uint8_t sensor4 = 1;
 uint8_t sensor5 = 1;
 uint8_t vinkelsensor = 1;
+int test_variable_a;
+int test_variable_b;
 //int robot_dir = 0; // nord, öst, syd, väst
 
 //------ C, VI LOVAR ATT DESSA STRUCTAR DEFINIERAS -------//
@@ -179,7 +181,7 @@ int What_is_open(int left, int right, int front, int rdir)
 
 // Create_node
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
-void Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, int open_walls)
+node* Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, int open_walls)
 {
 	// GENERELLT ARGUMENT betyder att det ska vara i någon form av argument till funktionen. Just nu bara dummydata
 		// 1.Skapa ny nod
@@ -194,7 +196,8 @@ void Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, in
 	}
 	p_node->links[(robot_dir + 2) % 4].p_node = p_robot_node; // 3b. Koppla gammal nod till ny nod
 	p_node->links[(robot_dir + 2) % 4].length = length; // 3c. Längd för vägen bakåt satt
-	p_robot_node = p_node; // 4.
+	return p_node; // 4.
+	// UPPDATERA ROBOT DIR
 		// 5. Nollställ avstånd (kanske sker utanför funktionen)
 		// 6. Ta styrbslut och return (sker utanför funktionen)
 }
@@ -218,8 +221,6 @@ node* Create_origin(int open_walls)
 // Innehållet kan ev. mergas med riktiga main när allt fungerar
 int Map_main(void)
 {
-	PORTA = 0; // Port A används för att testa koden typ spårutskrifter alltså
-	
 	// Lite testning och pseudokod för hur allt kommer gå till
 	// [undersöker riktningar (säg 1100)]
 	node* p_robot_node = Create_origin(1100); // Skapa origo och robotpekare
@@ -228,10 +229,24 @@ int Map_main(void)
 	// [beordra styrbeslut]
 	// [detekterar en helt ny nod]
 	// [ev. beräkning av längd (låt den bli 7)]
-	Create_node(0, 7, p_robot_node, robot_dir, 7, What_is_open(0, 1, 0, robot_dir)); // Skapa nod
+	p_robot_node = Create_node(0, 7, p_robot_node, robot_dir, 7, What_is_open(0, 1, 0, robot_dir)); // Skapa nod
 	// (All information om kartan är sparad via robotpekaren och nås genom att följa robotpekaren)
 	// [loopa]
+	test_variable_a = p_robot_node->x; // Ska va 0
+	test_variable_b = p_robot_node->y; // Ska va 7
 	
+	p_robot_node = Create_node(3, 7, p_robot_node, robot_dir, 3, What_is_open(1, 1, 0, robot_dir)); // Vi har åkt höger och skapat en nod.
+	test_variable_a = p_robot_node->x; // Ska va 3
+	test_variable_b = p_robot_node->y; // Ska va 7
+	
+	p_robot_node = Create_node(3, 9, p_robot_node, robot_dir, 3, What_is_open(1, 1, 0, robot_dir)); // Vi har åkt höger och skapat en nod.
+	test_variable_a = p_robot_node->links[2].p_node->x; // Ska va 3 (förra noden)
+	test_variable_b = p_robot_node->links[2].p_node->y; // Ska va 7 (förra noden)
+	
+	test_variable_a = p_robot_node->links[0].open; // Ska va 0
+	test_variable_b = p_robot_node->links[1].open; // Ska va 1
+	
+	p_robot_node = Create_node(5, 9, p_robot_node, robot_dir, 3, What_is_open(1, 1, 0, robot_dir)); // Vi har åkt höger och skapat en nod.
 	/*
 	struct node node1;
 	struct node node2;
