@@ -89,11 +89,11 @@ ISR (ADC_vect)
 		break;
 		
 		case(5):				
-		if ((-20 < angle) & (angle < 20))
+		if ((-20 < angle_rot) & (angle_rot < 20))
 		{
 			angular_value_rot = ADCH;
-			angular_diff_rot = (angular_value - offset) * sensitivity;
-			angle_rot += angular_diff/10000;
+			angular_diff_rot = (angular_value_rot - offset) * sensitivity;
+			angle_rot += angular_diff_rot/10000;
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // PA2
 		} else 
 		{  
