@@ -19,9 +19,10 @@ volatile uint8_t count=0;
 
 volatile unsigned char sensitivity = 1.28;
 volatile unsigned char offset = 133;
-volatile unsigned char angular_value;
-volatile float angle = 0;
-volatile float angular_diff;
+volatile unsigned char angular_value_rot;
+volatile uint8_t angle;
+volatile float angle_rot = 0;
+volatile float angular_diff_rot;
 
 void init_interrupts(){
 		sei();  //set global interrupt
@@ -84,20 +85,21 @@ ISR (ADC_vect)
 		sensor5 = S5_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet 
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA3
+		//angle = 90 - ((atan((sensor3-sensor4)/dist1)) + (atan((sensor2-sensor1)/dist2)))/2; //Ger vinkel från vänstra väggen 
 		break;
 		
 		case(5):				
 		if ((-20 < angle) & (angle < 20))
 		{
-			angular_value = ADCH;
-			angular_diff = (angular_value - offset) * sensitivity;
-			angle += angular_diff/10000;
+			angular_value_rot = ADCH;
+			angular_diff_rot = (angular_value - offset) * sensitivity;
+			angle_rot += angular_diff/10000;
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // PA2
 		} else 
 		{  
-			angle=0;
-			//count=5;
-			reflex_count=0;
+			angle_rot = 0;
+			//count = 5;
+			reflex_count = 0;
 			//send_angle(OK)
 		}
 		
@@ -151,4 +153,4 @@ int main(void)
 			}
 			}
 			
-			//angle = (atan((sensor1-sensor2)/dist)+ atan((sensor3-sesor4)/dist2))/2
+			
