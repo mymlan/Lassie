@@ -72,7 +72,7 @@ void Forward()
 }
 
 // Åk Bakåt
-void Back()
+void Backward()
 {
 	PORTD = (0<< PORTD2) | (0<< PORTD3);
 	OCR1A = BASE_SPEED * 0.5; // Uppdatera hastigheten
@@ -132,19 +132,19 @@ void Close_claw()
 }
 
 //----------------AUTONOMA REGLERFUNKTIONER-----------//
-void Forward_regulated()
+void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: uint8_t regulator_error, uint8_t regulator_angle
 {
 	// reglering efter sensorvärden
-	double e = 20; // Felet e i mm (exempelvis)
-	double theta = 0; // Vinkeln theta i rad
+	//double regulator_error = 20; // Felet e i mm (exempelvis)
+	//double regulator_angle = 0; // Vinkeln theta i rad
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
-	double adjusted_speed = K_P * e + K_D * tan(theta);
+	double adjusted_speed = K_P * regulator_error + K_D * tan(regulator_angle);
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
 }
 
-void Back_regulated()
+void Backward_regulated()
 {
 	// reglering efter sensorvärden
 	PORTD = (0<< PORTD2) | (0<< PORTD3); // Vänster - Höger riktning
@@ -167,7 +167,7 @@ void Delay_seconds(int seconds)
 // Test
 void Testprogram()
 {
-	Forward_regulated();
+	Forward_regulated(0, 0);
 	Delay_seconds(2);
 	
 	Stop();
@@ -225,7 +225,7 @@ ISR(INT2_vect) // TRYCKKNAPP på PB3
 		break;
 		case 1: Forward();
 		break;
-		case 2: Back();
+		case 2: Backward();
 		break;
 		case 3: Rotate_right();
 		break;

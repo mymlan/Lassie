@@ -5,9 +5,12 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 #include "Steering_SPI.h"
+#include "Steering_functions.h"
 #include <util/delay.h>
 
 static volatile uint8_t error;
+
+// uint8_t regulated_order;
 
 void SPI_steering_init(void)
 {
@@ -60,17 +63,76 @@ ISR(SPI_STC_vect)
 			uint8_t sensor_data[6];
 			SPI_steering_recieve_sensor_data(sensor_data);
 			// gör det som ska hända med sensor_data!
+			/*
+			switch(regulated_order) // =0 innbeär ingen reglering, =1 reglering fram, =2 reglering bak
+			{
+				case 1: Forward_regulated(sensor_data[5], sensor_data[6]);
+				break;
+				case 2: Backward_regulated();
+				break;
+				case 0:
+				break;
+			*/
 			break;
 		}
-		case ID_BYTE_GUIDED_DECISIONS:
+		case ID_BYTE_MANUAL_DECISIONS:
 		{
-			uint8_t guided_decision = SPI_steering_recieve_byte();
-			(void)guided_decision;
+			uint8_t manual_decision = SPI_steering_recieve_byte();
+			switch(manual_decision)
+			{
+				case COMMAND_STOP: Stop();
+				break;
+				case COMMAND_FORWARD: Forward();
+				break;
+				case COMMAND_BACKWARD: Backward();
+				break;
+				case COMMAND_ROTATE_RIGHT: Rotate_right();
+				break;
+				case COMMAND_ROTATE_LEFT: Rotate_left();
+				break;
+				case COMMAND_TURN_RIGHT: Turn_right();
+				break;
+				case COMMAND_TURN_LEFT: Turn_left();
+				break;
+				case COMMAND_OPEN_CLAW: Open_claw();
+				break;
+				case COMMAND_CLOSE_CLAW: Close_claw();
+				break;
+				default: Stop();
+				break;
+			}
 			break;
 		}
 		case ID_BYTE_AUTO_DECISIONS:
 		{
 			uint8_t auto_decision = SPI_steering_recieve_byte();
+			switch(auto_decision)
+			{
+				case COMMAND_STOP: Stop();
+				//regulated_order = 0;
+				break;
+				case COMMAND_FORWARD: Forward_regulated(0, 0);
+				//regulated_order = 1;
+				break;
+				case COMMAND_BACKWARD: Backward_regulated();
+				//regulated_order = 2;
+				break;
+				case COMMAND_ROTATE_RIGHT: Rotate_right();
+				//regulated_order = 0;
+				break;
+				case COMMAND_ROTATE_LEFT: Rotate_left();
+				//regulated_order = 0;
+				break;
+				case COMMAND_OPEN_CLAW: Open_claw();
+				//regulated_order = 0;
+				break;
+				case COMMAND_CLOSE_CLAW: Close_claw();
+				//regulated_order = 0;
+				break;
+				default: Stop();
+				//regulated_order = 0;
+				break;
+			}
 			(void)auto_decision;
 			break;
 		}
