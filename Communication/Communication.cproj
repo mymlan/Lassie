@@ -120,6 +120,12 @@
     <Compile Include="Communication.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Communication_SPI.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Communication_SPI.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.cproj">

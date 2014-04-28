@@ -9,8 +9,8 @@ static volatile uint8_t has_recieved_give_sensor_data;
 static volatile uint8_t has_recieved_give_distance;
 static volatile uint8_t has_recieved_start_calc_angle;
 static volatile uint8_t has_recieved_give_angle;
+
 static volatile uint8_t error;
-static volatile uint8_t byte_from_SPI;
 
 void SPI_sensor_init(void)
 {
@@ -21,20 +21,21 @@ void SPI_sensor_init(void)
 	PORTD = 0; //test
 	PORTD = 0x20; //test
 	PORTD = 0; //test
+	
+	SPDR = 0x22;
 
 	master_has_recieved_byte = 0; //initera variabler
 	has_recieved_give_sensor_data = 0;
 	has_recieved_give_distance = 0;
 	has_recieved_start_calc_angle = 0;
 	has_recieved_give_angle = 0;
+	
 	error = 0;
-	byte_from_SPI = 0;
 }
-
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
-	byte_from_SPI = SPDR;
+	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
 		case MASTER_RECIEVED_BYTE:
@@ -70,64 +71,71 @@ uint8_t SPI_master_have_recieved_byte(void)
 	master_has_recieved_byte = 0;
 	return result;
 }
-
-uint8_t SPI_should_give_sensor_data(void)
+uint8_t SPI_sensor_should_give_sensor_data(void)
 {
 	uint8_t result = has_recieved_give_sensor_data;
 	has_recieved_give_sensor_data = 0;
 	return result;
 }
-
-uint8_t SPI_should_give_distance(void)
+uint8_t SPI_sensor_should_give_distance(void)
 {
 	uint8_t result = has_recieved_give_distance;
 	has_recieved_give_distance = 0;
 	return result;
 }
-
-uint8_t SPI_should_start_calc_angle(void)
+uint8_t SPI_sensor_should_start_calc_angle(void)
 {
 	uint8_t result = has_recieved_start_calc_angle;
 	has_recieved_start_calc_angle = 0;
 	return result;
 }
-
-uint8_t SPI_should_give_angle(void)
+uint8_t SPI_sensor_should_give_angle(void)
 {
 	uint8_t result = has_recieved_give_angle;
 	has_recieved_give_angle = 0;
 	return result;
 }
 
-void SPI_slave_send_byte(uint8_t byte)
+/* void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
+*  Skickar id_byte till Master som framtvingar övriga bytes
+*/
+static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 {
-	SPDR = byte;
+	SPDR = id_byte;
 	COMMON_TOGGLE_PIN(PORTB, PORTB0); // Hissa flagga
 	while(!(SPI_master_have_recieved_byte())){}
 }
-/*
+
+/* void SPI_sensor_send(uint8_t id_byte, volatile uint8_t *data)
+*  Skickar hela meddelanden från sensor till Master
+*/
 void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 {
-	uint8_t number_of_bytes_in_data;
+	uint8_t number_of_bytes_in_data = 0;
 	switch (id_byte)
 	{
 		case ID_BYTE_SENSOR_DATA:
-			number_of_bytes_in_data = 6;
-			break;
-		case ID_BYTE_DISTANCE:
+		number_of_bytes_in_data = 6;
+		break;
+		case ID_BYTE_DISTANCE: 
 		case ID_BYTE_ANGLE:
-			number_of_bytes_in_data = 1;
-			break;
+		number_of_bytes_in_data = 1;
+		break;
+		default:
+		error = 1;
+		break;
 	}
-	cli(); //Borde hitta den som stänger av avbrott för SPI!!
-	SPI_send_byte(id_byte);
-	if(is_slave_ready)
+		
+	cli();
+	SPI_sensor_slave_send_id_byte(id_byte);
+		
+	while(number_of_bytes_in_data != 0)
 	{
-		while(!(number_of_bytes_in_data == 0))
+		if(SPSR & (1<<SPIF))
 		{
-			SPI_send_byte();
-			number_of_bytes_in_data = number_of_bytes_in_data - 1;
+			SPDR = data[(number_of_bytes_in_data - 1)];
+			number_of_bytes_in_data--;
 		}
-	}	
+	}
+	sei();	
 }
-*/
