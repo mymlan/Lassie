@@ -1,14 +1,10 @@
-/*
-* Steering.c
-*
-* Created: 3/31/2014 2:07:31 PM
-* Author: henba136
-*/
+
+#define F_CPU 1000000UL
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define F_CPU 1000000UL
 #include <util/delay.h>
+#include "Steering_SPI.h"
 
 //-------------VARIABLER/KONSTANTER---------------//
 
@@ -256,6 +252,7 @@ ISR(INT2_vect) // TRYCKKNAPP på PB3
 int main(void)
 {
 	// Initiering
+	SPI_steering_init();
 	Initialize_interrupt();
 	Initialize_pwm();
 	

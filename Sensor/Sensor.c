@@ -8,6 +8,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "Sensor_SPI.h"
 
 uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 
@@ -21,6 +22,7 @@ void init_ports(){
 int main(void)
 
 {
+	SPI_sensor_init();
 	init_ports();
 	ADCSRA |= 1<<ADPS2;
 	ADMUX |= 1<<REFS0 | 1<<REFS1 | 1<<ADLAR | 2;
