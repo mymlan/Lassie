@@ -1,10 +1,3 @@
-/*
- * Sensor.c
- *
- * Created: 2014-03-29 14:22:07
- *  Author: HuGu
- */ 
-
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
