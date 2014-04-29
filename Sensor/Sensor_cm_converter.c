@@ -1,17 +1,14 @@
-/*
- * CFile1.c
- *
- * Created: 2014-04-16 13:50:22
- *  Author: Hugo
- */ 
+#include <stdint.h>
 
- int8_t S1_convert_sensor_value_left_front(int8_t digital_distance)
+// gör om till mm Hugo!
+
+ uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
-	int8_t mm_value;
+	uint8_t mm_value;
 	
 	if (digital_distance <= 146 && digital_distance >= 105)
 	{
-		mm_value = ((digital_distance-228)/-20.5);
+		mm_value = ((digital_distance - 228)/-20.5);
 	}
 	else if (digital_distance <=105 && digital_distance >= 93)
 	{
@@ -36,9 +33,9 @@
 	return mm_value;
 }
 
-int8_t S2_convert_sensor_value__left_back(int8_t digital_distance)
+uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance)
 {
-	int8_t mm_value;
+	uint8_t mm_value;
 	
 	if (digital_distance <= 148 && digital_distance >= 125)
 	{
@@ -71,9 +68,9 @@ int8_t S2_convert_sensor_value__left_back(int8_t digital_distance)
 	return mm_value;
 }
 
-int8_t S3_convert_sensor_value_right_front(int8_t digital_distance)
+uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
-	int8_t mm_value;
+	uint8_t mm_value;
 	
 	if (digital_distance <= 148 && digital_distance >= 125)
 	{
@@ -106,7 +103,7 @@ int8_t S3_convert_sensor_value_right_front(int8_t digital_distance)
 	return mm_value;
 }
 
-int8_t S4_convert_sensor_value_right_back(int8_t digital_distance)
+uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 {
 	int mm_value;
 	
@@ -141,7 +138,7 @@ int8_t S4_convert_sensor_value_right_back(int8_t digital_distance)
 	return mm_value;
 }
 
-int8_t S5_convert_sensor_value_front_long(int8_t digital_distance)
+uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 {
 	int cm_value;
 	

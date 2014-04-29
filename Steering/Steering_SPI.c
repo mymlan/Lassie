@@ -28,7 +28,7 @@ void SPI_steering_init(void)
 
 static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
 {
-	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_SENSOR_DATA;
+	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 	while(number_of_bytes_in_data != 0)
 	{
 		if (SPSR & (1<<SPIF))
@@ -58,7 +58,7 @@ ISR(SPI_STC_vect)
 	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
-		case ID_BYTE_SENSOR_DATA:
+		case ID_BYTE_IR_SENSOR_DATA:
 		{
 			uint8_t sensor_data[6];
 			SPI_steering_recieve_sensor_data(sensor_data);

@@ -42,7 +42,7 @@ static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
 
 static void SPI_Master_recieve_sensor_data(uint8_t *sensor_data)
 {
-	for(int8_t i = (NUMBER_OF_BYTES_SENSOR_DATA - 1); i >= 0; i--)
+	for(int8_t i = (NUMBER_OF_BYTES_IR_SENSOR_DATA - 1); i >= 0; i--)
 	{
 		sensor_data[i] = SPI_Master_recieve_data_byte_from_sensor();
 	}
@@ -55,11 +55,11 @@ ISR(PCINT0_vect)
 	uint8_t byte_from_SPI = SPI_Master_recieve_data_byte_from_sensor();
 	switch (byte_from_SPI)
 	{
-		case ID_BYTE_SENSOR_DATA:
+		case ID_BYTE_IR_SENSOR_DATA:
 		{
 			uint8_t sensor_data[6];
 			SPI_Master_recieve_sensor_data(sensor_data);
-			SPI_Master_send_to_steering(ID_BYTE_SENSOR_DATA, sensor_data);
+			SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, sensor_data);
 			// skicka till PC
 			break;
 		}
@@ -70,7 +70,7 @@ ISR(PCINT0_vect)
 			// skicka till PC
 			break;
 		}
-		case ID_BYTE_ANGLE:
+		case ID_BYTE_ROTATION_FINISHED:
 		{
 			uint8_t angle = SPI_Master_recieve_data_byte_from_sensor();
 			(void)angle; //löser att den inte används, gör om till void
@@ -118,7 +118,7 @@ void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 	uint8_t number_of_bytes_in_data = 0;
 	switch (id_byte)
 	{
-		case ID_BYTE_SENSOR_DATA:
+		case ID_BYTE_IR_SENSOR_DATA:
 		number_of_bytes_in_data = 6;
 		break;
 		case ID_BYTE_MANUAL_DECISIONS:
