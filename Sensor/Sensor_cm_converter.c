@@ -6,29 +6,37 @@
 {
 	uint8_t mm_value;
 	
-	if (digital_distance <= 146 && digital_distance >= 105)
+	if (digital_distance <= 135 && digital_distance >= 114)
 	{
-		mm_value = ((digital_distance - 228)/-20.5);
+		mm_value = (((digital_distance - 135)*10) / -21);
 	}
-	else if (digital_distance <=105 && digital_distance >= 93)
+	else if (digital_distance <=114 && digital_distance >= 97)
 	{
-		mm_value = ((digital_distance - 186)/-13.5);
+		mm_value = (((digital_distance - 131)*10) / -17);
 	}
-	else if (digital_distance <= 93 && digital_distance >= 66)
+	else if (digital_distance <= 97 && digital_distance >= 77)
 	{
-		mm_value = ((digital_distance-156)/-9);
+		mm_value = ((digital_distance - 117) / -1);
 	}
-	else if (digital_distance <= 66 && digital_distance >= 40)
+	else if (digital_distance <= 77 && digital_distance >= 62)
 	{
-		mm_value = ((digital_distance-112)/-4.8);
+		mm_value = (((digital_distance - 107)*100) / -75);
 	}
-	else if (digital_distance <= 40 && digital_distance >= 34)
+	else if (digital_distance <= 62 && digital_distance >= 50)
 	{
-		mm_value = ((digital_distance-58)/-1.2);
+		mm_value = (((digital_distance - 86)*10) / -4);
+	}
+	else if (digital_distance <= 50 && digital_distance >= 35)
+	{
+		mm_value = (((digital_distance - 77)*10) / -3);
+	}
+	else if (digital_distance <= 35 && digital_distance >= 26)
+	{
+		mm_value = (((digital_distance - 56)*100) / -15);
 	}
 	else
 	{
-		mm_value = 25;
+		mm_value = 250;
 	}
 	return mm_value;
 }
@@ -37,33 +45,37 @@ uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance <= 148 && digital_distance >= 125)
+	if (digital_distance <= 130 && digital_distance >= 112)
 	{
-		mm_value = ((digital_distance-240)/-23);
+		mm_value = (((digital_distance - 130)*10) / -18);
 	}
-	else if (digital_distance <=125 && digital_distance >= 109)
+	else if (digital_distance <=112 && digital_distance >= 96)
 	{
-		mm_value = ((digital_distance-205)/-16);
+		mm_value = (((digital_distance - 128)*10) / -16);
 	}
-	else if (digital_distance <= 109 && digital_distance >= 94)
+	else if (digital_distance <= 96 && digital_distance >= 73)
 	{
-		mm_value = ((digital_distance-199)/-15);
+		mm_value = (((digital_distance - 119)*100) / -115);
 	}
-	else if (digital_distance <= 94 && digital_distance >= 70)
+	else if (digital_distance <= 73 && digital_distance >= 58)
 	{
-		mm_value = ((digital_distance-150)/-8);
+		mm_value = (((digital_distance - 103)*100) / -75);
 	}
-	else if (digital_distance <= 70 && digital_distance >= 49)
+	else if (digital_distance <= 58 && digital_distance >= 41)
 	{
-		mm_value = ((digital_distance-111)/-4.1);
+		mm_value = (((digital_distance - 92)*100) / -57);
 	}
-	else if (digital_distance <= 49 && digital_distance >= 34)
+	else if (digital_distance <= 41 && digital_distance >= 26)
 	{
-		mm_value = ((digital_distance-94)/-3);
+		mm_value = (((digital_distance - 68)*10) / -3);
+	}
+	else if (digital_distance <= 26 && digital_distance >= 18)
+	{
+		mm_value = (((digital_distance - 45)*100) / -13);
 	}
 	else
 	{
-		mm_value = 25;
+		mm_value = 250;
 	}
 	return mm_value;
 }
