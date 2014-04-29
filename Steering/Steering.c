@@ -17,13 +17,6 @@ int main(void)
 	Initialize_interrupt();
 	Initialize_pwm();
 	
-	// Dessa 3 rader är till för att kolla att RESET fungerar
-	//Open_claw();
-	//Delay_seconds(1);
-	//Close_claw();
-	
-	// Använd avborttsknappen för att starta testprogram
-	// Koden skrivs Testprogram()
 	
 	Loop();
 	
