@@ -193,6 +193,36 @@ int What_is_open(int left, int right, int front, int rdir)
 	return 0; //något har gått fel // man returnerar egentligen bara 0 när att gått bra. Andra siffror betyrer vissa felmeddelanden
 }
 
+// Create_origin
+// Funktionen skapar en origonod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
+node* Create_origin(int open_walls)
+{
+	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
+	node* p_node = Newnode(0, 0); // Skapa nod
+	p_node->start = true; // Sätt nod till startnod
+	
+	for(int i = 0; i < 4; i++) // Detta kanske ändras eller tas bort
+	{
+		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
+	}
+	return p_node;
+}
+
+// Create_goal
+// Funktionen skapar en målnod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
+node* Create_goal(int x, int y, int open_walls)
+{
+	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
+	node* p_node = Newnode(x, y); // Skapa nod
+	p_node->goal = true; // Sätt nod till startnod
+		
+	for(int i = 0; i < 4; i++) // Detta kanske ändras eller tas bort
+	{
+		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
+	}
+	return p_node;
+}
+
 // Create_node
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
 node* Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, int open_walls)
@@ -215,42 +245,42 @@ node* Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, i
 		// 6. Ta styrbslut och return (sker utanför funktionen)
 }
 
-// Create_origin
-// Funktionen skapar en origonod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
-node* Create_origin(int open_walls)
+// Update_node
+// Uppdaterar given nod med värden som kopplar ihop noden med senaste nod
+node* Update_node(node* p_node, node* p_robot_node, int robot_dir, int length)
 {
-	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
-	node* p_node = Newnode(0, 0); // Skapa nod
-	p_node->start = true; // Sätt nod till startnod
+	p_node->links[(robot_dir + 2) % 4].p_node = p_robot_node; // Ge noden pekar-info om förra noden
+	p_node->links[(robot_dir + 2) % 4].length = length; // Ge noden längd-info om förra noden
 	
-	for(int i = 0; i < 4; i++) // Detta kanske ändras eller tas bort
-	{
-		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
-	}
+	p_robot_node->links[robot_dir].p_node = p_node; // Ge förra noden pekar-info om noden
+	p_robot_node->links[robot_dir].length = length; // Ge förra noden längd-info om noden
+	
 	return p_node;
 }
 
-
+// Get_decision_searching
 //början av funktion för att genera styrbeslut
 //kanske får brytas ner till fler funktioner istället då den borde bli stor
 //se designspec för numerisk representation av styrbeslut, ex 1->åk fram.
 //Men den kanske inte ens ser ut såhär, den får stå kvar sålänge
 int Get_decision_searching(uint8_t senleftfront, uint8_t senleftback, uint8_t senfront, uint8_t senrightfront, uint8_t senrightback)
-{
-	if(senleftfront+senleftback+senrightfront+senrightback < 600 && senfront > 20) // kollar 2 cm innan vägg om återvändsgränd
+{	
+	if(senleftfront < 200 && senrightfront < 200 && senfront < 20) // Kollar 2 cm innan vägg om återvändsgränd
 	{
-		return 1;
+		Create_node(5, 6, NULL, NORTH, 42, What_is_open(201, 201, 201, NORTH));
+		// Ge order om att backa
 	}
-	if (senleftfront+senleftback+senrightfront+senrightback < 600 && senfront < 20)
+	if (senleftfront + senleftback + senrightfront + senrightback < 600 && senfront < 20)
 	{
 		return 0;
 	}
-return 0;
+	// Annars ingen intressant punk och vi tar inget nytt beslut.
+	return 0;
 }
 
 //Dijkstras algoritm, första steg att räkna avståndet, borde utvecklas til att hitta vägen/körrikting också.
 //bara skräpkod i just nu för att det ska kompilera
-int dijk(node* p_node1, node* p_node2)
+int Dijk(node* p_node1, node* p_node2)
 {
 //1. Alla noder är markerade ej avsökra direkt i struct
 	if(p_node1->cost == p_node2->cost)
@@ -310,22 +340,6 @@ int Map_main(void)
 	test_variable_b = p_robot_node->links[1].open; // Ska va 1
 	*/
 	
-	/*
-	struct node node1;
-	struct node node2;
-	node1.x = 35;
-	struct link link1;
-	struct link link2;
-	link1.length = 42;
-	link1.p_node = &node2;
-	link1.p_node->x = 32;
-	link2.p_node = &node1;
-	link2.p_node->y = 43;
-	node1.links[1] = link1;
-	node1.links[1].p_node-> x = 78;
-	//node1.array_of_links[1] = link1;
-	//node1.array_of_links[1].p_node = &node2;
-	*/
     while(1)
     {
 	}
