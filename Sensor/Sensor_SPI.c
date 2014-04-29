@@ -7,8 +7,7 @@
 static volatile uint8_t master_has_recieved_byte;
 static volatile uint8_t has_recieved_give_ir_sensor_data;
 static volatile uint8_t has_recieved_give_distance;
-static volatile uint8_t has_recieved_start_calc_angle;
-static volatile uint8_t has_recieved_give_angle;
+static volatile uint8_t has_recieved_start_angular_rate_sensor;
 
 static volatile uint8_t error;
 
@@ -27,8 +26,7 @@ void SPI_sensor_init(void)
 	master_has_recieved_byte = 0; //initera variabler
 	has_recieved_give_ir_sensor_data = 0;
 	has_recieved_give_distance = 0;
-	has_recieved_start_calc_angle = 0;
-	has_recieved_give_angle = 0;
+	has_recieved_start_angular_rate_sensor = 0;
 	
 	error = 0;
 }
@@ -51,10 +49,7 @@ ISR(SPI_STC_vect)
 			has_recieved_give_distance = 1;
 			break;
 		case ID_BYTE_START_CALC_ANGLE:
-			has_recieved_start_calc_angle = 1;
-			break;
-		case ID_BYTE_GIVE_ANGLE:
-			has_recieved_give_angle = 1;
+			has_recieved_start_angular_rate_sensor = 1;
 			break;
 		default:
 			error = 1;
@@ -83,16 +78,10 @@ uint8_t SPI_sensor_should_give_distance(void)
 	has_recieved_give_distance = 0;
 	return result;
 }
-uint8_t SPI_sensor_should_start_calc_angle(void) //byt namn angular_rate
+uint8_t SPI_sensor_should_start_angular_rate_sensor(void)
 {
-	uint8_t result = has_recieved_start_calc_angle;
-	has_recieved_start_calc_angle = 0;
-	return result;
-}
-uint8_t SPI_sensor_should_give_angle(void) //ska bort
-{
-	uint8_t result = has_recieved_give_angle;
-	has_recieved_give_angle = 0;
+	uint8_t result = has_recieved_start_angular_rate_sensor;
+	has_recieved_start_angular_rate_sensor = 0;
 	return result;
 }
 
@@ -104,6 +93,11 @@ static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 	SPDR = id_byte;
 	COMMON_TOGGLE_PIN(PORTB, PORTB0); // Hissa flagga
 	while(!(SPI_master_have_recieved_byte())){}
+}
+
+void SPI_sensor_send_rotation_finished(void)
+{
+	SPI_sensor_slave_send_id_byte(ID_BYTE_ROTATION_FINISHED);
 }
 
 /* void SPI_sensor_send(uint8_t id_byte, volatile uint8_t *data)
@@ -118,7 +112,6 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 		number_of_bytes_in_data = 6;
 		break;
 		case ID_BYTE_DISTANCE: 
-		case ID_BYTE_ROTATION_FINISHED: // Fel! ska skrivas om!
 		number_of_bytes_in_data = 1;
 		break;
 		default:
