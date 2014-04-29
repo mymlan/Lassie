@@ -60,32 +60,33 @@ ISR (ADC_vect)
 		case(0):		
 		sensor1 = S1_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //Set ADMUX to PA4
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
 		break;
 		
 		case(1):		
 		sensor2 = S2_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Set ADMUX to PA5
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
 		case(2):		
 		sensor3 = S3_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Set ADMUX to PA6
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
 		sensor4 = S4_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA7
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
 		
 		case(4):		
 		sensor5 = S5_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet 
 		count = 0; //nollställer count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Set ADMUX to PA3
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
 		//angle = 90 - ((atan((sensor3-sensor4)/dist1)) + (atan((sensor2-sensor1)/dist2)))/2; //Ger vinkel från vänstra väggen 
+		//diff_from_middle = 
 		break;
 		
 		case(5):				
@@ -94,7 +95,7 @@ ISR (ADC_vect)
 			angular_value_rot = ADCH;
 			angular_diff_rot = (angular_value_rot - offset) * sensitivity;
 			angle_rot += angular_diff_rot/10000;
-			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // PA2
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2
 		} else 
 		{  
 			angle_rot = 0;
