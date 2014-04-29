@@ -1,5 +1,5 @@
 
-#define F_CPU (16000000L)
+#define F_CPU (18432000L)
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -14,8 +14,8 @@ void SPI_Master_init(void)
 	DDRA = 0x8A; //Sätter PA1, PA3 och PA7 till utgångar (för lamporna)
 	DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
 	DDRD = 0x30;
-	SPCR = 0x50; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
-	SPSR = 0x00; //Sätter SCK till fosc/4
+	SPCR = 0x51; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
+	SPSR = 0x01; //Sätter SCK till fosc/4
 	COMMON_SET_PIN(PORTB, PORTB4); //initierar SS till hög
 	
 	//Register för att möjliggöra PCINT5
@@ -112,6 +112,7 @@ void SPI_Master_send_to_sensor(uint8_t id_byte)
 	_delay_us(10); //ger tid till sensor att spara undan SPDR
 	sei();
 }
+
 
 void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 {
