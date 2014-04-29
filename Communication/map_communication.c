@@ -45,6 +45,9 @@ typedef struct node_
 {
 	int x;
 	int y;
+	int cost;
+	bool searched;
+	//node* p_pre_dijk; // föregångare
 	bool start; // sant/falskt
 	bool goal; // sant/falskt
 	link links[4]; // Jag tror det är lättare om den har fix storlek och så får vi ha en bool för varje link som avgör öppen eller ej
@@ -78,6 +81,10 @@ node* Newnode(int x_in, int y_in)
 	
 	p_node->x = x_in;
 	p_node->y = y_in;
+	
+	p_node->cost = 255; //representrar oändligheten
+	p_node->searched = 0; //inte avsökt från start
+	//p_node->p_pre_dijk = NULL;
 	
 	p_node->start = false;
 	p_node->goal = false;
@@ -117,7 +124,7 @@ int What_is_open(int left, int right, int front, int rdir)
 	if(rdir == 0) // om vi åker norrut
 	{
 		int buffer = 2; // alltid öppet bakåt
-		if(front > 250)
+		if(front > 700)
 		{
 			buffer = buffer + 8;
 		}
@@ -138,7 +145,7 @@ int What_is_open(int left, int right, int front, int rdir)
 		{
 			buffer = buffer + 8;
 		}
-		if(front > 250)
+		if(front > 700)
 		{
 			buffer = buffer + 4;
 		}
@@ -155,7 +162,7 @@ int What_is_open(int left, int right, int front, int rdir)
 		{
 			buffer = buffer + 4;
 		}
-		if(front > 250)
+		if(front > 700)
 		{
 			buffer = buffer + 2;
 		}
@@ -177,7 +184,7 @@ int What_is_open(int left, int right, int front, int rdir)
 		{
 			buffer = buffer + 2;
 		}
-		if(front > 250)
+		if(front > 700)
 		{
 			buffer = buffer + 1;
 		}
@@ -221,6 +228,39 @@ node* Create_origin(int open_walls)
 		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
 	}
 	return p_node;
+}
+
+
+//början av funktion för att genera styrbeslut
+//kanske får brytas ner till fler funktioner istället då den borde bli stor
+//se designspec för numerisk representation av styrbeslut, ex 1->åk fram.
+//Men den kanske inte ens ser ut såhär, den får stå kvar sålänge
+int Get_decision_searching(uint8_t senleftfront, uint8_t senleftback, uint8_t senfront, uint8_t senrightfront, uint8_t senrightback)
+{
+	if(senleftfront+senleftback+senrightfront+senrightback < 600 && senfront > 20) // kollar 2 cm innan vägg om återvändsgränd
+	{
+		return 1;
+	}
+	if (senleftfront+senleftback+senrightfront+senrightback < 600 && senfront < 20)
+	{
+		return 0;
+	}
+return 0;
+}
+
+//Dijkstras algoritm, första steg att räkna avståndet, borde utvecklas til att hitta vägen/körrikting också.
+//bara skräpkod i just nu för att det ska kompilera
+int dijk(node* p_node1, node* p_node2)
+{
+//1. Alla noder är markerade ej avsökra direkt i struct
+	if(p_node1->cost == p_node2->cost)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 // Map_main
