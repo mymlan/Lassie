@@ -1,173 +1,170 @@
-/*
- * CFile1.c
- *
- * Created: 2014-04-16 13:50:22
- *  Author: Hugo
- */ 
+#include <stdint.h>
 
- int S1_sensor_value_left_front(int n)
+// gör om till mm Hugo!
+
+ uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
-	int cm_value;
+	uint8_t mm_value;
 	
-	if (n <= 146 && n >= 105)
+	if (digital_distance <= 146 && digital_distance >= 105)
 	{
-		cm_value = ((n-228)/-20.5);
+		mm_value = ((digital_distance - 228)/-20.5);
 	}
-	else if (n <=105 && n >= 93)
+	else if (digital_distance <=105 && digital_distance >= 93)
 	{
-		cm_value = ((n - 186)/-13.5);
+		mm_value = ((digital_distance - 186)/-13.5);
 	}
-	else if (n <= 93 && n >= 66)
+	else if (digital_distance <= 93 && digital_distance >= 66)
 	{
-		cm_value = ((n-156)/-9);
+		mm_value = ((digital_distance-156)/-9);
 	}
-	else if (n <= 66 && n >= 40)
+	else if (digital_distance <= 66 && digital_distance >= 40)
 	{
-		cm_value = ((n-112)/-4.8);
+		mm_value = ((digital_distance-112)/-4.8);
 	}
-	else if (n <= 40 && n >= 34)
+	else if (digital_distance <= 40 && digital_distance >= 34)
 	{
-		cm_value = ((n-58)/-1.2);
+		mm_value = ((digital_distance-58)/-1.2);
 	}
 	else
 	{
-		cm_value = 25;
+		mm_value = 25;
 	}
-	return cm_value;
+	return mm_value;
 }
 
-int S2_sensor_value__left_back(int n) 
+uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance)
 {
-	int cm_value;
+	uint8_t mm_value;
 	
-	if (n <= 148 && n >= 125)
+	if (digital_distance <= 148 && digital_distance >= 125)
 	{
-		cm_value = ((n-240)/-23);
+		mm_value = ((digital_distance-240)/-23);
 	}
-	else if (n <=125 && n >= 109)
+	else if (digital_distance <=125 && digital_distance >= 109)
 	{
-		cm_value = ((n-205)/-16);
+		mm_value = ((digital_distance-205)/-16);
 	}
-	else if (n <= 109 && n >= 94)
+	else if (digital_distance <= 109 && digital_distance >= 94)
 	{
-		cm_value = ((n-199)/-15);
+		mm_value = ((digital_distance-199)/-15);
 	}
-	else if (n <= 94 && n >= 70)
+	else if (digital_distance <= 94 && digital_distance >= 70)
 	{
-		cm_value = ((n-150)/-8);
+		mm_value = ((digital_distance-150)/-8);
 	}
-	else if (n <= 70 && n >= 49)
+	else if (digital_distance <= 70 && digital_distance >= 49)
 	{
-		cm_value = ((n-111)/-4.1);
+		mm_value = ((digital_distance-111)/-4.1);
 	}
-	else if (n <= 49 && n >= 34)
+	else if (digital_distance <= 49 && digital_distance >= 34)
 	{
-		cm_value = ((n-94)/-3);
+		mm_value = ((digital_distance-94)/-3);
 	}
 	else
 	{
-		cm_value = 25;
+		mm_value = 25;
 	}
-	return cm_value;
+	return mm_value;
 }
 
-int S3_sensor_value_right_front(int n)
+uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
-	int cm_value;
+	uint8_t mm_value;
 	
-	if (n <= 148 && n >= 125)
+	if (digital_distance <= 148 && digital_distance >= 125)
 	{
-		cm_value = ((n-240)/-23);
+		mm_value = ((digital_distance-240)/-23);
 	}
-	else if (n <=125 && n >= 109)
+	else if (digital_distance <=125 && digital_distance >= 109)
 	{
-		cm_value = ((n-205)/-16);
+		mm_value = ((digital_distance-205)/-16);
 	}
-	else if (n <= 109 && n >= 94)
+	else if (digital_distance <= 109 && digital_distance >= 94)
 	{
-		cm_value = ((n-199)/-15);
+		mm_value = ((digital_distance-199)/-15);
 	}
-	else if (n <= 94 && n >= 70)
+	else if (digital_distance <= 94 && digital_distance >= 70)
 	{
-		cm_value = ((n-150)/-8);
+		mm_value = ((digital_distance-150)/-8);
 	}
-	else if (n <= 70 && n >= 49)
+	else if (digital_distance <= 70 && digital_distance >= 49)
 	{
-		cm_value = ((n-111)/-4.1);
+		mm_value = ((digital_distance-111)/-4.1);
 	}
-	else if (n <= 49 && n >= 34)
+	else if (digital_distance <= 49 && digital_distance >= 34)
 	{
-		cm_value = ((n-94)/-3);
+		mm_value = ((digital_distance-94)/-3);
 	}
 	else
 	{
-		cm_value = 25;
+		mm_value = 25;
 	}
-	return cm_value;
+	return mm_value;
 }
 
-int S4_sensor_value_right_back(int n)
+uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 {
-	int cm_value;
+	int mm_value;
 	
-	if (n <= 149 && n >= 124)
+	if (digital_distance <= 149 && digital_distance >= 124)
 	{
-		cm_value = ((n-249)/-25);
+		mm_value = ((digital_distance-249)/-25);
 	}
-	else if (n <=124 && n >= 107)
+	else if (digital_distance <=124 && digital_distance >= 107)
 	{
-		cm_value = ((n-209)/-17);
+		mm_value = ((digital_distance-209)/-17);
 	}
-	else if (n <= 107 && n >= 94)
+	else if (digital_distance <= 107 && digital_distance >= 94)
 	{
-		cm_value = ((n-185)/-13);
+		mm_value = ((digital_distance-185)/-13);
 	}
-	else if (n <= 94 && n >= 68)
+	else if (digital_distance <= 94 && digital_distance >= 68)
 	{
-		cm_value = ((n-154.66)/-8.66);
+		mm_value = ((digital_distance-154.66)/-8.66);
 	}
-	else if (n <= 68 && n >= 48)
+	else if (digital_distance <= 68 && digital_distance >= 48)
 	{
-		cm_value = ((n-108)/-4);
+		mm_value = ((digital_distance-108)/-4);
 	}
-	else if (n <= 48 && n >= 36)
+	else if (digital_distance <= 48 && digital_distance >= 36)
 	{
-		cm_value = ((n-84)/-2.4);
+		mm_value = ((digital_distance-84)/-2.4);
 	}
 	else
 	{
-		cm_value = 25;
+		mm_value = 25;
 	}
-	return cm_value;
+	return mm_value;
 }
 
-int S5_sensor_value_front_long(int n)
+uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 {
 	int cm_value;
 	
-	if (n <= 130 && n >= 92)
+	if (digital_distance <= 130 && digital_distance >= 92)
 	{
-		cm_value = ((n-206)/-7.6);
+		cm_value = ((digital_distance-206)/-7.6);
 	}
-	else if (n <= 92 && n >= 72)
+	else if (digital_distance <= 92 && digital_distance >= 72)
 	{
-		cm_value = ((n-152)/-4);
+		cm_value = ((digital_distance-152)/-4);
 	}
-	else if (n <= 72 && n >= 60)
+	else if (digital_distance <= 72 && digital_distance >= 60)
 	{
-		cm_value = ((n-117)/-2.4);
+		cm_value = ((digital_distance-117)/-2.4);
 	}
-	else if (n <= 60 && n >= 53)
+	else if (digital_distance <= 60 && digital_distance >= 53)
 	{
-		cm_value = ((n-95)/-1.4);
+		cm_value = ((digital_distance-95)/-1.4);
 	}
-	else if (n <= 53 && n >= 35)
+	else if (digital_distance <= 53 && digital_distance >= 35)
 	{
-		cm_value = ((n-86)/-1.1);
+		cm_value = ((digital_distance-86)/-1.1);
 	}
-	else if (n <= 35 && n >= 30)
+	else if (digital_distance <= 35 && digital_distance >= 30)
 	{
-		cm_value = ((n-50)/-0.25);
+		cm_value = ((digital_distance-50)/-0.25);
 	}
 	else
 	{

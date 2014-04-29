@@ -8,6 +8,8 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "../CommonLibrary/Common.h"
+#include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 
 volatile unsigned char reflex_count = 0;
@@ -15,10 +17,10 @@ volatile unsigned char test;
 int baud;
 volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 
+volatile uint8_t ir_sensor_data[6];
+
 volatile uint8_t count=0;
 
-volatile unsigned char sensitivity = 1.28;
-volatile unsigned char offset = 133;
 volatile unsigned char angular_value_rot;
 volatile uint8_t angle;
 volatile float angle_rot = 0;
@@ -57,32 +59,34 @@ ISR (ADC_vect)
 	switch (count) 
 	{
 		
-		case(0):		
-		sensor1 = S1_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet 
+		case(0):
+		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
+		sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
 		break;
 		
-		case(1):		
-		sensor2 = S2_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet 
+		case(1):
+		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
+		sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
 		case(2):		
-		sensor3 = S3_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet 
+		sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
-		sensor4 = S4_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet 
+		sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
 		
 		case(4):		
-		sensor5 = S5_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet 
+		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet 
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
 		//angle = 90 - ((atan((sensor3-sensor4)/dist1)) + (atan((sensor2-sensor1)/dist2)))/2; //Ger vinkel från vänstra väggen 
@@ -93,7 +97,7 @@ ISR (ADC_vect)
 		if ((-20 < angle_rot) & (angle_rot < 20))
 		{
 			angular_value_rot = ADCH;
-			angular_diff_rot = (angular_value_rot - offset) * sensitivity;
+			angular_diff_rot = (angular_value_rot - ANGULAR_RATE_OFFSET) * ANGULAR_RATE_SENSITIVITY;
 			angle_rot += angular_diff_rot/10000;
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2
 		} else 
@@ -129,6 +133,13 @@ int main(void)
   	init_interrupts();
     while(1)
 	{
+	if(SPI_sensor_should_give_distance()) //skriv klart denna
+	{
+		//Skicka distans
+		uint8_t distance[1];
+		distance[0] = 0x00;
+		SPI_sensor_send(ID_BYTE_DISTANCE, distance);
+	}
 	
 	/*if {start_angle}
 		{
@@ -151,7 +162,7 @@ int main(void)
 	ser ut som: Läs parallel in från usart och kolla om rätt ID
 	om rätt, sätt en pinne kopplad till KOM avbrott
 	*/
-			}
-			}
+	}
+}
 			
 			

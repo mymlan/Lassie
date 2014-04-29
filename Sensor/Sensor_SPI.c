@@ -5,7 +5,7 @@
 #include "Sensor_SPI.h"
 
 static volatile uint8_t master_has_recieved_byte;
-static volatile uint8_t has_recieved_give_sensor_data;
+static volatile uint8_t has_recieved_give_ir_sensor_data;
 static volatile uint8_t has_recieved_give_distance;
 static volatile uint8_t has_recieved_start_calc_angle;
 static volatile uint8_t has_recieved_give_angle;
@@ -25,7 +25,7 @@ void SPI_sensor_init(void)
 	SPDR = 0x22;
 
 	master_has_recieved_byte = 0; //initera variabler
-	has_recieved_give_sensor_data = 0;
+	has_recieved_give_ir_sensor_data = 0;
 	has_recieved_give_distance = 0;
 	has_recieved_start_calc_angle = 0;
 	has_recieved_give_angle = 0;
@@ -44,8 +44,8 @@ ISR(SPI_STC_vect)
 			PORTD = 0x20;
 			PORTD = 0;
 			break;
-		case ID_BYTE_GIVE_SENSOR_DATA:
-			has_recieved_give_sensor_data = 1;
+		case ID_BYTE_GIVE_IR_SENSOR_DATA:
+			has_recieved_give_ir_sensor_data = 1;
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 			has_recieved_give_distance = 1;
@@ -71,10 +71,10 @@ uint8_t SPI_master_have_recieved_byte(void)
 	master_has_recieved_byte = 0;
 	return result;
 }
-uint8_t SPI_sensor_should_give_sensor_data(void)
+uint8_t SPI_sensor_should_give_ir_sensor_data(void)
 {
-	uint8_t result = has_recieved_give_sensor_data;
-	has_recieved_give_sensor_data = 0;
+	uint8_t result = has_recieved_give_ir_sensor_data;
+	has_recieved_give_ir_sensor_data = 0;
 	return result;
 }
 uint8_t SPI_sensor_should_give_distance(void)
@@ -83,13 +83,13 @@ uint8_t SPI_sensor_should_give_distance(void)
 	has_recieved_give_distance = 0;
 	return result;
 }
-uint8_t SPI_sensor_should_start_calc_angle(void)
+uint8_t SPI_sensor_should_start_calc_angle(void) //byt namn angular_rate
 {
 	uint8_t result = has_recieved_start_calc_angle;
 	has_recieved_start_calc_angle = 0;
 	return result;
 }
-uint8_t SPI_sensor_should_give_angle(void)
+uint8_t SPI_sensor_should_give_angle(void) //ska bort
 {
 	uint8_t result = has_recieved_give_angle;
 	has_recieved_give_angle = 0;
@@ -114,11 +114,11 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	uint8_t number_of_bytes_in_data = 0;
 	switch (id_byte)
 	{
-		case ID_BYTE_SENSOR_DATA:
+		case ID_BYTE_IR_SENSOR_DATA:
 		number_of_bytes_in_data = 6;
 		break;
 		case ID_BYTE_DISTANCE: 
-		case ID_BYTE_ANGLE:
+		case ID_BYTE_ROTATION_FINISHED: // Fel! ska skrivas om!
 		number_of_bytes_in_data = 1;
 		break;
 		default:
