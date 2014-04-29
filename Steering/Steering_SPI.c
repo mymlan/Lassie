@@ -12,6 +12,7 @@ static volatile uint8_t error;
 static volatile uint8_t test;
 static volatile uint8_t test2;
 static volatile uint8_t test3;
+static volatile uint8_t test4;
 
 // uint8_t regulated_order;
 
@@ -29,6 +30,7 @@ void SPI_steering_init(void)
 	test = 0;
 	test2 = 0;
 	test3 = 0;
+	test4 = 0;
 }
 
 static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
@@ -59,13 +61,11 @@ static uint8_t SPI_steering_recieve_byte(void)
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
-	test = 1;
 	cli();
 	uint8_t byte_from_SPI = SPDR;
 	test2 = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
-		test3 = 1;
 		case ID_BYTE_IR_SENSOR_DATA:
 		{
 			uint8_t sensor_data[6];
@@ -85,8 +85,9 @@ ISR(SPI_STC_vect)
 		}
 		case ID_BYTE_MANUAL_DECISIONS:
 		{
-
+			test3 = 1;
 			uint8_t manual_decision = SPI_steering_recieve_byte();
+			test = manual_decision;
 			switch(manual_decision)
 			{
 				case COMMAND_STOP: Stop();
@@ -96,6 +97,7 @@ ISR(SPI_STC_vect)
 				case COMMAND_BACKWARD: Backward();
 				break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
+				test4 = 1;
 				break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
 				break;
