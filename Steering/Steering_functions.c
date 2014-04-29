@@ -1,5 +1,6 @@
 ﻿
-#define F_CPU 16000000UL
+//#define F_CPU 16000000UL har ändrat klockan till en som går i 18432000Hz
+#define F_CPU 18432000UL
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
