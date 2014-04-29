@@ -10,11 +10,11 @@
 void Test_funcion_master_send_to_steering()
 {
 	uint8_t steering_decision[1];
-	steering_decision[0] = 0x01;
-	SPI_Master_send_to_steering(0x07, steering_decision);
+	steering_decision[0] = COMMAND_ROTATE_LEFT;
+	SPI_Master_send_to_steering(ID_BYTE_MANUAL_DECISIONS, steering_decision);
 	_delay_ms(1000);
-	steering_decision[0] = 0x00;
-	SPI_Master_send_to_steering(0x07, steering_decision);
+	//steering_decision[0] = 0x00;
+	//SPI_Master_send_to_steering(ID_BYTE_MANUAL_DECISIONS, steering_decision);
 }
 
 int main(void)
