@@ -5,12 +5,14 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 #include "Steering_SPI.h"
+#include "Steering_functions.h"
 #include <util/delay.h>
 
-static volatile uint8_t has_recieved_sensor_data;
-static volatile uint8_t byte_from_SPI;
+static volatile uint8_t error;
 
-void SPI_steering_init()
+// uint8_t regulated_order;
+
+void SPI_steering_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	DDRB = 0x40; //Sätter MISO till utgång
@@ -19,31 +21,125 @@ void SPI_steering_init()
 	PORTD = 0; //test
 	PORTD = 0x20; //test
 	PORTD = 0; //test
+
+	error = 0;
 	
-	has_recieved_sensor_data = 0;
-	byte_from_SPI = 0;
+}
+
+static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
+{
+	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_SENSOR_DATA;
+	while(number_of_bytes_in_data != 0)
+	{
+		if (SPSR & (1<<SPIF))
+		{
+			sensor_data[(number_of_bytes_in_data - 1)] = SPDR;
+			number_of_bytes_in_data--;
+		}
+	}
+}
+static uint8_t SPI_steering_recieve_byte(void)
+{
+	uint8_t number_of_bytes_in_data = 1;
+	while(number_of_bytes_in_data != 0)
+	{
+		if (SPSR & (1<<SPIF))
+		{
+			number_of_bytes_in_data--;
+		}
+	}
+	return SPDR;
 }
 
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
-	byte_from_SPI = SPDR;
+	cli();
+	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_SENSOR_DATA:
-		has_recieved_sensor_data = 1;
-		PORTD = 0;
-		PORTD = 0x20;
-		PORTD = 0;
-		break;
+		{
+			uint8_t sensor_data[6];
+			SPI_steering_recieve_sensor_data(sensor_data);
+			// gör det som ska hända med sensor_data!
+			/*
+			switch(regulated_order) // =0 innbeär ingen reglering, =1 reglering fram, =2 reglering bak
+			{
+				case 1: Forward_regulated(sensor_data[5], sensor_data[6]);
+				break;
+				case 2: Backward_regulated();
+				break;
+				case 0:
+				break;
+			*/
+			break;
+		}
+		case ID_BYTE_MANUAL_DECISIONS:
+		{
+			uint8_t manual_decision = SPI_steering_recieve_byte();
+			switch(manual_decision)
+			{
+				case COMMAND_STOP: Stop();
+				break;
+				case COMMAND_FORWARD: Forward();
+				break;
+				case COMMAND_BACKWARD: Backward();
+				break;
+				case COMMAND_ROTATE_RIGHT: Rotate_right();
+				break;
+				case COMMAND_ROTATE_LEFT: Rotate_left();
+				break;
+				case COMMAND_TURN_RIGHT: Turn_right();
+				break;
+				case COMMAND_TURN_LEFT: Turn_left();
+				break;
+				case COMMAND_OPEN_CLAW: Open_claw();
+				break;
+				case COMMAND_CLOSE_CLAW: Close_claw();
+				break;
+				default: Stop();
+				break;
+			}
+			break;
+		}
+		case ID_BYTE_AUTO_DECISIONS:
+		{
+			uint8_t auto_decision = SPI_steering_recieve_byte();
+			switch(auto_decision)
+			{
+				case COMMAND_STOP: Stop();
+				//regulated_order = 0;
+				break;
+				case COMMAND_FORWARD: Forward_regulated(0, 0);
+				//regulated_order = 1;
+				break;
+				case COMMAND_BACKWARD: Backward_regulated();
+				//regulated_order = 2;
+				break;
+				case COMMAND_ROTATE_RIGHT: Rotate_right();
+				//regulated_order = 0;
+				break;
+				case COMMAND_ROTATE_LEFT: Rotate_left();
+				//regulated_order = 0;
+				break;
+				case COMMAND_OPEN_CLAW: Open_claw();
+				//regulated_order = 0;
+				break;
+				case COMMAND_CLOSE_CLAW: Close_claw();
+				//regulated_order = 0;
+				break;
+				default: Stop();
+				//regulated_order = 0;
+				break;
+			}
+			(void)auto_decision;
+			break;
+		}
 		default:
+		error = 1;
 		break;
 	}
+	sei();
 }
 
-uint8_t SPI_have_recieved_sensor_data(void)
-{
-	uint8_t result = has_recieved_sensor_data;
-	has_recieved_sensor_data = 0;
-	return result;
-}

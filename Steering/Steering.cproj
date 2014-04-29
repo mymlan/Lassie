@@ -132,6 +132,12 @@
     <Compile Include="Steering.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Steering_functions.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Steering_functions.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Steering_SPI.c">
       <SubType>compile</SubType>
     </Compile>
