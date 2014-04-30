@@ -15,7 +15,7 @@ void SPI_Master_init(void)
 	DDRB = 0xB8; //Sätter SCK, MOSI, och SS till utgångar
 	DDRD = 0x30;
 	SPCR = 0x51; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
-	SPSR = 0x01; //Sätter SCK till fosc/4
+	SPSR = 0x00; //Sätter SCK till fosc/4
 	COMMON_SET_PIN(PORTB, PORTB4); //initierar SS till hög
 	
 	//Register för att möjliggöra PCINT5
@@ -118,7 +118,7 @@ void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 	switch (id_byte)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
-		number_of_bytes_in_data = 7;
+		number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 		break;
 		case ID_BYTE_MANUAL_DECISIONS:
 		case ID_BYTE_AUTO_DECISIONS:
