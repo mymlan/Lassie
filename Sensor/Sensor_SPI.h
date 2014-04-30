@@ -11,5 +11,6 @@ uint8_t SPI_sensor_should_start_angular_rate_sensor(void);
 
 void SPI_sensor_send_rotation_finished(void);
 void SPI_sensor_send(uint8_t id_byte,uint8_t *data);
+void SPI_sensor_send_data(uint8_t id_byte, uint8_t data_byte);
 
 #endif
