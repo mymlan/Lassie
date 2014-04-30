@@ -118,7 +118,7 @@ void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 	switch (id_byte)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
-		number_of_bytes_in_data = 6;
+		number_of_bytes_in_data = 7;
 		break;
 		case ID_BYTE_MANUAL_DECISIONS:
 		case ID_BYTE_AUTO_DECISIONS:
