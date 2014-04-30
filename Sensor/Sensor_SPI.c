@@ -10,6 +10,8 @@ static volatile uint8_t has_recieved_give_distance;
 static volatile uint8_t has_recieved_start_angular_rate_sensor;
 
 static volatile uint8_t error;
+static volatile uint8_t test2;
+static volatile uint8_t test3;
 
 void SPI_sensor_init(void)
 {
@@ -29,6 +31,8 @@ void SPI_sensor_init(void)
 	has_recieved_start_angular_rate_sensor = 0;
 	
 	error = 0;
+	test2 = 0;
+	test3 = 0;
 }
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
@@ -92,7 +96,8 @@ static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 {
 	SPDR = id_byte;
 	COMMON_TOGGLE_PIN(PORTB, PORTB0); // Hissa flagga
-	while(!(SPI_master_have_recieved_byte())){}
+	while(!(SPSR & (1<<SPIF))){}
+	//while(!(SPI_master_have_recieved_byte())){} // funkar ej, vi stänger av avbrott och dp kommer denna aldrig sättas
 }
 
 void SPI_sensor_send_rotation_finished(void)
@@ -131,4 +136,15 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 		}
 	}
 	sei();	
+}
+
+void SPI_sensor_send_data(uint8_t id_byte, uint8_t data_byte)
+{
+	cli();
+	SPI_sensor_slave_send_id_byte(id_byte);
+	test2 = 9;
+	SPDR = data_byte;
+	test3 = 2;
+	
+	sei();
 }

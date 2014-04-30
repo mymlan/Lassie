@@ -12,17 +12,30 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 
+static volatile uint8_t test1;
+uint8_t test_ir_sensor_data[7];
 
 int main(void)
 {
   	init_interrupts();
+	SPI_sensor_init();
+	test_ir_sensor_data[0] = 0;
+	test_ir_sensor_data[1] = 1;
+	test_ir_sensor_data[2] = 2;
+	test_ir_sensor_data[3] = 3;
+	test_ir_sensor_data[4] = 4;
+	test_ir_sensor_data[5] = 5;
+	test_ir_sensor_data[6] = 6;
 	sei();
 	
+	SPI_sensor_send(ID_BYTE_IR_SENSOR_DATA, test_ir_sensor_data);
+	//SPI_sensor_send_data(ID_BYTE_DISTANCE, 0x03);
 	
 	while(1)
 	{
 		;
 	}
+	
 	 
 	/*
     while(1)
