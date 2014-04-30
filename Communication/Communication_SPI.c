@@ -72,9 +72,7 @@ ISR(PCINT0_vect)
 		}
 		case ID_BYTE_ROTATION_FINISHED:
 		{
-			uint8_t angle = SPI_Master_recieve_data_byte_from_sensor();
-			(void)angle; //löser att den inte används, gör om till void
-			// skicka till PC
+			//Hantera att 90grader nåtts, i karta!
 			break;
 		}
 		default:

@@ -12,19 +12,21 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 
-volatile unsigned char reflex_count = 0;
+volatile uint16_t reflex_count = 0;
 volatile unsigned char test;
 int baud;
 volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 
-volatile uint8_t ir_sensor_data[6];
+uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
 
 volatile uint8_t count=0;
 
-volatile unsigned char angular_value_rot;
-volatile uint8_t angle;
-volatile float angle_rot = 0;
-volatile float angular_diff_rot;
+volatile uint8_t diff_from_middle_corridor;
+volatile uint8_t angle_corridor;
+
+volatile uint8_t angular_rate_value;
+volatile float angular_rate_total = 0;
+volatile float angular_rate_diff;
 
 void init_interrupts(){
 		sei();  //set global interrupt
@@ -73,39 +75,44 @@ ISR (ADC_vect)
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
-		case(2):		
+		case(2):
+		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);		
 		sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
+		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
 		sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet 
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
 		
 		case(4):		
+		ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH);
 		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet 
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
-		//angle = 90 - ((atan((sensor3-sensor4)/dist1)) + (atan((sensor2-sensor1)/dist2)))/2; //Ger vinkel från vänstra väggen 
-		//diff_from_middle = 
+		//angle_corridor = 90 - (((atan((sensor3-sensor4) / dist1)) + (atan((sensor2-sensor1) / dist2))) / 2); //Ger vinkel från vänstra väggen 
+		//diff_from_middle_corridor = (((sensor2 + (10 - tan(angle_corridor)*dist1)) / sin(angle_corridor));
+		ir_sensor_data[5] = angle_corridor;
+		ir_sensor_data[6] = diff_from_middle_corridor;
 		break;
 		
 		case(5):				
-		if ((-20 < angle_rot) & (angle_rot < 20))
+		if ((-20 < angular_rate_total) & (angular_rate_total < 20))
 		{
-			angular_value_rot = ADCH;
-			angular_diff_rot = (angular_value_rot - ANGULAR_RATE_OFFSET) * ANGULAR_RATE_SENSITIVITY;
-			angle_rot += angular_diff_rot/10000;
+			angular_rate_value = ADCH;
+			angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY;
+			angular_rate_total += (angular_rate_diff / 10000);
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2
 		} else 
 		{  
-			angle_rot = 0;
-			//count = 5;
+			angular_rate_total = 0;
+			count = 0;
 			reflex_count = 0;
-			//send_angle(OK)
+			SPI_sensor_send_rotation_finished();
 		}
 		
 		break;
@@ -133,12 +140,26 @@ int main(void)
   	init_interrupts();
     while(1)
 	{
-	if(SPI_sensor_should_give_distance()) //skriv klart denna
-	{
-		//Skicka distans
-		uint8_t distance[1];
-		distance[0] = 0x00;
-		SPI_sensor_send(ID_BYTE_DISTANCE, distance);
+		if(SPI_sensor_should_give_distance()) //skriv klart denna
+		{
+			//Skicka distans
+			uint8_t distance[1];
+			uint8_t moved_distance = 0;
+			moved_distance = ((reflex_count*13) / 10);
+			distance[0] = moved_distance;
+			SPI_sensor_send(ID_BYTE_DISTANCE, distance);
+		}
+		else if (SPI_sensor_should_give_ir_sensor_data())
+		{
+			SPI_sensor_send(ID_BYTE_GIVE_IR_SENSOR_DATA, ir_sensor_data);		
+		}
+		else if (SPI_sensor_should_start_angular_rate_sensor())
+		{
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
+			count = 5;
+		} 
+		else
+		{}
 	}
 	
 	/*if {start_angle}
@@ -162,7 +183,7 @@ int main(void)
 	ser ut som: Läs parallel in från usart och kolla om rätt ID
 	om rätt, sätt en pinne kopplad till KOM avbrott
 	*/
-	}
+	
 }
 			
 			
