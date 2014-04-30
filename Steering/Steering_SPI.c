@@ -68,7 +68,7 @@ ISR(SPI_STC_vect)
 		test3 = 1;
 		case ID_BYTE_IR_SENSOR_DATA:
 		{
-			uint8_t sensor_data[6];
+			uint8_t sensor_data[7];
 			SPI_steering_recieve_sensor_data(sensor_data);
 			// gör det som ska hända med sensor_data!
 			/*
