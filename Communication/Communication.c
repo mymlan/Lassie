@@ -7,15 +7,6 @@
 #include "../CommonLibrary/Common.h"
 #include "Communication_SPI.h"
 
-void Test_funcion_master_send_to_steering()
-{
-	uint8_t steering_decision[1];
-	steering_decision[0] = 0x01;
-	SPI_Master_send_to_steering(0x07, steering_decision);
-	_delay_ms(1000);
-	steering_decision[0] = 0x00;
-	SPI_Master_send_to_steering(0x07, steering_decision);
-}
 
 int main(void)
 {
@@ -24,19 +15,37 @@ int main(void)
 	SPI_Master_init();
 	sei();
 	
-	/*uint8_t test_sensor_data[6];
+	uint8_t test_sensor_data[7];
 	
-	test_sensor_data[0] = 0;//plockar ut värdet, alt stoppar in. 0-5
-	test_sensor_data[1] = 1;
-	test_sensor_data[2] = 2;
-	test_sensor_data[3] = 3;
-	test_sensor_data[4] = 4;
-	test_sensor_data[5] = 5;
-	*/
-	//SPI_Master_send_to_steering(0x01, test_sensor_data);
-	Test_funcion_master_send_to_steering();
+	test_sensor_data[0] = 10;//plockar ut värdet, alt stoppar in. 0-5
+	test_sensor_data[1] = 11;
+	test_sensor_data[2] = 12;
+	test_sensor_data[3] = 13;
+	test_sensor_data[4] = 14;
+	test_sensor_data[5] = 15;
+	test_sensor_data[6] = 16;
 	
-
+	SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, test_sensor_data);
+	
+	/*SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_FORWARD);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_BACKWARD);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_OPEN_CLAW);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_TURN_RIGHT);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_TURN_LEFT);
+	_delay_ms(1000);
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);	*/
+	
+	
 	
     while(1)
     {
