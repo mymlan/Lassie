@@ -140,3 +140,13 @@ void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
 	sei();
 }
 
+void SPI_Master_send_command_to_steering(uint8_t id_byte, uint8_t command)
+{	
+	cli();
+	COMMON_CLEAR_PIN(PORTB, PORTB3);
+	SPI_Master_transmit_data_byte(id_byte);
+	SPI_Master_transmit_data_byte(command);
+	COMMON_SET_PIN(PORTB, PORTB3);
+	sei();
+}
+
