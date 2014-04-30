@@ -135,6 +135,12 @@
     <Compile Include="map_communication.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="map_communication_functions.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="map_communication_functions.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.cproj">

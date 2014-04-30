@@ -1,125 +1,11 @@
-﻿/*
- * tempkarta.c
- *
- * Created: 4/14/2014 4:22:05 PM
- *  Author: henba136
- */ 
-
-
-#include <avr/io.h>
+﻿#include <avr/io.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h> // bool
-
-//init
-//uint8_t sensor_front = 255; // i cm!
-//uint8_t sensor_front_left = 1; // i mm!
-//uint8_t sensor_front_right = 1; // i mm!
-//uint8_t sensor_back_left = 1; // i mm!
-//uint8_t sensor_back_right = 1; // i mm!
-//uint8_t vinkelsensor = 1;
-int test_variable_a;
-int test_variable_b;
-int a, b, c, d, e, f, g, h, i, j, k, l, m, n; // testvariabler
-
-//int robot_dir = 0; // nord, öst, syd, väst
-int NORTH = 0;
-int EAST = 1;
-int SOUTH = 2;
-int WEST = 3;
-
-//------ C, VI LOVAR ATT DESSA STRUCTAR DEFINIERAS -------//
-struct node_;
-struct link_;
-
-//-------------------- STRUCT-DEFINITIONER------------------------//
-typedef struct link_
-{
-	int length;
-	struct node_ *p_node;
-	//char dir; // tas bort om vi kör på alltid 4 länkar
-	bool open; // true om väg finns
-} link;
-typedef struct node_
-{
-	int x;
-	int y;
-	int cost;
-	bool searched;
-	//node* p_pre_dijk; // föregångare
-	bool start; // sant/falskt
-	bool goal; // sant/falskt
-	link links[4]; // Jag tror det är lättare om den har fix storlek och så får vi ha en bool för varje link som avgör öppen eller ej
-	// Det ska vara en fyra här (4 st element 0-3)
-} node;
-
-//------ C, VI LOVAR ATT DESSA FUNKTIONER DEFINIERAS, AKA INITIERING -------//
-node* Newnode(int, int);
-link* Newlink(int, node*);
-
-//-------------------- NEW STRUCT DEFINITIONER------------------------//
-link* Newlink(int length_in, node* nodeptr)
-{
-	link *p_lik = malloc(sizeof(link));
-	
-	p_lik->length = length_in;
-	//p_lik->dir = dir_in;
-	p_lik->p_node = nodeptr;
-	
-	return p_lik;
-}
-
-node* Newnode(int x_in, int y_in)
-{
-	node *p_node = malloc(sizeof(node)); // Allokerar minne
-	
-	//for så många ööpningar, sen placera i array också, kanske if öppen på alla öppningar och directions, case i en case???
-	
-	//node *ps;
-	//node *p_node = malloc(2 * sizeof(int) + sizeof(link) + number_of_roads * sizeof(node)); // Vad är det här?? // Detta allokerar en viss mängd minne för structen så att arrayen kan anta "godtycklig" storlek
-	
-	p_node->x = x_in;
-	p_node->y = y_in;
-	
-	p_node->cost = 255; //representrar oändligheten
-	p_node->searched = false; //inte avsökt från start
-	//p_node->p_pre_dijk = NULL;
-	
-	p_node->start = false;
-	p_node->goal = false;
-	
-	p_node->links[0].open = 0;
-	p_node->links[1].open = 0;
-	p_node->links[2].open = 0;
-	p_node->links[3].open = 0;
-	
-	/*
-	//link arra[];
-	//p_node->links = arra;
-	p_node->links[0] = Newlink(1,NULL);
-	p_node->links[1] = Newlink(1,NULL);
-	p_node->links[2] = Newlink(1,NULL);
-	*/
-	
-
-	return p_node;
-}
-
-node* all_nodes[200]; // Sparar alla noder
-node* p_robot_node;
-int robot_dir;
-
-//--------------------PUSH ARRAY------------------------//
-/* // Denna behövs inte om vi kör på fast storlekt på arrayen
-struct link Push_array(struct link array[])
-{
-	struct link temp[];
-	return *temp;
-}
-*/
+#include "map_communication_functions.h"
 
 //-------------------FUNKTIONER---------------------------//
 //vill skriva funktion som tar in riktning och sensorvärden för att bestämma vilka riktningar/väderstreck som är öppna
@@ -277,19 +163,68 @@ node* Exisiting_node_at(int x, int y)
 	return NULL;
 }
 
+// Hittar placeringen som noden ligger på i all_nodes
+int Find_index_of_node(node* p_node)
+{
+	for (int i = 0; i<200 && all_nodes[i] != NULL;i++)
+	{
+		if(all_nodes[i] == p_node)
+		{
+			return i;
+		}
+	}
+	return 201;
+}
+
+//Hjälpfunktion till Dijkstras, hittar den nod som har lägst kostnad och som inte är avsökt.
+int Find_low_cost_index()
+{
+	int temp_cost = 255;
+	int temp_index = 201;
+	for(int i = 0; i<200 && all_nodes[i] != NULL && all_nodes[i]->searched == false; i++)
+	{
+		if(all_nodes[i]->cost < temp_cost)
+		{
+			temp_cost = all_nodes[i]->cost;
+			temp_index = i;
+		}
+	}
+	return temp_index;
+}
+
 //Dijkstras algoritm, första steg att räkna avståndet, borde utvecklas til att hitta vägen/körrikting också.
-//bara skräpkod i just nu för att det ska kompilera
+//skräpkod i lsutet för att det ska kompilera
+//Behöver kanske inte returnera någonting, pekare ochkostnad finns i noden? Avbryta nör nod2 avsökt?
 int Dijk(node* p_node1, node* p_node2)
 {
-//1. Alla noder är markerade ej avsökra direkt i struct
-	if(p_node1->cost == p_node2->cost)
+	//1. Markerar alla noder ej avsökta och sätter kostnaden till oändlighten samt sätter föregångaren som odefinerad
+	//Sätter även startnodens kostnad till 0.
+	for(int i=0; i<200 && all_nodes[i] != NULL; i++)
 	{
-		return 1;
+		all_nodes[i]->searched = false;
+		all_nodes[i]->cost = 255;// =102 m =~ inf
+		all_nodes[i]->p_pre_dijk = NULL;
 	}
-	else
+	p_node1->cost = 0;
+	
+	while(all_nodes[Find_index_of_node(p_node2)]->searched == false)
 	{
-		return 0;
+		//2. Hitta den nod som har lägst nodpris, första gången startnoden.
+		node* p_chosen_node = all_nodes[Find_low_cost_index()];
+		//3. Ge angränsande noder uppdaterade värden om deras kostnad och föregångare.
+		for(int n = 0; n<4 && p_chosen_node->links[n].p_node != NULL; n++)
+		{
+			if(p_chosen_node->links[n].p_node->cost > p_chosen_node->cost + p_chosen_node->links[n].length)
+			{
+				p_chosen_node->links[n].p_node->cost = p_chosen_node->cost + p_chosen_node->links[n].length;
+				p_chosen_node->links[n].p_node->p_pre_dijk = p_chosen_node;
+			}
+		}
+		//4. Sätt vald nod som genomsökt
+		p_chosen_node->searched = true;
 	}
+
+	return all_nodes[Find_index_of_node(p_node2)]->cost;
 }
 
 // Sensor_values_has_arrived
@@ -418,11 +353,15 @@ uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, 
 	return (robot_dir + turn) % 4;
 }
 
-
 // Map_main
 // Innehållet kan ev. mergas med riktiga main när allt fungerar
 int Map_main(void)
 {
+	NORTH = 0;
+	EAST = 1;
+	SOUTH = 2;
+	WEST = 3;
+	
 	robot_dir = NORTH;
 	Create_origin(What_is_open(0, 255, 50)); // 
 	robot_dir = NORTH;
