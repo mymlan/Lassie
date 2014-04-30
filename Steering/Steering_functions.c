@@ -135,7 +135,7 @@ void Close_claw()
 void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: uint8_t regulator_error, uint8_t regulator_angle
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
-	double adjusted_speed = K_P * (regulator_error - 20) + K_D * tan(regulator_angle - 90);
+	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
@@ -144,7 +144,7 @@ void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: u
 void Backward_regulated(uint8_t regulator_error, uint8_t regulator_angle)
 {
 	PORTD = (0<< PORTD2) | (0<< PORTD3); // Vänster - Höger riktning
-	double adjusted_speed = K_P * (regulator_error - 200) + K_D * tan(regulator_angle - 90);
+	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 + adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns
 }
