@@ -23,6 +23,7 @@
 //uint8_t vinkelsensor = 1;
 int test_variable_a;
 int test_variable_b;
+int a, b, c, d, e, f, g, h, i, j, k, l, m, n; // testvariabler
 
 //int robot_dir = 0; // nord, öst, syd, väst
 int NORTH = 0;
@@ -124,12 +125,13 @@ struct link Push_array(struct link array[])
 //vill skriva funktion som tar in riktning och sensorvärden för att bestämma vilka riktningar/väderstreck som är öppna
 //returnerar ett tal på 4 bitar i ordningen nord,öst,syd,väst -> 1111, rdir är robtens riktning 0-3 i ordningen nord,öst,syd,väst
 //jag vet inte om det finns snyggare samband, men jag går igenom alla fall till att börja med
-int What_is_open(int left, int right, int front, int rdir)
+int What_is_open(int left, int right, int front)
 {
+	int rdir = robot_dir;
 	if(rdir == 0) // om vi åker norrut
 	{
 		int buffer = 2; // alltid öppet bakåt
-		if(front > 700)
+		if(front > 40)
 		{
 			buffer = buffer + 8;
 		}
@@ -150,7 +152,7 @@ int What_is_open(int left, int right, int front, int rdir)
 		{
 			buffer = buffer + 8;
 		}
-		if(front > 700)
+		if(front > 40)
 		{
 			buffer = buffer + 4;
 		}
@@ -167,7 +169,7 @@ int What_is_open(int left, int right, int front, int rdir)
 		{
 			buffer = buffer + 4;
 		}
-		if(front > 700)
+		if(front > 40)
 		{
 			buffer = buffer + 2;
 		}
@@ -189,7 +191,7 @@ int What_is_open(int left, int right, int front, int rdir)
 		{
 			buffer = buffer + 2;
 		}
-		if(front > 700)
+		if(front > 40)
 		{
 			buffer = buffer + 1;
 		}
@@ -200,7 +202,7 @@ int What_is_open(int left, int right, int front, int rdir)
 
 // Create_origin
 // Funktionen skapar en origonod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
-node* Create_origin(int open_walls)
+void Create_origin(int open_walls)
 {
 	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
 	node* p_node = Newnode(0, 0); // Skapa nod
@@ -208,14 +210,13 @@ node* Create_origin(int open_walls)
 	
 	for(int i = 0; i < 4; i++) // Detta kanske ändras eller tas bort
 	{
-		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
+		p_node->links[i].open = ((open_walls >> (3 - i)) & 0x01); // Sätt rätt .open till true
 	}
-	return p_node;
 }
 
 // Create_goal
 // Funktionen skapar en målnod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
-node* Create_goal(int x, int y, int open_walls)
+void Create_goal(int x, int y, int open_walls)
 {
 	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
 	node* p_node = Newnode(x, y); // Skapa nod
@@ -225,12 +226,11 @@ node* Create_goal(int x, int y, int open_walls)
 	{
 		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
 	}
-	return p_node;
 }
 
 // Create_node
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
-node* Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, int open_walls)
+void Create_node(int x, int y, int length, int open_walls)
 {
 	// GENERELLT ARGUMENT betyder att det ska vara i någon form av argument till funktionen. Just nu bara dummydata
 		// 1.Skapa ny nod
@@ -245,14 +245,14 @@ node* Create_node(int x, int y, node* p_robot_node, int robot_dir, int length, i
 	}
 	p_node->links[(robot_dir + 2) % 4].p_node = p_robot_node; // 3b. Koppla gammal nod till ny nod
 	p_node->links[(robot_dir + 2) % 4].length = length; // 3c. Längd för vägen bakåt satt
-	return p_node; // 4.
+	 // 4.
 		// 5. Nollställ avstånd (kanske sker utanför funktionen)
 		// 6. Ta styrbslut och return (sker utanför funktionen)
 }
 
 // Update_node
 // Uppdaterar given nod med värden som kopplar ihop noden med senaste nod
-node* Update_node(node* p_node, node* p_robot_node, int robot_dir, int length)
+void Update_node(node* p_node, int length)
 {
 	p_node->links[(robot_dir + 2) % 4].p_node = p_robot_node; // Ge noden pekar-info om förra noden
 	p_node->links[(robot_dir + 2) % 4].length = length; // Ge noden längd-info om förra noden
@@ -260,7 +260,6 @@ node* Update_node(node* p_node, node* p_robot_node, int robot_dir, int length)
 	p_robot_node->links[robot_dir].p_node = p_node; // Ge förra noden pekar-info om noden
 	p_robot_node->links[robot_dir].length = length; // Ge förra noden längd-info om noden
 	
-	return p_node;
 }
 
 // Existing_node_at
@@ -276,26 +275,6 @@ node* Exisiting_node_at(int x, int y)
 		}
 	}
 	return NULL;
-}
-
-// Get_decision_searching
-//början av funktion för att genera styrbeslut
-//kanske får brytas ner till fler funktioner istället då den borde bli stor
-//se designspec för numerisk representation av styrbeslut, ex 1->åk fram.
-//Men den kanske inte ens ser ut såhär, den får stå kvar sålänge
-int Get_decision_searching(uint8_t senleftfront, uint8_t senleftback, uint8_t senfront, uint8_t senrightfront, uint8_t senrightback)
-{	
-	if(senleftfront < 200 && senrightfront < 200 && senfront < 20) // Kollar 2 cm innan vägg om återvändsgränd
-	{
-		Create_node(5, 6, NULL, NORTH, 42, What_is_open(201, 201, 201, NORTH));
-		// Ge order om att backa
-	}
-	if (senleftfront + senleftback + senrightfront + senrightback < 600 && senfront < 20)
-	{
-		return 0;
-	}
-	// Annars ingen intressant punk och vi tar inget nytt beslut.
-	return 0;
 }
 
 //Dijkstras algoritm, första steg att räkna avståndet, borde utvecklas til att hitta vägen/körrikting också.
@@ -317,53 +296,83 @@ int Dijk(node* p_node1, node* p_node2)
 // Denna kod körs varje gång sensorvärden kommer. Koden kan senare ev. flyttas till mainloopen när allt fungerar.
 // När sensorvärden kommer, kör denna kod. Koden avgör om man är i en korsning och beroende på om det är en ny eller gammal korsning skapas eller uppdateras noden.
 // Det finns avsatta rader där strybeslut skickas till styrmodulen.
-void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right, int length)
+void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
-	// Uträkning av koordinater
-	int x = p_robot_node->x;
-	int y = p_robot_node->y;
-	int traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
-	switch (robot_dir)
-	{
-		case 0:
-		{
-			int y = y + traveled_blocks;
-			break;
-		}
-		case 1:
-		{
-			int y = y - traveled_blocks;
-			break;
-		}
-		case 2:
-		{
-			int x = x + traveled_blocks;
-			break;
-		}
-		case 3:
-		{
-			int x = x - traveled_blocks;
-			break;
-		}
-	}
-	
 	// -------- Detta är kartlagring och genomsökning ---------- //
 	// HÄNDELSE: Sensorvärde inkommit
 	// Indikerar sensorvärden återvändsgränd?
 	if (sensor_front < 10 && sensor_front_left < 200 && sensor_front_right < 200) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
+		int length;
+		length = 42; // Fixas vid anrop till sensormodul
+		// Uträkning av koordinater
+		int x = p_robot_node->x;
+		int y = p_robot_node->y;
+		int traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
+		switch (robot_dir)
+		{
+			case 0:
+			{
+				int y = y + traveled_blocks;
+				break;
+			}
+			case 1:
+			{
+				int y = y - traveled_blocks;
+				break;
+			}
+			case 2:
+			{
+				int x = x + traveled_blocks;
+				break;
+			}
+			case 3:
+			{
+				int x = x - traveled_blocks;
+				break;
+			}
+		}
 		// Skapa nod
-		Create_node(x, y, p_robot_node, robot_dir, length, What_is_open(sensor_front_left, sensor_front_right, sensor_front, robot_dir));
+		Create_node(x, y, traveled_blocks, What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 		// "HOPP": Åk utforskad väg till närmsta outforskade nod
 	}
 	// Annars, indikerar bakre sensorer en korsning?
 	else if (sensor_back_left > 20 || sensor_back_right > 20)
 	{
+		int length;
+		length = 42; // Fixas vid anrop till sensormodul
+		// Uträkning av koordinater
+		int x = p_robot_node->x;
+		int y = p_robot_node->y;
+		int traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
+		switch (robot_dir)
+		{
+			case 0:
+			{
+				int y = y + traveled_blocks;
+				break;
+			}
+			case 1:
+			{
+				int y = y - traveled_blocks;
+				break;
+			}
+			case 2:
+			{
+				int x = x + traveled_blocks;
+				break;
+			}
+			case 3:
+			{
+				int x = x - traveled_blocks;
+				break;
+			}
+		}
 		// Är det en ny korsning?
-		if (Exisiting_node_at(x, y)) // Ska bli generell (true)
+		if (Exisiting_node_at(x, y) == NULL)
 		{
 			// Skapa nod utifrån främre 3 sensorer
-			Create_node(x, y, p_robot_node, robot_dir, length, What_is_open(sensor_front_left, sensor_front_right, sensor_front, robot_dir));
+			Create_node(x, y, traveled_blocks, What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 			// Öppet rakt fram?
 				// Ingen förändring av styrbeslut
 			// Annars, öppet höger?
@@ -387,7 +396,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 		else
 		{
 			// Uppdatera nod
-			Update_node(Exisiting_node_at(x, y), p_robot_node, robot_dir, length);
+			Update_node(Exisiting_node_at(x, y), length);
 			// Möjligt att åka rakt fram?
 			if (sensor_front > 30)
 			{
@@ -402,10 +411,44 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 	}
 }
 
+// Get_cardinal_direction
+// Funktionen omvandlar robotens riktning och dess sväng (rakt, vänster, höger, back) till ett vädersträck
+uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, turn right = 1, back = 2, turn left = 3
+{
+	return (robot_dir + turn) % 4;
+}
+
+
 // Map_main
 // Innehållet kan ev. mergas med riktiga main när allt fungerar
 int Map_main(void)
 {
+	robot_dir = NORTH;
+	Create_origin(What_is_open(0, 255, 50)); // 
+	robot_dir = NORTH;
+	
+	a = p_robot_node->x; // 0
+	b = p_robot_node->y; // 0
+	c = p_robot_node->start; // 1
+	d = p_robot_node->links[0].open; // 1
+	e = p_robot_node->links[1].open; // 1
+	f = p_robot_node->links[2].open; // 0 // fastän bak vid start kommer vi aldrig utforska
+	g = p_robot_node->links[3].open; // 0
+	
+	Sensor_values_has_arrived(20, 100, 255, 100, 255);
+	
+	a = p_robot_node->x; // 0
+	b = p_robot_node->y; // 3
+	c = p_robot_node->start; // 0
+	d = p_robot_node->links[0].open; // 0
+	e = p_robot_node->links[1].open; // 1
+	f = p_robot_node->links[2].open; // 1
+	g = p_robot_node->links[3].open; // 0
+	
+	//Sensor_values_has_arrived();
+	
+	
+	/*
 	// Lite testning och pseudokod för hur allt kommer gå till
 	// FÖRKLARING: i what is open är 255 (avstånd) "öppet", och 0 (avstånd) "vägg". NORTH, WEST etc definierade som 0, 3 etc.
 	// [undersöker riktningar (säg 1100)]
@@ -436,6 +479,7 @@ int Map_main(void)
 	
 	robot_dir = 1;// Vi åker öster
 	p_robot_node = Create_node(5, 9, p_robot_node, robot_dir, 3, What_is_open(0, 0, 0, robot_dir)); // Vi har åkt höger och skapat en nod.
+	*/
 	
 	/* // Behövs ej om all_nodes redan är fyllt med NULL istället för skräp
 	for (int i = 0; i < 200; i = i + 1)
