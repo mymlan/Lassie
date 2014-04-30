@@ -15,6 +15,9 @@ int main(void)
 	SPI_Master_init();
 	sei();
 	
+	//SPI_Master_send_to_sensor(ID_BYTE_GIVE_DISTANCE);
+	
+	/*
 	uint8_t test_sensor_data[7];
 	
 	test_sensor_data[0] = 10;//plockar ut värdet, alt stoppar in. 0-5
@@ -26,7 +29,7 @@ int main(void)
 	test_sensor_data[6] = 16;
 	
 	SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, test_sensor_data);
-	
+	*/
 	/*SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_FORWARD);
 	_delay_ms(1000);
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_BACKWARD);
@@ -44,8 +47,6 @@ int main(void)
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_TURN_LEFT);
 	_delay_ms(1000);
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);	*/
-	
-	
 	
     while(1)
     {

@@ -8,6 +8,9 @@
 #include "Communication_SPI.h"
 
 static volatile uint8_t error;
+static volatile uint8_t test1;
+static volatile uint8_t test2;
+static volatile uint8_t test3;
 
 void SPI_Master_init(void)
 {
@@ -24,6 +27,9 @@ void SPI_Master_init(void)
 	PCIFR = 0x01;
 	
 	error = 0;
+	test1 = 0;
+	test2 = 0;
+	test3 = 0;
 }
 
 /* static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
@@ -51,8 +57,9 @@ static void SPI_Master_recieve_sensor_data(uint8_t *sensor_data)
 // Avbrottsvektor som går hög då sensor har något att skicka. (röd flagga)
 ISR(PCINT0_vect)
 {
-	cli(); // Avaktiverar avbrott under skickning
+	cli(); // Avaktiverar avbrott under hämtning
 	uint8_t byte_from_SPI = SPI_Master_recieve_data_byte_from_sensor();
+	test1 = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
@@ -65,7 +72,10 @@ ISR(PCINT0_vect)
 		}
 		case ID_BYTE_DISTANCE:
 		{
+			test2 = 5;
+			_delay_us(10);
 			uint8_t distance = SPI_Master_recieve_data_byte_from_sensor();
+			test3 = distance;
 			(void)distance; //löser att den inte används, gör om till void
 			// skicka till PC
 			break;
@@ -107,7 +117,7 @@ void SPI_Master_send_to_sensor(uint8_t id_byte)
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	SPI_Master_transmit_data_byte(id_byte); //Skickar adressbyten till sensor
 	COMMON_SET_PIN(PORTB, PORTB4);
-	_delay_us(10); //ger tid till sensor att spara undan SPDR
+	//_delay_us(10); //ger tid till sensor att spara undan SPDR
 	sei();
 }
 
