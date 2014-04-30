@@ -27,7 +27,6 @@ PORTD2: Vänster riktning
 //-----------------INITIERINGSFUNKTIONER----------------//
 void Initialize_interrupt()
 {
-	sei(); // Tillåter globala interrupt
 	EIMSK |= (1<<INT2); // Tillåter avbrott 2
 	EICRA |= (0<<ISC20) | (1<<ISC21); // Ger avbrott på låg flank
 	
@@ -145,11 +144,13 @@ void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: u
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
 }
 
-void Backward_regulated()
+void Backward_regulated(uint8_t regulator_error, uint8_t regulator_angle)
 {
 	// reglering efter sensorvärden
 	PORTD = (0<< PORTD2) | (0<< PORTD3); // Vänster - Höger riktning
-	// copy-paste när Forward_regulated() slutgiltigt klar
+	double adjusted_speed = K_P * regulator_error + K_D * tan(regulator_angle);
+	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
+	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
 }
 
 //-----------------DIVERSE FUNKTIONER----------------//

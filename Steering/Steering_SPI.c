@@ -8,12 +8,14 @@
 #include "Steering_functions.h"
 #include <util/delay.h>
 
+static volatile uint8_t last_auto_decision;
+
 static volatile uint8_t error;
 static volatile uint8_t test;
 static volatile uint8_t test2;
 static volatile uint8_t test3;
-
-// uint8_t regulated_order;
+static volatile uint8_t test4;
+static volatile uint8_t sensor_data[7];
 
 void SPI_steering_init(void)
 {
@@ -24,14 +26,17 @@ void SPI_steering_init(void)
 	PORTD = 0; //test
 	PORTD = 0x20; //test
 	PORTD = 0; //test
+	
+	last_auto_decision = NO_NEED_TO_REGULATE;
 
 	error = 0;
 	test = 0;
 	test2 = 0;
 	test3 = 0;
+	test4 = 0;
 }
 
-static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
+static void SPI_steering_recieve_sensor_data(volatile uint8_t *sensor_data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 	while(number_of_bytes_in_data != 0)
@@ -65,28 +70,31 @@ ISR(SPI_STC_vect)
 	test2 = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
-		test3 = 1;
 		case ID_BYTE_IR_SENSOR_DATA:
 		{
-			uint8_t sensor_data[7];
 			SPI_steering_recieve_sensor_data(sensor_data);
-			// gör det som ska hända med sensor_data!
-			/*
-			switch(regulated_order) // =0 innbeär ingen reglering, =1 reglering fram, =2 reglering bak
+			switch(last_auto_decision)
 			{
-				case 1: Forward_regulated(sensor_data[5], sensor_data[6]);
+				case NO_NEED_TO_REGULATE:
 				break;
-				case 2: Backward_regulated();
+				case REGULATED_FORWARD:
+				Forward_regulated(sensor_data[5], sensor_data[6]);
 				break;
-				case 0:
+				case REGULATED_BACKWARD:
+				Backward_regulated(sensor_data[5], sensor_data[6]);
 				break;
-			*/
+				default:
+				error = 1;
+				break;
+			}
+			
 			break;
 		}
 		case ID_BYTE_MANUAL_DECISIONS:
 		{
-
+			test3 = 1;
 			uint8_t manual_decision = SPI_steering_recieve_byte();
+			test4 = manual_decision;
 			switch(manual_decision)
 			{
 				case COMMAND_STOP: Stop();
@@ -108,6 +116,7 @@ ISR(SPI_STC_vect)
 				case COMMAND_CLOSE_CLAW: Close_claw();
 				break;
 				default: Stop();
+				error = 1;
 				break;
 			}
 			break;
@@ -118,31 +127,31 @@ ISR(SPI_STC_vect)
 			switch(auto_decision)
 			{
 				case COMMAND_STOP: Stop();
-				//regulated_order = 0;
+				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 				case COMMAND_FORWARD: Forward_regulated(0, 0);
-				//regulated_order = 1;
+				last_auto_decision = REGULATED_FORWARD;
 				break;
-				case COMMAND_BACKWARD: Backward_regulated();
-				//regulated_order = 2;
+				case COMMAND_BACKWARD: Backward_regulated(0, 0);
+				last_auto_decision = REGULATED_BACKWARD;
 				break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
-				//regulated_order = 0;
+				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
-				//regulated_order = 0;
+				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 				case COMMAND_OPEN_CLAW: Open_claw();
-				//regulated_order = 0;
+				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 				case COMMAND_CLOSE_CLAW: Close_claw();
-				//regulated_order = 0;
+				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 				default: Stop();
-				//regulated_order = 0;
+				error = 1;
+				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 			}
-			(void)auto_decision;
 			break;
 		}
 		default:

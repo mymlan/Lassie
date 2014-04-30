@@ -14,12 +14,14 @@ int main(void)
 {
 	// Initiering
 	SPI_steering_init();
-	//Initialize_interrupt();
-	//Initialize_pwm();
+	Initialize_pwm();
 	sei();
 	
 	
-	Loop();
+	while(1)
+	{
+		;
+	}
 	
 	return 0;
 }

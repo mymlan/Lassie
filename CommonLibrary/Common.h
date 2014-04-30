@@ -44,3 +44,8 @@
 //Sensor
 #define ANGULAR_RATE_SENSITIVITY (1.28)
 #define ANGULAR_RATE_OFFSET (133)
+
+//Styr
+#define REGULATED_FORWARD (1)
+#define REGULATED_BACKWARD (2)
+#define NO_NEED_TO_REGULATE (0)
