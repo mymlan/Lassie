@@ -14,8 +14,9 @@ int main(void)
 {
 	// Initiering
 	SPI_steering_init();
-	Initialize_interrupt();
-	Initialize_pwm();
+	//Initialize_interrupt();
+	//Initialize_pwm();
+	sei();
 	
 	
 	Loop();
