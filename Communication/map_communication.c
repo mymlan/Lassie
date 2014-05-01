@@ -199,6 +199,7 @@ int Find_low_cost_index()
 //Behöver kanske inte returnera någonting, pekare ochkostnad finns i noden? Avbryta nör nod2 avsökt?
 int Find_shortest_path(node* p_node1, node* p_node2)
 {
+	
 	//1. Markerar alla noder ej avsökta och sätter kostnaden till oändlighten samt sätter föregångaren som odefinerad
 	//Sätter även startnodens kostnad till 0.
 	for(int i = 0; i < all_nodes_size; i++)
@@ -206,6 +207,10 @@ int Find_shortest_path(node* p_node1, node* p_node2)
 		all_nodes[i]->searched = false;
 		all_nodes[i]->cost = 255;// =102 m =~ inf
 		all_nodes[i]->p_pre_dijk = NULL;
+	}
+	if (p_node1 == p_node2)
+	{
+		return 0;
 	}
 	p_node1->cost = 0;
 	
@@ -234,9 +239,83 @@ int Find_shortest_path(node* p_node1, node* p_node2)
 	return p_node2->cost;
 }
 
+// Get_cardinal_direction
+// Funktionen omvandlar robotens riktning och dess sväng (rakt, vänster, höger, back) till ett vädersträck
+uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, turn right = 1, back = 2, turn left = 3
+{
+	return (robot_dir + turn) % 4;
+}
 
+// Do_turn
+// Funktonen uför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
+void Do_turn(uint8_t cardinal_direction)
+{
+	switch ((robot_dir - cardinal_direction + 4) % 4)
+	{
+		case 3:
+		//Trun right order
+		robot_dir = (robot_dir + 1) % 4;
+		break;
+		case 2:
+		// Backa order
+		robot_dir = (robot_dir + 2) % 4;
+		break;
+		case 1:
+		//Turn left order
+		robot_dir = (robot_dir + 3) % 4;
+		break;
+		case 0:
+		robot_dir = (robot_dir + 4) % 4;
+		// Åk fram order
+		break;
+	}
+	// Åk fram order
+}
 
-// Hittar en nod om har en outforskad öppning
+// Get_dijkpointers_cardinal_direction
+// Funktionen tar in en nodpekare och returnerar dess dijkstraspekares vädersträck
+int Get_dijkpointers_cardinal_direction(node* p_node)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		if (p_node->links[i].p_node->x == p_node->p_pre_dijk->x && p_node->links[i].p_node->y == p_node->p_pre_dijk->y)
+		{
+			return i;
+		}
+	}
+	return 5;
+}
+
+// Follow_path
+// Funktionen utför en sväng enligt dijkstraspekarna när roboten når en korsning
+void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right
+{
+	//indikerar bakre sensorer en korsning
+
+		
+		if (p_robot_node->p_pre_dijk == NULL)
+		{
+			following_path = false;
+			for (int i = 0; i < 4; i++)
+			{
+				if (p_robot_node->links[i].length == 0 && p_robot_node->links[i].open)
+				{
+					c = i;
+					Do_turn(i);
+					break;
+				}
+			}
+		}
+		else
+		{
+
+			c = Get_dijkpointers_cardinal_direction(p_robot_node);
+			Do_turn(Get_dijkpointers_cardinal_direction(p_robot_node));
+		}
+	//}
+}
+
+// Hittar en nod som har en outforskad öppning
 node* Easy_find_unexplored_node()
 {
 	for(int i = 1; i < all_nodes_size; i++)
@@ -252,20 +331,17 @@ node* Easy_find_unexplored_node()
 	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
-
-// Sensor_values_has_arrived
-// Denna kod körs varje gång sensorvärden kommer. Koden kan senare ev. flyttas till mainloopen när allt fungerar.
-// När sensorvärden kommer, kör denna kod. Koden avgör om man är i en korsning och beroende på om det är en ny eller gammal korsning skapas eller uppdateras noden.
-// Det finns avsatta rader där strybeslut skickas till styrmodulen.
-void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+// Search
+// Funktionen tar styrbeslut för sökning
+void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
+	int length = 84;
 	// -------- Detta är kartlagring och genomsökning ---------- //
 	// HÄNDELSE: Sensorvärde inkommit
 	// Indikerar sensorvärden återvändsgränd?
 	if (sensor_front < 10 && sensor_front_left < 200 && sensor_front_right < 200) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
-		int length;
-		length = 42; // Fixas vid anrop till sensormodul
+		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul  (2 STÄLLEN)
 		// Uträkning av koordinater
 		int x = p_robot_node->x;
 		int y = p_robot_node->y;
@@ -301,8 +377,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 	// Annars, indikerar bakre sensorer en korsning?
 	else if (sensor_back_left > 200 || sensor_back_right > 200)
 	{
-		int length;
-		length = 42; // Fixas vid anrop till sensormodul
+		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul (2 STÄLLEN)
 		// Uträkning av koordinater
 		int x = p_robot_node->x;
 		int y = p_robot_node->y;
@@ -336,9 +411,13 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			// Skapa nod utifrån främre 3 sensorer
 			Create_node(x, y, traveled_blocks, What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 			// Öppet rakt fram?
-				// Ingen förändring av styrbeslut
+			// Ingen förändring av styrbeslut
+			if (sensor_front > 40)
+			{
+				// Ändra inte robot_dir
+			}
 			// Annars, öppet höger?
-			if (sensor_front_right > 200)
+			else if (sensor_front_right > 200)
 			{
 				// Ge order om sväng höger
 				robot_dir = (robot_dir + 1) % 4;
@@ -361,60 +440,33 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 		{
 			// Uppdatera nod
 			Update_node(Exisiting_node_at(x, y), traveled_blocks);
-			// Möjligt att åka rakt fram?
-			if (sensor_front > 30)
-			{
-				// Ge order om att åka rakt fram
-			}
-			// Annars (vi står inte i en korsning med en outforskad väg)
-			else
-			{
-				// "HOPP": Åk utforskad väg till närmsta outforskade nod
-			}
+			// Åk utforskad väg till närmsta outforskade nod
+			Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
+			following_path = true;
+			Follow_path();
 		}
 	}
 }
 
-// Get_cardinal_direction
-// Funktionen omvandlar robotens riktning och dess sväng (rakt, vänster, höger, back) till ett vädersträck
-uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, turn right = 1, back = 2, turn left = 3
+// Sensor_values_has_arrived
+// Denna kod körs varje gång sensorvärden kommer. Koden kan senare ev. flyttas till mainloopen när allt fungerar.
+// När sensorvärden kommer, kör denna kod. Koden avgör om man är i en korsning och beroende på om det är en ny eller gammal korsning skapas eller uppdateras noden.
+// Det finns avsatta rader där strybeslut skickas till styrmodulen.
+void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
-	return (robot_dir + turn) % 4;
-}
-
-void Do_turn(uint8_t cardinal_direction)
-{
-	switch ((robot_dir - cardinal_direction) % 4)
+	if (following_path)
 	{
-		case 3:
-		//Trun right order;
-		break;
-		case 2:
-		// Backa order;
-		break;
-		case 1:
-		//Turn left order;
-		break;
-		case 0:
-		// Åk fram order;
-		break;
-	}
-}
-
-int Get_prepointers_cardinal_direction(node* p_node)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		if (p_node->links[i].p_node == p_node->p_pre_dijk)
+		if (sensor_back_left > 200 || sensor_back_right > 200)
 		{
-			return i;
+			p_robot_node = p_robot_node->p_pre_dijk;
+			Follow_path();
 		}
 	}
-	return 5;
-}	
-
-
-
+	else if (searching)
+	{
+		Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+	}
+}
 
 // Map_main
 // Innehållet kan ev. mergas med riktiga main när allt fungerar
@@ -425,14 +477,71 @@ int Map_main(void)
 	SOUTH = 2;
 	WEST = 3;
 	all_nodes_size = 0;
+	following_path = 0;
+	searching = 1;
 	
 	robot_dir = NORTH;
-	Create_origin(What_is_open(0, 255, 50));
-	Sensor_values_has_arrived(20, 100, 255, 100, 255);
-	Sensor_values_has_arrived(20, 255, 255, 100, 255);
-	Sensor_values_has_arrived(20, 255, 255, 100, 100);
-	Sensor_values_has_arrived(20, 255, 255, 255, 255);
-	Sensor_values_has_arrived(20, 100, 255, 100, 255);
+	Create_origin(What_is_open(100, 100, 70)); // 0,0
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 0,6
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 0,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 0,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 4,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); //2,2 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 0,2
+	
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 2,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 4,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 2,4
+	
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 255, 255, 255, 255); //0,4 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 100, 255, 100); //0,2 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 100, 255, 100); //2,2 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); //2,4 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(5, 100, 100, 100, 100); //2,6 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	
+	
 	a = Find_shortest_path(all_nodes[2], all_nodes[0]);
 	b = all_nodes[0]->p_pre_dijk->x;
 	c = all_nodes[0]->p_pre_dijk->y;

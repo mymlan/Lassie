@@ -16,13 +16,13 @@ uint8_t all_nodes_size;
 struct node_* p_robot_node;
 int robot_dir;
 
-
+bool following_path, searching;
 
 
 
 int test_variable_a;
 int test_variable_b;
-int a, b, c, d, e, f, g, h, i, j, k, l, m, n; // testvariabler
+int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z; // testvariabler
 
 //int robot_dir = 0; // nord, öst, syd, väst
 int NORTH;
