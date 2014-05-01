@@ -15,7 +15,7 @@ int main(void)
 	SPI_Master_init();
 	sei();
 	
-	//SPI_Master_send_to_sensor(ID_BYTE_GIVE_DISTANCE);
+	SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
 	
 	/*
 	uint8_t test_sensor_data[7];
