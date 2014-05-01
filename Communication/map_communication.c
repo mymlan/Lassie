@@ -165,7 +165,7 @@ node* Exisiting_node_at(int x, int y)
 	return NULL;
 }
 
-// Hittar placeringen som noden ligger på i all_nodes
+// Hittar placeringen som noden ligger på i all_nodes // Kan tas bort senare om den inte används
 int Find_index_of_node(node* p_node)
 {
 	for (int i = 0; i < all_nodes_size ; i++)
@@ -183,9 +183,9 @@ int Find_low_cost_index()
 {
 	int temp_cost = 255;
 	int temp_index = 201;
-	for(int i = 0; i < all_nodes_size && all_nodes[i]->searched == false; i++)
+	for(int i = 0; i < all_nodes_size; i++)
 	{
-		if(all_nodes[i]->cost < temp_cost)
+		if(all_nodes[i]->searched == false && all_nodes[i]->cost < temp_cost)
 		{
 			temp_cost = all_nodes[i]->cost;
 			temp_index = i;
@@ -197,11 +197,11 @@ int Find_low_cost_index()
 //Dijkstras algoritm, första steg att räkna avståndet, borde utvecklas til att hitta vägen/körrikting också.
 //skräpkod i lsutet för att det ska kompilera
 //Behöver kanske inte returnera någonting, pekare ochkostnad finns i noden? Avbryta nör nod2 avsökt?
-int Dijk(node* p_node1, node* p_node2)
+int Find_shortest_path(node* p_node1, node* p_node2)
 {
 	//1. Markerar alla noder ej avsökta och sätter kostnaden till oändlighten samt sätter föregångaren som odefinerad
 	//Sätter även startnodens kostnad till 0.
-	for(int i=0; i<200 && all_nodes[i] != NULL; i++)
+	for(int i = 0; i < all_nodes_size; i++)
 	{
 		all_nodes[i]->searched = false;
 		all_nodes[i]->cost = 255;// =102 m =~ inf
@@ -209,14 +209,19 @@ int Dijk(node* p_node1, node* p_node2)
 	}
 	p_node1->cost = 0;
 	
-	while(all_nodes[Find_index_of_node(p_node2)]->searched == false)
+	if (p_node2 == NULL)
+	{
+		return 0;
+	}
+	
+	while(p_node2->searched == false)
 	{
 		//2. Hitta den nod som har lägst nodpris, första gången startnoden.
 		node* p_chosen_node = all_nodes[Find_low_cost_index()];
 		//3. Ge angränsande noder uppdaterade värden om deras kostnad och föregångare.
-		for(int n = 0; n<4 && p_chosen_node->links[n].p_node != NULL; n++)
+		for(int n = 0; n < 4; n++)
 		{
-			if(p_chosen_node->links[n].p_node->cost > p_chosen_node->cost + p_chosen_node->links[n].length)
+			if(p_chosen_node->links[n].p_node != NULL && p_chosen_node->links[n].p_node->cost > p_chosen_node->cost + p_chosen_node->links[n].length)
 			{
 				p_chosen_node->links[n].p_node->cost = p_chosen_node->cost + p_chosen_node->links[n].length;
 				p_chosen_node->links[n].p_node->p_pre_dijk = p_chosen_node;
@@ -226,7 +231,7 @@ int Dijk(node* p_node1, node* p_node2)
 		p_chosen_node->searched = true;
 	}
 
-	return all_nodes[Find_index_of_node(p_node2)]->cost;
+	return p_node2->cost;
 }
 
 
@@ -234,7 +239,7 @@ int Dijk(node* p_node1, node* p_node2)
 // Hittar en nod om har en outforskad öppning
 node* Easy_find_unexplored_node()
 {
-	for(int i = 1; i < 200 && all_nodes[i] != NULL; i++)
+	for(int i = 1; i < all_nodes_size; i++)
 	{
 		for (int n = 0; n < 4; n++)
 		{
@@ -244,7 +249,7 @@ node* Easy_find_unexplored_node()
 			}
 		}
 	}
-	return all_nodes[0]; // Borde aldrig komma hít, eftersom startnoden alltid har en öppning, right? Annars så borde startnoden vara all_nodes[0].
+	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
 
@@ -377,6 +382,40 @@ uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, 
 	return (robot_dir + turn) % 4;
 }
 
+void Do_turn(uint8_t cardinal_direction)
+{
+	switch ((robot_dir - cardinal_direction) % 4)
+	{
+		case 3:
+		//Trun right order;
+		break;
+		case 2:
+		// Backa order;
+		break;
+		case 1:
+		//Turn left order;
+		break;
+		case 0:
+		// Åk fram order;
+		break;
+	}
+}
+
+int Get_prepointers_cardinal_direction(node* p_node)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		if (p_node->links[i].p_node == p_node->p_pre_dijk)
+		{
+			return i;
+		}
+	}
+	return 5;
+}	
+
+
+
+
 // Map_main
 // Innehållet kan ev. mergas med riktiga main när allt fungerar
 int Map_main(void)
@@ -394,6 +433,11 @@ int Map_main(void)
 	Sensor_values_has_arrived(20, 255, 255, 100, 100);
 	Sensor_values_has_arrived(20, 255, 255, 255, 255);
 	Sensor_values_has_arrived(20, 100, 255, 100, 255);
+	a = Find_shortest_path(all_nodes[2], all_nodes[0]);
+	b = all_nodes[0]->p_pre_dijk->x;
+	c = all_nodes[0]->p_pre_dijk->y;
+	d = all_nodes[0]->p_pre_dijk->p_pre_dijk->x;
+	e = all_nodes[0]->p_pre_dijk->p_pre_dijk->y;
 	
 	
 	
