@@ -9,6 +9,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
+
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 
@@ -19,21 +20,23 @@ int main(void)
 {
   	init_interrupts();
 	SPI_sensor_init();
-	test_ir_sensor_data[0] = 0;
-	test_ir_sensor_data[1] = 1;
-	test_ir_sensor_data[2] = 2;
-	test_ir_sensor_data[3] = 3;
-	test_ir_sensor_data[4] = 4;
-	test_ir_sensor_data[5] = 5;
-	test_ir_sensor_data[6] = 6;
 	sei();
 	
-	SPI_sensor_send(ID_BYTE_IR_SENSOR_DATA, test_ir_sensor_data);
-	//SPI_sensor_send_data(ID_BYTE_DISTANCE, 0x03);
+	test_ir_sensor_data[0] = 10;
+	test_ir_sensor_data[1] = 11;
+	test_ir_sensor_data[2] = 12;
+	test_ir_sensor_data[3] = 13;
+	test_ir_sensor_data[4] = 14;
+	test_ir_sensor_data[5] = 15;
+	test_ir_sensor_data[6] = 16;
 	
 	while(1)
 	{
-		;
+		if(SPI_sensor_should_give_ir_sensor_data())
+		{
+			test1 = 1;
+			SPI_sensor_send(ID_BYTE_IR_SENSOR_DATA, test_ir_sensor_data);
+		}
 	}
 	
 	 
@@ -83,7 +86,7 @@ int main(void)
 	ser ut som: Läs parallel in från usart och kolla om rätt ID
 	om rätt, sätt en pinne kopplad till KOM avbrott
 	*/
-	
+	return 0;
 }
 			
 			
