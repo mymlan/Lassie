@@ -37,6 +37,7 @@ void SPI_sensor_init(void)
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
+	test2 = 1;
 	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
@@ -48,6 +49,7 @@ ISR(SPI_STC_vect)
 			break;
 		case ID_BYTE_GIVE_IR_SENSOR_DATA:
 			has_recieved_give_ir_sensor_data = 1;
+			test3 = 1;
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 			has_recieved_give_distance = 1;
@@ -97,7 +99,6 @@ static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 	SPDR = id_byte;
 	COMMON_TOGGLE_PIN(PORTB, PORTB0); // Hissa flagga
 	while(!(SPSR & (1<<SPIF))){}
-	//while(!(SPI_master_have_recieved_byte())){} // funkar ej, vi stänger av avbrott och dp kommer denna aldrig sättas
 }
 
 void SPI_sensor_send_rotation_finished(void)
@@ -114,7 +115,7 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	switch (id_byte)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
-		number_of_bytes_in_data = 6;
+		number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 		break;
 		case ID_BYTE_DISTANCE: 
 		number_of_bytes_in_data = 1;
@@ -128,7 +129,7 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	SPI_sensor_slave_send_id_byte(id_byte);
 		
 	while(number_of_bytes_in_data != 0)
-	{
+	{	
 		if(SPSR & (1<<SPIF))
 		{
 			SPDR = data[(number_of_bytes_in_data - 1)];
@@ -138,13 +139,13 @@ void SPI_sensor_send(uint8_t id_byte, uint8_t *data)
 	sei();	
 }
 
-void SPI_sensor_send_data(uint8_t id_byte, uint8_t data_byte)
+void SPI_sensor_send_data_byte(uint8_t id_byte, uint8_t data_byte)
 {
 	cli();
 	SPI_sensor_slave_send_id_byte(id_byte);
-	test2 = 9;
-	SPDR = data_byte;
-	test3 = 2;
-	
+	if(SPSR & (1<<SPIF))
+	{
+		SPDR = data_byte;
+	}
 	sei();
 }
