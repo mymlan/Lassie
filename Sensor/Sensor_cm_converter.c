@@ -212,29 +212,29 @@ uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance <= 148 && digital_distance >= 125)
+	if (digital_distance <= 130 && digital_distance >= 95)
 	{
-		mm_value = ((digital_distance-240)/-23);
+		mm_value = (((digital_distance - 130)*100) / -175);
 	}
-	else if (digital_distance <=125 && digital_distance >= 109)
+	else if (digital_distance <=95 && digital_distance >= 75)
 	{
-		mm_value = ((digital_distance-205)/-16);
+		mm_value = ((digital_distance - 115) / -1);
 	}
-	else if (digital_distance <= 109 && digital_distance >= 94)
+	else if (digital_distance <= 75 && digital_distance >= 62)
 	{
-		mm_value = ((digital_distance-199)/-15);
+		mm_value = (((digital_distance - 101)*100) / -65);
 	}
-	else if (digital_distance <= 94 && digital_distance >= 70)
+	else if (digital_distance <= 62 && digital_distance >= 46)
 	{
-		mm_value = ((digital_distance-150)/-8);
+		mm_value = (((digital_distance - 94)*100) / -53);
 	}
-	else if (digital_distance <= 70 && digital_distance >= 49)
+	else if (digital_distance <= 46 && digital_distance >= 33)
 	{
-		mm_value = ((digital_distance-111)/-4.1);
+		mm_value = (((digital_distance - 67)*100) / -26);
 	}
-	else if (digital_distance <= 49 && digital_distance >= 34)
+	else if (digital_distance <= 33 && digital_distance >= 23)
 	{
-		mm_value = ((digital_distance-94)/-3);
+		mm_value = (((digital_distance - 56)*100) / -17);
 	}
 	else
 	{
@@ -247,29 +247,29 @@ uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 {
 	int mm_value;
 	
-	if (digital_distance <= 149 && digital_distance >= 124)
+	if (digital_distance <= 135 && digital_distance >= 104)
 	{
-		mm_value = ((digital_distance-249)/-25);
+		mm_value = (((digital_distance - 135)*100) / -155);
 	}
-	else if (digital_distance <=124 && digital_distance >= 107)
+	else if (digital_distance <=104 && digital_distance >= 79)
 	{
-		mm_value = ((digital_distance-209)/-17);
+		mm_value = (((digital_distance - 129)*100) / -125);
 	}
-	else if (digital_distance <= 107 && digital_distance >= 94)
+	else if (digital_distance <= 79 && digital_distance >= 63)
 	{
-		mm_value = ((digital_distance-185)/-13);
+		mm_value = (((digital_distance - 110)*10) / -8);
 	}
-	else if (digital_distance <= 94 && digital_distance >= 68)
+	else if (digital_distance <= 63 && digital_distance >= 50)
 	{
-		mm_value = ((digital_distance-154.66)/-8.66);
+		mm_value = (((digital_distance - 88)*100) / -43);
 	}
-	else if (digital_distance <= 68 && digital_distance >= 48)
+	else if (digital_distance <= 50 && digital_distance >= 36)
 	{
-		mm_value = ((digital_distance-108)/-4);
+		mm_value = (((digital_distance - 75)*100) / -28);
 	}
-	else if (digital_distance <= 48 && digital_distance >= 36)
+	else if (digital_distance <= 36 && digital_distance >= 24)
 	{
-		mm_value = ((digital_distance-84)/-2.4);
+		mm_value = (((digital_distance - 64)*10) / -2);
 	}
 	else
 	{
