@@ -31,5 +31,13 @@ node* Newnode(int x_in, int y_in)
 	p_node->links[2].open = 0;
 	p_node->links[3].open = 0;
 	
+	p_node->links[0].length = 0;
+	p_node->links[1].length = 0;
+	p_node->links[2].length = 0;
+	p_node->links[3].length = 0;
+	
+	all_nodes[all_nodes_size] = p_node;
+	all_nodes_size++;
+	
 	return p_node;
 }

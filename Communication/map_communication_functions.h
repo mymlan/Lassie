@@ -12,6 +12,7 @@ struct node_ *Newnode(int, int);
 struct link_ *Newlink(int, struct node_*);
 
 struct node_* all_nodes[200]; // Sparar alla noder
+uint8_t all_nodes_size;
 struct node_* p_robot_node;
 int robot_dir;
 

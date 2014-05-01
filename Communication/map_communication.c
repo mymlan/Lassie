@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdbool.h> // bool
 #include "map_communication_functions.h"
-
+int traveled_blocks;
 //-------------------FUNKTIONER---------------------------//
 //vill skriva funktion som tar in riktning och sensorvärden för att bestämma vilka riktningar/väderstreck som är öppna
 //returnerar ett tal på 4 bitar i ordningen nord,öst,syd,väst -> 1111, rdir är robtens riktning 0-3 i ordningen nord,öst,syd,väst
@@ -98,6 +98,7 @@ void Create_origin(int open_walls)
 	{
 		p_node->links[i].open = ((open_walls >> (3 - i)) & 0x01); // Sätt rätt .open till true
 	}
+	p_robot_node = p_node;
 }
 
 // Create_goal
@@ -112,6 +113,7 @@ void Create_goal(int x, int y, int open_walls)
 	{
 		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
 	}
+	p_robot_node = p_node;
 }
 
 // Create_node
@@ -131,7 +133,7 @@ void Create_node(int x, int y, int length, int open_walls)
 	}
 	p_node->links[(robot_dir + 2) % 4].p_node = p_robot_node; // 3b. Koppla gammal nod till ny nod
 	p_node->links[(robot_dir + 2) % 4].length = length; // 3c. Längd för vägen bakåt satt
-	 // 4.
+	p_robot_node = p_node;// 4.
 		// 5. Nollställ avstånd (kanske sker utanför funktionen)
 		// 6. Ta styrbslut och return (sker utanför funktionen)
 }
@@ -146,14 +148,14 @@ void Update_node(node* p_node, int length)
 	p_robot_node->links[robot_dir].p_node = p_node; // Ge förra noden pekar-info om noden
 	p_robot_node->links[robot_dir].length = length; // Ge förra noden längd-info om noden
 	
+	p_robot_node = p_node;
 }
 
 // Existing_node_at
 // Funktionen returnerar pekare till noden som finns på de givna koordinaterna om det finnsen nod där. Annars returneras NULL;
 node* Exisiting_node_at(int x, int y)
 {
-	int i = 0;
-	while (i < 200 && all_nodes[i] != NULL)
+	for (int i = 0; i < all_nodes_size; i++)
 	{
 		if (all_nodes[i]->x == x && all_nodes[i]->y == y)
 		{
@@ -166,7 +168,7 @@ node* Exisiting_node_at(int x, int y)
 // Hittar placeringen som noden ligger på i all_nodes
 int Find_index_of_node(node* p_node)
 {
-	for (int i = 0; i<200 && all_nodes[i] != NULL;i++)
+	for (int i = 0; i < all_nodes_size ; i++)
 	{
 		if(all_nodes[i] == p_node)
 		{
@@ -181,7 +183,7 @@ int Find_low_cost_index()
 {
 	int temp_cost = 255;
 	int temp_index = 201;
-	for(int i = 0; i<200 && all_nodes[i] != NULL && all_nodes[i]->searched == false; i++)
+	for(int i = 0; i < all_nodes_size && all_nodes[i]->searched == false; i++)
 	{
 		if(all_nodes[i]->cost < temp_cost)
 		{
@@ -227,6 +229,25 @@ int Dijk(node* p_node1, node* p_node2)
 	return all_nodes[Find_index_of_node(p_node2)]->cost;
 }
 
+
+
+// Hittar en nod om har en outforskad öppning
+node* Easy_find_unexplored_node()
+{
+	for(int i = 1; i < 200 && all_nodes[i] != NULL; i++)
+	{
+		for (int n = 0; n < 4; n++)
+		{
+			if (all_nodes[i]->links[n].open && all_nodes[i]->links[n].length == 0) // Om öppen med längd 0, alltså outforskad.
+			{
+				return all_nodes[i];
+			}
+		}
+	}
+	return all_nodes[0]; // Borde aldrig komma hít, eftersom startnoden alltid har en öppning, right? Annars så borde startnoden vara all_nodes[0].
+}
+
+
 // Sensor_values_has_arrived
 // Denna kod körs varje gång sensorvärden kommer. Koden kan senare ev. flyttas till mainloopen när allt fungerar.
 // När sensorvärden kommer, kör denna kod. Koden avgör om man är i en korsning och beroende på om det är en ny eller gammal korsning skapas eller uppdateras noden.
@@ -243,63 +264,64 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 		// Uträkning av koordinater
 		int x = p_robot_node->x;
 		int y = p_robot_node->y;
-		int traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
+		traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
 		switch (robot_dir)
 		{
 			case 0:
 			{
-				int y = y + traveled_blocks;
+				y = y + traveled_blocks;
 				break;
 			}
 			case 1:
 			{
-				int y = y - traveled_blocks;
+				x = x + traveled_blocks;
 				break;
 			}
 			case 2:
 			{
-				int x = x + traveled_blocks;
+				y = y - traveled_blocks;
 				break;
 			}
 			case 3:
 			{
-				int x = x - traveled_blocks;
+				x = x - traveled_blocks;
 				break;
 			}
 		}
 		// Skapa nod
 		Create_node(x, y, traveled_blocks, What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 		// "HOPP": Åk utforskad väg till närmsta outforskade nod
+		robot_dir = (robot_dir + 2) % 4;
 	}
 	// Annars, indikerar bakre sensorer en korsning?
-	else if (sensor_back_left > 20 || sensor_back_right > 20)
+	else if (sensor_back_left > 200 || sensor_back_right > 200)
 	{
 		int length;
 		length = 42; // Fixas vid anrop till sensormodul
 		// Uträkning av koordinater
 		int x = p_robot_node->x;
 		int y = p_robot_node->y;
-		int traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
+		traveled_blocks = (length + 20) / 40; // Antalet färdade rutor
 		switch (robot_dir)
 		{
 			case 0:
 			{
-				int y = y + traveled_blocks;
+				y = y + traveled_blocks;
 				break;
 			}
 			case 1:
 			{
-				int y = y - traveled_blocks;
+				x = x + traveled_blocks;
 				break;
 			}
 			case 2:
 			{
-				int x = x + traveled_blocks;
+				y = y - traveled_blocks;
 				break;
 			}
 			case 3:
 			{
-				int x = x - traveled_blocks;
+				x = x - traveled_blocks;
 				break;
 			}
 		}
@@ -314,6 +336,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			if (sensor_front_right > 200)
 			{
 				// Ge order om sväng höger
+				robot_dir = (robot_dir + 1) % 4;
 				// Vänta
 				// HÄNDELSE: 90 grader klart
 				// Kör rakt fram
@@ -322,6 +345,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			else
 			{
 				// Ge order om svänga vänster
+				robot_dir = (robot_dir + 3) % 4;
 				// Vänta
 				// HÄNDELSE: 90 grader klart
 				// Kör rakt fram
@@ -331,7 +355,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 		else
 		{
 			// Uppdatera nod
-			Update_node(Exisiting_node_at(x, y), length);
+			Update_node(Exisiting_node_at(x, y), traveled_blocks);
 			// Möjligt att åka rakt fram?
 			if (sensor_front > 30)
 			{
@@ -361,29 +385,19 @@ int Map_main(void)
 	EAST = 1;
 	SOUTH = 2;
 	WEST = 3;
+	all_nodes_size = 0;
 	
 	robot_dir = NORTH;
-	Create_origin(What_is_open(0, 255, 50)); // 
-	robot_dir = NORTH;
-	
-	a = p_robot_node->x; // 0
-	b = p_robot_node->y; // 0
-	c = p_robot_node->start; // 1
-	d = p_robot_node->links[0].open; // 1
-	e = p_robot_node->links[1].open; // 1
-	f = p_robot_node->links[2].open; // 0 // fastän bak vid start kommer vi aldrig utforska
-	g = p_robot_node->links[3].open; // 0
-	
+	Create_origin(What_is_open(0, 255, 50));
+	Sensor_values_has_arrived(20, 100, 255, 100, 255);
+	Sensor_values_has_arrived(20, 255, 255, 100, 255);
+	Sensor_values_has_arrived(20, 255, 255, 100, 100);
+	Sensor_values_has_arrived(20, 255, 255, 255, 255);
 	Sensor_values_has_arrived(20, 100, 255, 100, 255);
 	
-	a = p_robot_node->x; // 0
-	b = p_robot_node->y; // 3
-	c = p_robot_node->start; // 0
-	d = p_robot_node->links[0].open; // 0
-	e = p_robot_node->links[1].open; // 1
-	f = p_robot_node->links[2].open; // 1
-	g = p_robot_node->links[3].open; // 0
 	
+	
+	test_variable_a = 0;
 	//Sensor_values_has_arrived();
 	
 	
@@ -439,7 +453,7 @@ int Map_main(void)
 	
 	
 	// ------------- Test hur många noder som får plats i minnet ------------- //
-	test_variable_a = 0;
+	
 	while (malloc(sizeof(node)) != NULL)
 	{
 		test_variable_a = test_variable_a + 1;
