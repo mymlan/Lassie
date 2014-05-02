@@ -35,7 +35,7 @@ int main(void)
 		if(SPI_sensor_should_give_ir_sensor_data())
 		{
 			test1 = 1;
-			SPI_sensor_send(ID_BYTE_IR_SENSOR_DATA, test_ir_sensor_data);
+			SPI_sensor_send(ID_BYTE_IR_SENSOR_DATA, ir_sensor_data);
 		}
 	}
 	

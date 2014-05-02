@@ -10,7 +10,7 @@ volatile unsigned char test;
 int baud;
 volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
 
-uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
+
 
 volatile uint8_t count=0;
 
@@ -44,28 +44,28 @@ ISR (ADC_vect)
 		
 		case(0):
 		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
-		sensor1 = 50;//S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
+		sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
 		break;
 		
 		case(1):
 		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
-		sensor2 = 50;//S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
+		sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
 		case(2):
 		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
-		sensor3 = 190;//S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
+		sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
 		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
-		sensor4 = 245;//S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
+		sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
@@ -75,7 +75,7 @@ ISR (ADC_vect)
 		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
-		angle_corridor = 90 - ((((atan2((sensor3-sensor4), 105))*180) / 3.14)  + (((atan2((sensor2-sensor1), 105)*180)) / 3.14) / 2); //Ger vinkel från vänstra väggen
+		angle_corridor = 90 - ((((atan2((sensor3-sensor4), 105))*180) / 3.14)); //Ger vinkel från vänstra väggen - 90 + ((((atan2((sensor3-sensor4), 105))*180) / 3.14))
 		diff_from_middle_corridor = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*55 + sensor4)); //Beräknar avståndet från den väggen i en korridor
 		ir_sensor_data[5] = angle_corridor;
 		ir_sensor_data[6] = diff_from_middle_corridor;
