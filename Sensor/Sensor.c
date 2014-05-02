@@ -27,8 +27,8 @@ int main(void)
 	test_ir_sensor_data[2] = 12;
 	test_ir_sensor_data[3] = 13;
 	test_ir_sensor_data[4] = 14;
-	test_ir_sensor_data[5] = 15;
-	test_ir_sensor_data[6] = 16;
+	test_ir_sensor_data[5] = 3;
+	test_ir_sensor_data[6] = 5;
 	
 	while(1)
 	{
