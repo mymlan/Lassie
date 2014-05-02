@@ -22,7 +22,7 @@ function varargout = mjukvaru_gui(varargin)
 
 % Edit the above text to modify the response to help mjukvaru_gui
 
-% Last Modified by GUIDE v2.5 12-Apr-2014 16:30:52
+% Last Modified by GUIDE v2.5 02-May-2014 13:57:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,8 +86,10 @@ handles.IR4_tid = IR4_tid;
 handles.IR5_tid = IR5_tid;
 handles.coord1 = coord1;
 handles.coord2 = coord2;
+%handles.bt = BT
 % Övriga variabler från mjukvara.m skrivs här
 guidata(hObject, handles); % Typ uppdaterar hObject med handles
+
 
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)
