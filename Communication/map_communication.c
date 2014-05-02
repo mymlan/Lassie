@@ -288,7 +288,7 @@ int Get_dijkpointers_cardinal_direction(node* p_node)
 
 // Follow_path
 // Funktionen utför en sväng enligt dijkstraspekarna när roboten når en korsning
-void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right
+void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 {
 	//indikerar bakre sensorer en korsning
 
@@ -329,6 +329,27 @@ node* Easy_find_unexplored_node()
 		}
 	}
 	return all_nodes[0]; // åker till start om upptäckt hela
+}
+
+//En smartare variant av Easy_find_unexplored_node
+//Hittar istället den nod som är minst antal steg från given nod(oftast robotpekaren)
+node* Smarter_find_unexplored_node(node* p_node)
+{
+	for(int i = 0; i < 4; i++) //kolar om någon link är outforskad
+	{
+		if(p_node->links[i].open && p_node->links[i].length == 0) // öppen och längd 0 -> outforskad väg
+		{
+			return p_node;
+		}
+	}
+	for(int n = 0; n < 4; n++) //Om inte hittad outforskad, gör samma sak på grannarna
+	{
+		if(p_node->links[n].p_node != NULL && p_node->links[n].p_node->start) //Om nästa nod inte är NULL och inte startnod
+		{
+		return Smarter_find_unexplored_node(p_node->links[n].p_node); //Så ska genomsökning på den noden ske.
+		}
+	}
+	return NULL; //Om ingen outforskad väg hittad = Vi är klara.
 }
 
 // Search
