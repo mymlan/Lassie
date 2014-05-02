@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <avr/interrupt.h>
+#include <math.h>
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 #include "../CommonLibrary/Common.h"
@@ -13,8 +14,10 @@ uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
 
 volatile uint8_t count=0;
 
-volatile uint8_t diff_from_middle_corridor;
+volatile int diff_from_middle_corridor; // fick det inte att fungera med uint8_t
 volatile uint8_t angle_corridor;
+volatile float a;
+volatile float b;
 
 volatile uint8_t angular_rate_value;
 volatile float angular_rate_total = 0;
@@ -41,28 +44,28 @@ ISR (ADC_vect)
 		
 		case(0):
 		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
-		sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
+		sensor1 = 50;//S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
 		break;
 		
 		case(1):
 		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
-		sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
+		sensor2 = 50;//S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
 		case(2):
 		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
-		sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
+		sensor3 = 190;//S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
 		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
-		sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
+		sensor4 = 245;//S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
@@ -72,8 +75,8 @@ ISR (ADC_vect)
 		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
-		//angle_corridor = 90 - (((atan((sensor3-sensor4) / dist1)) + (atan((sensor2-sensor1) / dist2))) / 2); //Ger vinkel från vänstra väggen
-		//diff_from_middle_corridor = (((sensor2 + (10 - tan(angle_corridor)*dist1)) / sin(angle_corridor));
+		angle_corridor = 90 - ((((atan2((sensor3-sensor4), 105))*180) / 3.14)  + (((atan2((sensor2-sensor1), 105)*180)) / 3.14) / 2); //Ger vinkel från vänstra väggen
+		diff_from_middle_corridor = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*55 + sensor4)); //Beräknar avståndet från den väggen i en korridor
 		ir_sensor_data[5] = angle_corridor;
 		ir_sensor_data[6] = diff_from_middle_corridor;
 		break;
@@ -128,7 +131,6 @@ ISR(ANALOG_COMP_vect){
 
 //************ SLUT PÅ TERRITORIUM *******************
 
-// gör om till mm Hugo!
 
  uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
@@ -238,7 +240,7 @@ uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 	}
 	else
 	{
-		mm_value = 25;
+		mm_value = 250;
 	}
 	return mm_value;
 }
@@ -273,7 +275,7 @@ uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 	}
 	else
 	{
-		mm_value = 25;
+		mm_value = 250;
 	}
 	return mm_value;
 }
