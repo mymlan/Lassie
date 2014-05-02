@@ -7,6 +7,8 @@
 #include <util/delay.h>
 #include "Steering_functions.h"
 
+static volatile uint8_t in_forward_regulated;
+
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
@@ -134,11 +136,18 @@ void Close_claw()
 //----------------AUTONOMA REGLERFUNKTIONER-----------//
 void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: uint8_t regulator_error, uint8_t regulator_angle
 {
+	in_forward_regulated = 1;
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
 	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
+	
+	/*test för att testa bussen
+	if (regulator_angle == 5)
+	{
+		OCR1B = BASE_SPEED * 0;
+	}*/
 }
 
 void Backward_regulated(uint8_t regulator_error, uint8_t regulator_angle)
