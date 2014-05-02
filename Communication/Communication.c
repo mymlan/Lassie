@@ -6,6 +6,7 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 #include "Communication_SPI.h"
+#include "Firefly.h"
 
 
 int main(void)
@@ -13,6 +14,7 @@ int main(void)
 	COMMON_SET_PIN(PORTA, PORTA7);
 
 	SPI_Master_init();
+	USART_init();
 	sei();
 	
 	SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
