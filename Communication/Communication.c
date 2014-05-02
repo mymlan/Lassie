@@ -14,25 +14,33 @@ int main(void)
 	COMMON_SET_PIN(PORTA, PORTA7);
 
 	SPI_Master_init();
-	USART_init();
+	//USART_init();
 	sei();
 	
-	SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
+	//SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
 	
-	/*
-	uint8_t test_sensor_data[7];
+	//uint8_t test_sensor_data[7];
 	
-	test_sensor_data[0] = 10;//plockar ut värdet, alt stoppar in. 0-5
+	/*test_sensor_data[0] = 10;//plockar ut värdet, alt stoppar in. 0-5
 	test_sensor_data[1] = 11;
 	test_sensor_data[2] = 12;
 	test_sensor_data[3] = 13;
 	test_sensor_data[4] = 14;
 	test_sensor_data[5] = 15;
-	test_sensor_data[6] = 16;
-	
-	SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, test_sensor_data);
+	test_sensor_data[6] = 3;
 	*/
-	/*SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_FORWARD);
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	_delay_ms(1000);
+	
+	SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
+	
+	//SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, test_sensor_data);
+	
+	_delay_ms(2000);
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);
+	
+	/*
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_FORWARD);
 	_delay_ms(1000);
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_BACKWARD);
 	_delay_ms(1000);
@@ -48,8 +56,8 @@ int main(void)
 	_delay_ms(1000);
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_TURN_LEFT);
 	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);	*/
-	
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);
+	*/
     while(1)
     {
         ;
