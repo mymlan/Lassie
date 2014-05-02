@@ -7,16 +7,14 @@
 #include <util/delay.h>
 #include "Steering_functions.h"
 
-static volatile uint8_t in_forward_regulated;
-
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
 double BASE_SPEED = 40000; // Halvfart, HÖGRE värde ger HÖGRE hastighet
 double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double K_P = 0.01; // Proportionella konstanten
-double K_D = 0.01; // Deriveringskonstanten
+double K_P = 0.003; // Proportionella konstanten
+double K_D = 0.003; // Deriveringskonstanten
 
 //-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
@@ -67,8 +65,8 @@ void Stop()
 void Forward()
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 0.5; // Mellan 0 och 2
-	right_speed_factor = 0.5; // Mellan 0 och 2
+	left_speed_factor = 1; // Mellan 0 och 2
+	right_speed_factor = 1; // Mellan 0 och 2
 	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
 	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
 }
@@ -134,11 +132,10 @@ void Close_claw()
 }
 
 //----------------AUTONOMA REGLERFUNKTIONER-----------//
-void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: uint8_t regulator_error, uint8_t regulator_angle
+void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: uint8_t regulator_error, uint8_t regulator_angle
 {
-	in_forward_regulated = 1;
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
-	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
+	double adjusted_speed = K_P * (regulator_error - 200) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
@@ -150,7 +147,7 @@ void Forward_regulated(uint8_t regulator_error, uint8_t regulator_angle)//arg: u
 	}*/
 }
 
-void Backward_regulated(uint8_t regulator_error, uint8_t regulator_angle)
+void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 {
 	PORTD = (0<< PORTD2) | (0<< PORTD3); // Vänster - Höger riktning
 	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
