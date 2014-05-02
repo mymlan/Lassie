@@ -18,7 +18,7 @@ int robot_dir;
 
 bool following_path, searching;
 
-
+bool enable_node_editing;
 
 int test_variable_a;
 int test_variable_b;

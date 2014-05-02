@@ -101,21 +101,6 @@ void Create_origin(int open_walls)
 	p_robot_node = p_node;
 }
 
-// Create_goal
-// Funktionen skapar en målnod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
-void Create_goal(int x, int y, int open_walls)
-{
-	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
-	node* p_node = Newnode(x, y); // Skapa nod
-	p_node->goal = true; // Sätt nod till startnod
-		
-	for(int i = 0; i < 4; i++) // Detta kanske ändras eller tas bort
-	{
-		p_node->links[i].open = ((open_walls >> (4 - i)) & 0x01); // Sätt rätt .open till true
-	}
-	p_robot_node = p_node;
-}
-
 // Create_node
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
 void Create_node(int x, int y, int length, int open_walls)
@@ -136,6 +121,17 @@ void Create_node(int x, int y, int length, int open_walls)
 	p_robot_node = p_node;// 4.
 		// 5. Nollställ avstånd (kanske sker utanför funktionen)
 		// 6. Ta styrbslut och return (sker utanför funktionen)
+	enable_node_editing = false;	
+}
+
+// Create_goal
+// Funktionen skapar en målnod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
+void Create_goal(int x, int y,int length, int open_walls)
+{
+	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
+	Create_node(x, y, length, open_walls); // Skapa nod
+	p_robot_node->goal = true; // Sätt nod till startnod
+	// [Ändra mode] kanskei inte searching längre
 }
 
 // Update_node
@@ -149,6 +145,8 @@ void Update_node(node* p_node, int length)
 	p_robot_node->links[robot_dir].length = length; // Ge förra noden längd-info om noden
 	
 	p_robot_node = p_node;
+	
+	enable_node_editing = false;
 }
 
 // Existing_node_at
@@ -300,7 +298,6 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 			{
 				if (p_robot_node->links[i].length == 0 && p_robot_node->links[i].open)
 				{
-					c = i;
 					Do_turn(i);
 					break;
 				}
@@ -308,8 +305,6 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 		}
 		else
 		{
-
-			c = Get_dijkpointers_cardinal_direction(p_robot_node);
 			Do_turn(Get_dijkpointers_cardinal_direction(p_robot_node));
 		}
 	//}
@@ -318,7 +313,7 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 // Hittar en nod som har en outforskad öppning
 node* Easy_find_unexplored_node()
 {
-	for(int i = 1; i < all_nodes_size; i++)
+	for(int i = all_nodes_size - 1; i > 0; i--)
 	{
 		for (int n = 0; n < 4; n++)
 		{
@@ -346,7 +341,7 @@ node* Smarter_find_unexplored_node(node* p_node)
 	{
 		if(p_node->links[n].p_node != NULL && p_node->links[n].p_node->start) //Om nästa nod inte är NULL och inte startnod
 		{
-		return Smarter_find_unexplored_node(p_node->links[n].p_node); //Så ska genomsökning på den noden ske.
+			return Smarter_find_unexplored_node(p_node->links[n].p_node); //Så ska genomsökning på den noden ske.
 		}
 	}
 	return NULL; //Om ingen outforskad väg hittad = Vi är klara.
@@ -392,8 +387,11 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 		}
 		// Skapa nod
 		Create_node(x, y, traveled_blocks, What_is_open(sensor_front_left, sensor_front_right, sensor_front));
-		// "HOPP": Åk utforskad väg till närmsta outforskade nod
-		robot_dir = (robot_dir + 2) % 4;
+		// Åk utforskad väg till närmsta outforskade nod
+		Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
+		following_path = true;
+		Follow_path();
+		// robot_dir = (robot_dir + 2) % 4; // antagligen ska bort
 	}
 	// Annars, indikerar bakre sensorer en korsning?
 	else if (sensor_back_left > 200 || sensor_back_right > 200)
@@ -475,15 +473,25 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 // Det finns avsatta rader där strybeslut skickas till styrmodulen.
 void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
+	enable_node_editing = true; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
+	if(sensor_back_left < 200 && sensor_back_right < 200 && sensor_front_left < 200 && sensor_front_right < 200 && sensor_front > 10)// hade räckt med bakre, men säkrare att kolla alla.
+	{
+		enable_node_editing = true;
+	}
+	
 	if (following_path)
 	{
-		if (sensor_back_left > 200 || sensor_back_right > 200)
+		if (sensor_back_left > 200 || sensor_back_right > 200 || p_robot_node->p_pre_dijk->start)
 		{
-			p_robot_node = p_robot_node->p_pre_dijk;
-			Follow_path();
+			if(enable_node_editing)
+			{
+			p_robot_node = p_robot_node->p_pre_dijk; // ska ju bara göras en gång per nod
+			enable_node_editing = false;
+			}
+			Follow_path(); // borde kunna köra flera ggr per nod, do_turn svänger inte flera gånger.
 		}
 	}
-	else if (searching)
+	else if (searching && enable_node_editing)
 	{
 		Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 	}
@@ -500,62 +508,124 @@ int Map_main(void)
 	all_nodes_size = 0;
 	following_path = 0;
 	searching = 1;
+	enable_node_editing = 1;
 	
 	robot_dir = NORTH;
 	Create_origin(What_is_open(100, 100, 70)); // 0,0
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,2
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,1
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2
+
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,3
 	a = p_robot_node->x;
 	b = p_robot_node->y;
 	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
 	a = p_robot_node->x;
 	b = p_robot_node->y;
 	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 0,6
 	a = p_robot_node->x;
 	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
+	a = p_robot_node->x;
+	b = p_robot_node->y;
 	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 0,4
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 0,2
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 2,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 255, 255, 100, 255); // 4,4 %%%%%
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 100, 255, 100, 255); // 4,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 2,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 255, 255, 100); // 0,2 %%%%
 	a = p_robot_node->x;
 	b = p_robot_node->y;
 	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,2
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 4,2
+	Sensor_values_has_arrived(20, 255, 255, 255, 255); //2,4 
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); //2,2 
+	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 4,4
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 0,2
+	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 4,6
 	
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,4
+	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 4,4
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 2,4
+	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,4
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 4,4
+	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 0,4
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 2,4
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 100, 255, 100, 255); // -2,2
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 255, 100, 255, 100); // -2,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(5, 100, 100, 100, 100); // -4,4
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(20, 100, 255, 100, 255); // -2,4
 	
 	a = p_robot_node->x;
 	b = p_robot_node->y;
-	Sensor_values_has_arrived(20, 255, 255, 255, 255); //0,4 
+	Sensor_values_has_arrived(20, 255, 100, 255, 100); // -2,2
 	a = p_robot_node->x;
 	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); //0,2 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,0
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	
+	
+	
+	
+	
 	Sensor_values_has_arrived(70, 255, 100, 255, 100); //0,2 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 1,2
 	a = p_robot_node->x;
 	b = p_robot_node->y;
 	Sensor_values_has_arrived(70, 255, 100, 255, 100); //2,2 
 	a = p_robot_node->x;
 	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 2,3
+	a = p_robot_node->x;
+	b = p_robot_node->y;
 	Sensor_values_has_arrived(70, 255, 255, 255, 255); //2,4 
+	a = p_robot_node->x;
+	b = p_robot_node->y;
+	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 2,5
 	a = p_robot_node->x;
 	b = p_robot_node->y;
 	Sensor_values_has_arrived(5, 100, 100, 100, 100); //2,6 
