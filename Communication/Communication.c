@@ -29,7 +29,7 @@ int main(void)
 	test_sensor_data[5] = 15;
 	test_sensor_data[6] = 3;
 	*/
-	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	/*SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 	_delay_ms(1000);
 	
 	SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
@@ -37,7 +37,7 @@ int main(void)
 	//SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, test_sensor_data);
 	
 	_delay_ms(2000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);
+	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);*/
 	
 	/*
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_FORWARD);
@@ -58,9 +58,12 @@ int main(void)
 	_delay_ms(1000);
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);
 	*/
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
     while(1)
     {
-        ;
+		_delay_ms(100);
+		
+		SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
     }
 	return 0;
 }
