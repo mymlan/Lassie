@@ -15,9 +15,10 @@ struct node_* all_nodes[200]; // Sparar alla noder
 uint8_t all_nodes_size;
 struct node_* p_robot_node;
 int robot_dir;
+struct node_* goal_node;
 
-bool following_path, searching;
-
+bool following_path;
+int level;
 bool enable_node_editing;
 
 int test_variable_a;

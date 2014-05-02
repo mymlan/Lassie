@@ -131,7 +131,7 @@ void Create_goal(int x, int y,int length, int open_walls)
 	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
 	Create_node(x, y, length, open_walls); // Skapa nod
 	p_robot_node->goal = true; // Sätt nod till startnod
-	// [Ändra mode] kanskei inte searching längre
+	goal_node = p_robot_node;
 }
 
 // Update_node
@@ -323,6 +323,7 @@ node* Easy_find_unexplored_node()
 			}
 		}
 	}
+	level++; // Level up 1->2
 	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
@@ -485,15 +486,73 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 		{
 			if(enable_node_editing)
 			{
-			p_robot_node = p_robot_node->p_pre_dijk; // ska ju bara göras en gång per nod
-			enable_node_editing = false;
+				p_robot_node = p_robot_node->p_pre_dijk; // ska ju bara göras en gång per nod
+				enable_node_editing = false;
+				if (p_robot_node->start && (level == 2 || level == 6))
+				{
+					level++; // Level 2->3, 6->7
+				}
+				else if (p_robot_node->goal && level == 4)
+				{
+					level++; // Level 4->5
+				}
 			}
 			Follow_path(); // borde kunna köra flera ggr per nod, do_turn svänger inte flera gånger.
 		}
 	}
-	else if (searching && enable_node_editing)
+	else
 	{
-		Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+		switch(level)
+		{
+			case 0: // Lassie letare efter målet. [Avbrott att avsluta]
+			if (enable_node_editing)
+			{
+				Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			}
+			break;
+		
+			case 1: // Fortsätter leta efter väg. Level i Easy_find_unexplored_node
+			if (enable_node_editing)
+			{
+				Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			}
+			break;
+		
+			case 2: // Lassie åker hem. Level i Sensor_values_has_arrived
+			Find_shortest_path(all_nodes[0], p_robot_node);
+			following_path = true;
+			Follow_path();
+			break;
+			
+			case 3: // Väntar på proviant. [Level i avbrott från knapp]
+			// [Styrbeslut stanna]
+					
+			case 4: // Åk till mål. Level i Sensor_values_has_arrived
+			// [Grip med gripklo]
+			// [Kort delay]
+			Find_shortest_path(goal_node, all_nodes[0]);
+			following_path = true;
+			Follow_path();
+			break;
+			
+			case 5: // Stanna, vänta, loss, levla. Level här.
+			// [Stopp]
+			// [Delay]
+			// [Gripklo släpp]
+			// [Kort elay]
+			level++; // Ev. bugg till senare: Lassie ska åka samma väg tillbaka.
+			break;
+			
+			case 6: // Åk hem. Level i Sensor_values_has_arrived.
+			Find_shortest_path(all_nodes[0], p_robot_node);
+			following_path = true;
+			Follow_path();
+			break;
+			
+			case 7: // Inget. Vi är klara. Ingen levling.
+			// [Stop]
+			break;
+		}
 	}
 }
 
@@ -507,7 +566,7 @@ int Map_main(void)
 	WEST = 3;
 	all_nodes_size = 0;
 	following_path = 0;
-	searching = 1;
+	level = 0;
 	enable_node_editing = 1;
 	
 	robot_dir = NORTH;
