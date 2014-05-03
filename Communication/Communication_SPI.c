@@ -87,6 +87,7 @@ ISR(PCINT0_vect)
 			uint8_t distance = SPI_Master_recieve_data_byte_from_sensor();
 			test3 = distance;
 			(void)distance; //löser att den inte används, gör om till void
+			USART_send_one_sensor_value_to_PC(ID_BYTE_DISTANCE, distance);
 			// skicka till PC
 			break;
 		}
