@@ -2,9 +2,9 @@ clc;
 
 %%%%%%%%%%% BLUETOOTHUPPKOPPLING %%%%%%%%%%%%%
 %%%%%%%%%%% avkommentera det som är intressant %%%%%%
-%info = instrhwinfo('Bluetooth');
-%info.RemoteNames
-%Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
+info = instrhwinfo('Bluetooth');
+info.RemoteNames
+Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
  %Device ID: 00066602D47F
  BT = Bluetooth('Koppel', 1); % Channel är möjligtvis inte alltid 1
  disp('Blåtansobjekt skapat.')

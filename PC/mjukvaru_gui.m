@@ -1,3 +1,5 @@
+
+
 function varargout = mjukvaru_gui(varargin)
 % MJUKVARU_GUI MATLAB code for mjukvaru_gui.fig
 %      MJUKVARU_GUI, by itself, creates a new MJUKVARU_GUI or raises the existing
@@ -22,7 +24,7 @@ function varargout = mjukvaru_gui(varargin)
 
 % Edit the above text to modify the response to help mjukvaru_gui
 
-% Last Modified by GUIDE v2.5 02-May-2014 13:57:29
+% Last Modified by GUIDE v2.5 03-May-2014 12:10:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,7 +88,7 @@ handles.IR4_tid = IR4_tid;
 handles.IR5_tid = IR5_tid;
 handles.coord1 = coord1;
 handles.coord2 = coord2;
-%handles.bt = BT
+
 % Övriga variabler från mjukvara.m skrivs här
 guidata(hObject, handles); % Typ uppdaterar hObject med handles
 
@@ -137,12 +139,28 @@ function figure1_KeyPressFcn(hObject, eventdata, handles)
 switch eventdata.Key
     case 'uparrow'
         set(handles.kommando,'String','Fram')
+        
+        %%Här vill vi lägga kommandot för forward (0x01) i buffert
+        fwrite(handles.BT, uint8(1));
+        
+        
     case 'downarrow'
         set(handles.kommando,'String','Back')
+        
+        %%Här vill vi lägga kommandot för backward (0x02) i buffert
+        fwrite(handles.BT, uint8(2));
+        
     case 'leftarrow'
         set(handles.kommando,'String','Rotera vänster')
+        
+        %%Här vill vi lägga kommandot för rotate_left (0x06) i buffert
+        fwrite(handles.BT, uint8(6));
+        
     case 'rightarrow'
         set(handles.kommando,'String','Rotera höger')
+        
+        %%Här vill vi lägga kommandot för rotate_right (0x05) i buffert
+        fwrite(handles.BT, uint8(5));
 end
 
 
@@ -155,3 +173,41 @@ function figure1_KeyReleaseFcn(hObject, eventdata, handles)
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) released
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.kommando,'String','Stop')
+fwrite(handles.BT, uint8(0));
+
+
+
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%info = instrhwinfo('Bluetooth');
+%info.RemoteNames
+%Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
+%Device ID: 00066602D47F
+set(handles.bt_info, 'String', 'Wait...');
+BT = Bluetooth('Koppel', 1); % Channel är möjligtvis inte alltid 1
+disp('Blåtansobjekt skapat.')
+fopen(BT);
+disp('Kommunikationskanal öppnad.')
+set(handles.bt_info, 'String', get(BT, 'status'));
+set(handles.pushbutton3,'Enable','on')
+set(handles.pushbutton2,'Enable','off')
+
+handles.BT = BT;
+guidata(hObject, handles);
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.bt_info, 'String', 'Wait...');
+fclose(handles.BT);
+%clear(handles.BT); % ger error just nu
+disp('Koppel frånkopplad')
+set(handles.pushbutton3,'Enable','off')
+set(handles.pushbutton2,'Enable','on')
+set(handles.bt_info, 'String', 'Disonnected');
