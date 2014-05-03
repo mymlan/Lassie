@@ -107,7 +107,26 @@ set(handles.ir_h_f,'String',5.2)
 set(handles.ir_v_b,'String',8.0)
 set(handles.ir_h_b,'String',4.4)
 
-plot(handles.IR1_tid,'yellow')
+%Just nu: När vi trycker på knappen kommer nya sensorvärden (i dagsläget 
+%dummyvärden)att hämtas. fread läser från buffert från blåtand. handles. BT
+%anger att det är blåtandsobjektet BT som vi läser från. 8 är antalet bytes
+%vi max kommer vilja läsa (1 id-byte och 7 sensorvärden). Det vi får ut är 
+%en vektor Sensor_data med de 8 bytesen. Count anger antal läst data och
+%msg meddelar om läsning misslyckats.
+
+%[Sensor_data, count, msg] = fread(handles.BT, 8); 
+
+%Det vi vill göra nu är att läsa av den första byten i vektorn som är
+%id_byten. Beroende på vad vi har för id_byte vill vi lägga in värdena i
+%olika vektorer. En vektor för varje sensor. Varje gång vi hämtar nya
+%sensorvärden vill vi lägga in de nya värdena i rätt vektor och plotta den
+%nya vektorn. ex ir_höger_fram = [ir_höger_fram, Sensor_data]
+
+%hur vet vi när det finns ny data att läsa. Finns det flaggor motsvarande
+%RXC1, TXC1 och UDRE1? 
+
+%Här plottas värdena upp
+plot([1,2],'yellow')
 plot(handles.IR2_tid,'red')
 plot(handles.IR3_tid,'green')
 plot(handles.IR4_tid,'blue')
