@@ -133,6 +133,7 @@ void Close_claw()
 
 //----------------AUTONOMA REGLERFUNKTIONER-----------//
 void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: uint8_t regulator_error, uint8_t regulator_angle
+
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
 	double adjusted_speed = K_P * (regulator_error - 200) + K_D * tan(regulator_angle - 90);
