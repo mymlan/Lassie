@@ -13,8 +13,9 @@ long int COUNTER_MAX = 65535;
 double BASE_SPEED = 40000; // Halvfart, HÖGRE värde ger HÖGRE hastighet
 double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double K_P = 0.003; // Proportionella konstanten
-double K_D = 0.003; // Deriveringskonstanten
+double K_P = 0.0025; // Proportionella konstanten
+double K_D = 0.3; // Deriveringskonstanten
+double adjusted_speed;
 
 //-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
@@ -136,16 +137,20 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: u
 
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
-	double adjusted_speed = K_P * (regulator_error - 200) + K_D * tan(regulator_angle - 90);
+	adjusted_speed = K_P * (regulator_error - 200) + K_D * tan((- regulator_angle + 90) * 3.1415 / 180.0f);
+	if (adjusted_speed >= 0.3)
+	{
+		adjusted_speed = 0.3;
+	}
+	else if (adjusted_speed <= -0.3)
+	{
+		adjusted_speed = -0.3;
+	}
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
-	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
 	
-	/*test för att testa bussen
-	if (regulator_angle == 5)
-	{
-		OCR1B = BASE_SPEED * 0;
-	}*/
+	
+	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
 }
 
 void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
