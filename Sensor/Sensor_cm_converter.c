@@ -16,8 +16,7 @@ volatile uint8_t count=0;
 
 volatile int diff_from_middle_corridor; // fick det inte att fungera med uint8_t
 volatile uint8_t angle_corridor;
-volatile float a;
-volatile float b;
+
 
 volatile uint8_t angular_rate_value;
 volatile float angular_rate_total = 0;
@@ -37,35 +36,33 @@ void init_interrupts()
 
 ISR (ADC_vect)
 {
-	//count = 5;
-	
 	switch (count)
 	{
 		
 		case(0):
 		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
-		sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
+		sensor1 = ADCH;//S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
 		break;
 		
 		case(1):
 		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
-		sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
+		sensor2 = ADCH;//S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
 		case(2):
 		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
-		sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
+		sensor3 = ADCH;//S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
 		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
-		sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
+		sensor4 = ADCH;//S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
@@ -75,7 +72,7 @@ ISR (ADC_vect)
 		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
-		angle_corridor = 90 - ((((atan2((sensor3-sensor4), 105))*180) / 3.14)); //Ger vinkel från vänstra väggen - 90 + ((((atan2((sensor3-sensor4), 105))*180) / 3.14))
+		angle_corridor = 90 - ((((atan2((sensor3-sensor4), 105))*180) / 3.14)); //Ger vinkel från vänstra väggen - 90 + ((((atan2((sensor2-sensor1), 105))*180) / 3.14))
 		diff_from_middle_corridor = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*55 + sensor4)); //Beräknar avståndet från den väggen i en korridor
 		ir_sensor_data[5] = angle_corridor;
 		ir_sensor_data[6] = diff_from_middle_corridor;
@@ -136,37 +133,41 @@ ISR(ANALOG_COMP_vect){
 {
 	uint8_t mm_value;
 	
-	if (digital_distance <= 135 && digital_distance >= 114)
+	if (digital_distance <= 144 && digital_distance >= 104)
 	{
-		mm_value = (((digital_distance - 135)*10) / -21);
+		mm_value = ((digital_distance - 224) / -2);
 	}
-	else if (digital_distance <=114 && digital_distance >= 97)
+	else if (digital_distance <=104 && digital_distance >= 80)
 	{
-		mm_value = (((digital_distance - 131)*10) / -17);
+		mm_value = (((digital_distance - 176)*10) / -12);
 	}
-	else if (digital_distance <= 97 && digital_distance >= 77)
+	else if (digital_distance <= 80 && digital_distance >= 66)
 	{
-		mm_value = ((digital_distance - 117) / -1);
+		mm_value = ((digital_distance - 136)*10/ -7);
 	}
-	else if (digital_distance <= 77 && digital_distance >= 62)
+	else if (digital_distance <= 66 && digital_distance >= 55)
 	{
-		mm_value = (((digital_distance - 107)*100) / -75);
+		mm_value = (((digital_distance - 121)*100) / -55);
 	}
-	else if (digital_distance <= 62 && digital_distance >= 50)
+	else if (digital_distance <= 55 && digital_distance >= 47)
 	{
-		mm_value = (((digital_distance - 86)*10) / -4);
+		mm_value = (((digital_distance - 103)*10) / -4);
 	}
-	else if (digital_distance <= 50 && digital_distance >= 35)
+	else if (digital_distance <= 47 && digital_distance >= 43)
 	{
-		mm_value = (((digital_distance - 77)*10) / -3);
+		mm_value = (((digital_distance - 75)*10) / -2);
 	}
-	else if (digital_distance <= 35 && digital_distance >= 26)
+	else if (digital_distance <= 43 && digital_distance >= 37)
 	{
-		mm_value = (((digital_distance - 56)*100) / -15);
+		mm_value = (((digital_distance - 91)*10) / -3);
+	}
+	else if (digital_distance <= 37 && digital_distance >= 30)
+	{
+		mm_value = (((digital_distance - 68)*100) / -17);
 	}
 	else
 	{
-		mm_value = 250;
+		mm_value = 255;
 	}
 	return mm_value;
 }
@@ -175,33 +176,37 @@ uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance <= 130 && digital_distance >= 112)
+	if (digital_distance <= 142 && digital_distance >= 103)
 	{
-		mm_value = (((digital_distance - 130)*10) / -18);
+		mm_value = (((digital_distance - 220)*100) / -195);
 	}
-	else if (digital_distance <=112 && digital_distance >= 96)
+	else if (digital_distance <=103 && digital_distance >= 80)
 	{
-		mm_value = (((digital_distance - 128)*10) / -16);
+		mm_value = (((digital_distance - 172)*100) / -172);
 	}
-	else if (digital_distance <= 96 && digital_distance >= 73)
+	else if (digital_distance <= 80 && digital_distance >= 65)
 	{
-		mm_value = (((digital_distance - 119)*100) / -115);
+		mm_value = (((digital_distance - 140)*100) / -75);
 	}
-	else if (digital_distance <= 73 && digital_distance >= 58)
+	else if (digital_distance <= 65 && digital_distance >= 55)
 	{
-		mm_value = (((digital_distance - 103)*100) / -75);
+		mm_value = (((digital_distance - 115)*10) / -5);
 	}
-	else if (digital_distance <= 58 && digital_distance >= 41)
+	else if (digital_distance <= 55 && digital_distance >= 47)
 	{
-		mm_value = (((digital_distance - 92)*100) / -57);
+		mm_value = (((digital_distance - 103)*10) / -4);
 	}
-	else if (digital_distance <= 41 && digital_distance >= 26)
+	else if (digital_distance <= 47 && digital_distance >= 41)
 	{
-		mm_value = (((digital_distance - 68)*10) / -3);
+		mm_value = (((digital_distance - 89)*10) / -3);
 	}
-	else if (digital_distance <= 26 && digital_distance >= 18)
+	else if (digital_distance <= 41 && digital_distance >= 35)
 	{
-		mm_value = (((digital_distance - 45)*100) / -13);
+		mm_value = (((digital_distance - 53)*10) / -3);
+	}
+	else if (digital_distance <= 35 && digital_distance >= 31)
+	{
+		mm_value = (((digital_distance - 42)*10) / -2);
 	}
 	else
 	{
@@ -214,29 +219,29 @@ uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance <= 130 && digital_distance >= 95)
+	if (digital_distance <= 150 && digital_distance >= 108)
 	{
-		mm_value = (((digital_distance - 130)*100) / -175);
+		mm_value = (((digital_distance - 234)*10) / -21);
 	}
-	else if (digital_distance <=95 && digital_distance >= 75)
+	else if (digital_distance <=108 && digital_distance >= 83)
 	{
-		mm_value = ((digital_distance - 115) / -1);
+		mm_value = (((digital_distance - 183)*100) / -125);
 	}
-	else if (digital_distance <= 75 && digital_distance >= 62)
+	else if (digital_distance <= 83 && digital_distance >= 68)
 	{
-		mm_value = (((digital_distance - 101)*100) / -65);
+		mm_value = (((digital_distance - 143)*100) / -75);
 	}
-	else if (digital_distance <= 62 && digital_distance >= 46)
+	else if (digital_distance <= 68 && digital_distance >= 56)
 	{
-		mm_value = (((digital_distance - 94)*100) / -53);
+		mm_value = (((digital_distance - 128)*10) / -6);
 	}
-	else if (digital_distance <= 46 && digital_distance >= 33)
+	else if (digital_distance <= 56 && digital_distance >= 41)
 	{
-		mm_value = (((digital_distance - 67)*100) / -26);
+		mm_value = (((digital_distance - 101)*1000) / -375);
 	}
-	else if (digital_distance <= 33 && digital_distance >= 23)
+	else if (digital_distance <=41 && digital_distance >= 30)
 	{
-		mm_value = (((digital_distance - 56)*100) / -17);
+		mm_value = (((digital_distance - 70)*100) / -18);
 	}
 	else
 	{
@@ -249,29 +254,33 @@ uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 {
 	int mm_value;
 	
-	if (digital_distance <= 135 && digital_distance >= 104)
+	if (digital_distance <= 155 && digital_distance >= 110)
 	{
-		mm_value = (((digital_distance - 135)*100) / -155);
+		mm_value = (((digital_distance - 245)*100) / -225);
 	}
-	else if (digital_distance <=104 && digital_distance >= 79)
+	else if (digital_distance <=110 && digital_distance >= 84)
 	{
-		mm_value = (((digital_distance - 129)*100) / -125);
+		mm_value = (((digital_distance - 188)*10) / -13);
 	}
-	else if (digital_distance <= 79 && digital_distance >= 63)
+	else if (digital_distance <= 84 && digital_distance >= 68)
 	{
-		mm_value = (((digital_distance - 110)*10) / -8);
+		mm_value = (((digital_distance - 148)*10) / -8);
 	}
-	else if (digital_distance <= 63 && digital_distance >= 50)
+	else if (digital_distance <= 68 && digital_distance >= 56)
 	{
-		mm_value = (((digital_distance - 88)*100) / -43);
+		mm_value = (((digital_distance - 128)*10) / -6);
 	}
-	else if (digital_distance <= 50 && digital_distance >= 36)
+	else if (digital_distance <= 56 && digital_distance >= 48)
 	{
-		mm_value = (((digital_distance - 75)*100) / -28);
+		mm_value = (((digital_distance - 104)*10) / -4);
 	}
-	else if (digital_distance <= 36 && digital_distance >= 24)
+	else if (digital_distance <= 48 && digital_distance >= 40)
 	{
-		mm_value = (((digital_distance - 64)*10) / -2);
+		mm_value = (((digital_distance - 104)*10) / -4);
+	}
+	else if (digital_distance <= 40 && digital_distance >= 29)
+	{
+		mm_value = (((digital_distance - 64)*100) / -15);
 	}
 	else
 	{
