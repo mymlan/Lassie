@@ -6,6 +6,7 @@
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 #include "Communication_SPI.h"
+#include "Firefly.h"
 
 static volatile uint8_t error;
 static volatile uint8_t test1;
@@ -77,7 +78,7 @@ ISR(PCINT0_vect)
 			test_sensor_data[6] = sensor_data[6];
 			
 			SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, sensor_data);
-			// skicka till PC
+			USART_send_sensor_data_to_PC(ID_BYTE_IR_SENSOR_DATA, sensor_data);
 			break;
 		}
 		case ID_BYTE_DISTANCE:
