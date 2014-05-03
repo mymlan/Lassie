@@ -10,6 +10,8 @@
 #include "../CommonLibrary/Common.h"
 #include "Communication_SPI.h"
 
+static volatile uint8_t USART_avbrott;
+
 void USART_init()
 {	
 	DDRD = 0x08; //Sätter PD3 (USART1 transmitt pin) till utgång
@@ -24,6 +26,7 @@ ISR(USART1_RX_vect)
 {
 	cli();
 	uint8_t command = UDR1;
+	USART_avbrott = command;
 	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, command);
 	
 	sei();
