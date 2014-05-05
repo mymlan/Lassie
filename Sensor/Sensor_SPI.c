@@ -16,11 +16,6 @@ void SPI_sensor_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	DDRB = 0x41; //sätter MISO till  utgång och även PB0 till utgång, flagga SPI
-	
-	DDRD = 0x30; //utgångar på PD4 och PD5
-	PORTD = 0; //test
-	PORTD = 0x20; //test
-	PORTD = 0; //test
 
 	has_recieved_give_ir_sensor_data = 0;
 	has_recieved_give_distance = 0;
@@ -49,9 +44,6 @@ ISR(SPI_STC_vect)
 			break;
 		default:
 			error = 1;
-			PORTD = 0;
-			PORTD = 0x20;
-			PORTD = 0;
 			break;
 	}
 }
