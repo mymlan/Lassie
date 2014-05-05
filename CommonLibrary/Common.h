@@ -17,6 +17,7 @@
 #define ID_BYTE_IR_SENSOR_DATA (0x01)//7byte
 #define ID_BYTE_DISTANCE (0x03)//1byte cm
 #define ID_BYTE_ROTATION_FINISHED (0x06) //inget meddelande!
+#define ID_BYTE_FOUND_RFID (0x0B)
 
 #define ID_BYTE_MANUAL_DECISIONS (0x07)
 #define ID_BYTE_AUTO_DECISIONS (0x08)
@@ -46,6 +47,12 @@
 //Sensor
 #define ANGULAR_RATE_SENSITIVITY (1.28)
 #define ANGULAR_RATE_OFFSET (133)
+
+#define RFID_1 (1)
+#define RFID_2 (2)
+#define RFID_3 (3)
+#define RFID_4 (4)
+#define RFID_5 (5)
 
 //Styr
 #define REGULATED_FORWARD (1)

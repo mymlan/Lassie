@@ -78,7 +78,7 @@ ISR(PCINT0_vect)
 			test_sensor_data[6] = sensor_data[6];
 			
 			SPI_Master_send_sensor_data_to_steering(sensor_data);
-			USART_send_sensor_data_to_PC(ID_BYTE_IR_SENSOR_DATA, sensor_data);
+			USART_send_sensor_data_to_PC(sensor_data);
 			break;
 		}
 		case ID_BYTE_DISTANCE:
@@ -87,7 +87,7 @@ ISR(PCINT0_vect)
 			uint8_t distance = SPI_Master_recieve_data_byte_from_sensor();
 			test3 = distance;
 			(void)distance; //löser att den inte används, gör om till void
-			USART_send_one_sensor_value_to_PC(ID_BYTE_DISTANCE, distance);
+			USART_send_byte_to_PC(ID_BYTE_DISTANCE, distance);
 			// skicka till PC
 			break;
 		}
