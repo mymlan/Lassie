@@ -77,7 +77,7 @@ ISR(PCINT0_vect)
 			test_sensor_data[5] = sensor_data[5];
 			test_sensor_data[6] = sensor_data[6];
 			
-			SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, sensor_data);
+			SPI_Master_send_sensor_data_to_steering(sensor_data);
 			USART_send_sensor_data_to_PC(ID_BYTE_IR_SENSOR_DATA, sensor_data);
 			break;
 		}
@@ -133,26 +133,13 @@ void SPI_Master_send_to_sensor(uint8_t id_byte)
 }
 
 
-void SPI_Master_send_to_steering(uint8_t id_byte, uint8_t *data_ptr)
+void SPI_Master_send_sensor_data_to_steering(uint8_t *data_ptr)
 {
-	uint8_t number_of_bytes_in_data = 0;
-	switch (id_byte)
-	{
-		case ID_BYTE_IR_SENSOR_DATA:
-		number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
-		break;
-		case ID_BYTE_MANUAL_DECISIONS:
-		case ID_BYTE_AUTO_DECISIONS:
-		number_of_bytes_in_data = 1;
-		break;
-		default:
-		error = 1;
-		break;
-	}
+	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 	
 	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB3);
-	SPI_Master_transmit_data_byte(id_byte);
+	SPI_Master_transmit_data_byte(ID_BYTE_IR_SENSOR_DATA);
 	for(int8_t i = (number_of_bytes_in_data - 1); i >= 0; i--)
 	{
 		SPI_Master_transmit_data_byte(data_ptr[i]);
