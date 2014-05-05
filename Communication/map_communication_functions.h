@@ -8,46 +8,42 @@ struct link_;
 //typedef struct link_ link;
 
 //------ C, VI LOVAR ATT DESSA FUNKTIONER DEFINIERAS, AKA INITIERING -------//
-struct node_ *Newnode(int, int);
-struct link_ *Newlink(int, struct node_*);
+struct node_ *Newnode(uint8_t, uint8_t);
+struct link_ *Newlink(uint8_t, struct node_*);
 
 struct node_* all_nodes[200]; // Sparar alla noder
 uint8_t all_nodes_size;
 struct node_* p_robot_node;
-int robot_dir;
+uint8_t robot_dir;
 struct node_* goal_node;
 
-bool following_path;
-int level;
-bool enable_node_editing;
+uint8_t following_path;
+uint8_t level;
+uint8_t enable_node_editing;
 
 int test_variable_a;
 int test_variable_b;
 int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z; // testvariabler
 
 //int robot_dir = 0; // nord, öst, syd, väst
-int NORTH;
-int EAST;
-int SOUTH;
-int WEST;
 
 
 //-------------------- STRUCT-DEFINITIONER------------------------//
 typedef struct link_
 {
-	int length;
+	uint8_t length;
 	struct node_ *p_node;
-	bool open; // true om väg finns
+	uint8_t open; // true om väg finns
 } link;
 typedef struct node_
 {
-	int x;
-	int y;
-	int cost;
-	bool searched;
+	uint8_t x_coordinate;
+	uint8_t y_coordinate;
+	uint8_t cost;
+	uint8_t searched;
 	struct node_ *p_pre_dijk; // föregångare
-	bool start; // sant/falskt
-	bool goal; // sant/falskt
+	uint8_t start; // sant/falskt
+	uint8_t goal; // sant/falskt
 	link links[4]; // Jag tror det är lättare om den har fix storlek och så får vi ha en bool för varje link som avgör öppen eller ej
 	// Det ska vara en fyra här (4 st element 0-3)
 } node;
