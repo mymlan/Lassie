@@ -6,6 +6,7 @@
 #include <util/delay.h>
 #include "../CommonLibrary/Common.h"
 #include "Communication_SPI.h"
+#include "Firefly.h"
 
 static volatile uint8_t USART_avbrott;
 static volatile uint8_t error;

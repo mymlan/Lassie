@@ -5,6 +5,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
+#include "Communication_map.h"
 #include "Communication_SPI.h"
 #include "Firefly.h"
 

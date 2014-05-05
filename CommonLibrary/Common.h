@@ -30,6 +30,7 @@
 #define MASTER_RECIEVED_BYTE (0x0A)
 
 //Kommando till styrmodulen
+
 #define COMMAND_STOP (0x00)
 #define COMMAND_FORWARD (0x01)
 #define COMMAND_BACKWARD (0x02)
@@ -58,3 +59,19 @@
 #define REGULATED_FORWARD (1)
 #define REGULATED_BACKWARD (2)
 #define NO_NEED_TO_REGULATE (0)
+
+#define NORTH (0)
+#define EAST (1)
+#define SOUTH (2)
+#define WEST (3)
+#define TRUE (1)
+#define FALSE (0)
+#define ERROR_IN_GET_DIJKPOINTERS_CARDINAL_DIRECTION (5)
+#define ERROR_IN_WHAT_IS_OPEN (17)
+#define NUMBER_OF_LINKS (4)
+#define ERROR_IN_FIND_INDEX_OF_NODE (201)
+#define COMMUNICATION_INFINITY (255)
+#define TRAVELED_BLOCKS_MARGIN (20)
+#define SIDE_SENSOR_OPEN_LIMIT (200)
+#define SIZE_OF_SQUARE_IN_CM (40)
+
