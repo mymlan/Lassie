@@ -7,9 +7,11 @@
 #define Baudrate 2400
 #define F_CPU 18432000UL
 #define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)
-uint8_t RFIDtag[12];
+volatile uint8_t RFIDtag_read[10];
+volatile uint8_t RFIDtag_correct[10];
 volatile uint8_t RFID_count = 0;
-volatile uint8_t A;
+volatile uint8_t Startbit_hittad = 0;
+
 volatile uint16_t reflex_count = 0;
 volatile unsigned char test;
 volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
@@ -48,15 +50,36 @@ void USART_init(){
 }
 
 ISR(USART0_RX_vect)
-{
-	RFIDtag[RFID_count] = UDR0;
-	RFID_count++;
-	A = UDR0;
+{	
+	if (RFID_count==10)
+	{
+		if (UDR0 == 13)
+		{
+			for (int i = 0; i <= 9; i++)
+			{
+				RFIDtag_correct[i] = RFIDtag_read[i];
+			}
+			RFID_count = 0;
+			Startbit_hittad = 0;
+			//flagga till kom
+		}
+		else
+		{
+			RFID_count = 0;
+		}
+	}
+ 	if (Startbit_hittad == 1)
+	{
+		RFIDtag_read[RFID_count] = UDR0;
+		RFID_count++;
+	}
+	
+	if (UDR0 == 10)
+	{
+	Startbit_hittad = 1;
+	}
 	//while ((UCSR0A &(1<<RXC0))==0){ //check if receiving is complete
 	//}
-	if (RFID_count==12){
-		//flagga till kom
-	}
 }
 
 ISR (ADC_vect)
