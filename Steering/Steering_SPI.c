@@ -135,6 +135,12 @@ ISR(SPI_STC_vect)
 				case COMMAND_BACKWARD: Backward_regulated(90, 200);
 				last_auto_decision = REGULATED_BACKWARD;
 				break;
+				case COMMAND_FORWARD_NOT_REGULATED: Forward_regulated(90, 200);
+				last_auto_decision = NO_NEED_TO_REGULATE;
+				break;
+				case COMMAND_BACKWARD_NOT_REGULATED: Backward_regulated(90, 200);
+				last_auto_decision = NO_NEED_TO_REGULATE;
+				break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
 				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
