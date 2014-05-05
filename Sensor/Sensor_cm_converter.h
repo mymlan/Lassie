@@ -1,8 +1,8 @@
-
 #ifndef _SENSOR_CM_CONVERTER_H
 #define _SENSOR_CM_CONVERTER_H
 
 void init_interrupts();
+void USART_init();
 
 uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance);
 uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance);

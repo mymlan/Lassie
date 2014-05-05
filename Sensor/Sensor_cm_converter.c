@@ -4,19 +4,20 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 #include "../CommonLibrary/Common.h"
-
+#define Baudrate 2400
+#define F_CPU 18432000UL
+#define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)
+uint8_t RFIDtag[12];
+volatile uint8_t RFID_count = 0;
+volatile uint8_t A;
 volatile uint16_t reflex_count = 0;
 volatile unsigned char test;
-int baud;
 volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
-
-
 
 volatile uint8_t count=0;
 
 volatile int diff_from_middle_corridor; // fick det inte att fungera med uint8_t
 volatile uint8_t angle_corridor;
-
 
 volatile uint8_t angular_rate_value;
 volatile float angular_rate_total = 0;
@@ -24,7 +25,7 @@ volatile float angular_rate_diff;
 
 void init_interrupts()
 {
-	ACSR = (1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);  //ACD=0 AC på, ACBG=0 external comparator pin AIN0, ACIE=1 interrupt enable, ACIC=0 Timer/Counter disabled, ACIS0..1=1 interrupt on rising output edge
+	ACSR = (1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);  //ACD=0 AC på, ACBG=0 external comparator pin AIN0, ACIE=1 interrupt enable, ACIC=0 Timer/Counter disabled, ACIS0..1=1 interrupt on rising/falling output edge
 	//DDRD = 1<<DDD6;
 	PORTD = 1<<PORTD6;
 	ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); // Set the ADMUX
@@ -32,6 +33,30 @@ void init_interrupts()
 	
 	ADCSRA |= (1<<ADSC); //Start ADC
 	//DIDR1 = (1<<AIN1D)|(1<<AIN0D); //
+}
+
+void USART_init(){
+	DDRD |= (1<<DDD2);  //Enable RFID
+	UCSR0B |= (1<<RXEN0);  //Enable USART0 receiver
+	UCSR0B |= (1<<RXCIE0);  //enable receive complete interrupt
+	UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01) | (1<<UCSZ02);  //8 bits per frame
+	UCSR0C |= (0<<USBS0);  //Declares one stop bit
+	//eventuellt prescale räkning på buad?!?!?!
+	UBRR0H = (unsigned char)(Baud_Prescale>>8);//set upper 8 bit of baudrate
+	UBRR0L = (unsigned char)Baud_Prescale; //set rest of bits of baudrate
+	sei();
+}
+
+ISR(USART0_RX_vect)
+{
+	RFIDtag[RFID_count] = UDR0;
+	RFID_count++;
+	A = UDR0;
+	//while ((UCSR0A &(1<<RXC0))==0){ //check if receiving is complete
+	//}
+	if (RFID_count==12){
+		//flagga till kom
+	}
 }
 
 ISR (ADC_vect)
@@ -115,23 +140,6 @@ ISR(ANALOG_COMP_vect){
 	reflex_count = reflex_count+1;
 	ACSR |= (1<<ACI);//|(1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);
 }
-
-//**************** GUSTAV TERRITORIUM **************
-
-/*void USART_init(){
-	DDRD = (1<<DDD2);  //Enable RFID
-	UBRR1H = (unsigned char) (baud>>8);  //set baud rate
-	UBRR1L = (unsigned char) baud;  //set baud rate
-	UCSR1B = (1<<RXEN1);  //USRT1 recieve pin? Enable reciever
-	UCSR1C = (1<<USBS1) | (3<<UCSZ10);  //Frame format, 8data, 2 stop bits
-}*/
-
-//ISR(INT1_vect){
-	//test = PIND;
-//}
-
-//************ SLUT PÅ TERRITORIUM *******************
-
 
  uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
