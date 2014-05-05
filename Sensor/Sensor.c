@@ -33,11 +33,11 @@ int main(void)
 	
 	while(1)
 	{
-		if(SPI_sensor_should_give_ir_sensor_data())
+		/*if(SPI_sensor_should_give_ir_sensor_data())
 		{
 			test1 = 1;
 			SPI_sensor_send(ID_BYTE_IR_SENSOR_DATA, ir_sensor_data);
-		}
+		}*/
 	}
 	
 	 
