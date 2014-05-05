@@ -17,6 +17,9 @@ int main(void)
 	USART_init();
 	sei();
 	
+	//timer (hämta sensordata)
+	//kart-tjofräs
+	
 	//SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
 	
 	//uint8_t test_sensor_data[7];
