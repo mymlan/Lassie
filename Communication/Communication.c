@@ -10,6 +10,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
+#include "map_communication_functions.h"
 
 static volatile uint8_t has_recieved_sensor_data;
 static volatile uint8_t has_recieved_distance;

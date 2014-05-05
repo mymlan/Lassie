@@ -132,9 +132,6 @@
     <Compile Include="Communication.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="map_communication.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="map_communication_functions.c">
       <SubType>compile</SubType>
     </Compile>

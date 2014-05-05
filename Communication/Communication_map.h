@@ -1,5 +1,5 @@
-﻿#ifndef MAP_COMMUNIVATION_FUNCTIONS_H
-#define MAP_COMMUNIVATION_FUNCTIONS_H
+﻿#ifndef _COMMUNICATION_MAP_H
+#define _COMMUNICATION_MAP_H
 
 //------ C, VI LOVAR ATT DESSA STRUCTAR DEFINIERAS -------//
 struct node_;
@@ -20,6 +20,7 @@ struct node_* goal_node;
 uint8_t following_path;
 uint8_t level;
 uint8_t enable_node_editing;
+uint8_t traveled_blocks;
 
 int test_variable_a;
 int test_variable_b;
@@ -47,5 +48,26 @@ typedef struct node_
 	link links[4]; // Jag tror det är lättare om den har fix storlek och så får vi ha en bool för varje link som avgör öppen eller ej
 	// Det ska vara en fyra här (4 st element 0-3)
 } node;
+
+
+uint8_t What_is_open(uint8_t left, uint8_t right, uint8_t front);
+void Create_origin(uint8_t open_walls);
+void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uint8_t open_walls);
+void Create_goal(uint8_t x_coordinate, uint8_t y_coordinate,uint8_t length, uint8_t open_walls);
+void Update_node(node* p_node, uint8_t length);
+node* Exisiting_node_at(uint8_t x_coordinate, uint8_t y_coordinate);
+uint8_t Find_index_of_node(node* p_node);
+uint8_t Find_low_cost_index();
+uint8_t Find_shortest_path(node* p_node1, node* p_node2);
+uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn);
+void Do_turn(uint8_t cardinal_direction);
+uint8_t Get_dijkpointers_cardinal_direction(node* p_node);
+void Follow_path();
+node* Easy_find_unexplored_node();
+node* Smarter_find_unexplored_node(node* p_node);
+void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+
+int Map_main(void);
 
 #endif

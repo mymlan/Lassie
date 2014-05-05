@@ -1,13 +1,43 @@
 ﻿#include <avr/io.h>
-#include "../CommonLibrary/Common.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
-#include <string.h>
+#include "../CommonLibrary/Common.h"
 #include "map_communication_functions.h"
-uint8_t traveled_blocks;
-//-------------------FUNKTIONER---------------------------//
+
+node* Newnode(uint8_t x_coordinate_in, uint8_t y_coordinate_in)
+{	
+	node *p_node = malloc(sizeof(node)); // Allokerar minne
+	
+	//for så många ööpningar, sen placera i array också, kanske if öppen på alla öppningar och directions, case i en case???
+	
+	//node *ps;
+	//node *p_node = malloc(2 * sizeof(int) + sizeof(link) + number_of_roads * sizeof(node)); // Vad är det här?? // Detta allokerar en viss mängd minne för structen så att arrayen kan anta "godtycklig" storlek
+	
+	p_node->x_coordinate = x_coordinate_in;
+	p_node->y_coordinate = y_coordinate_in;
+	
+	p_node->cost = 255; //representrar oändligheten
+	p_node->searched = FALSE; //inte avsökt från start
+	//p_node->p_pre_dijk = NULL;
+	
+	p_node->start = FALSE;
+	p_node->goal = FALSE;
+	
+	p_node->links[0].open = FALSE;
+	p_node->links[1].open = FALSE;
+	p_node->links[2].open = FALSE;
+	p_node->links[3].open = FALSE;
+	
+	p_node->links[0].length = 0;
+	p_node->links[1].length = 0;
+	p_node->links[2].length = 0;
+	p_node->links[3].length = 0;
+	
+	all_nodes[all_nodes_size] = p_node;
+	all_nodes_size++;
+	
+	return p_node;
+}
+
 //vill skriva funktion som tar in riktning och sensorvärden för att bestämma vilka riktningar/väderstreck som är öppna
 //returnerar ett tal på 4 bitar i ordningen nord,öst,syd,väst -> 1111, rdir är robtens riktning 0-3 i ordningen nord,öst,syd,väst
 //jag vet inte om det finns snyggare samband, men jag går igenom alla fall till att börja med
@@ -85,6 +115,7 @@ uint8_t What_is_open(uint8_t left, uint8_t right, uint8_t front)
 	return ERROR_IN_WHAT_IS_OPEN; //något har gått fel // man returnerar egentligen bara 0 när att gått bra. Andra siffror betyrer vissa felmeddelanden
 }
 
+
 // Create_origin
 // Funktionen skapar en origonod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
 void Create_origin(uint8_t open_walls)
@@ -105,12 +136,12 @@ void Create_origin(uint8_t open_walls)
 void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uint8_t open_walls)
 {
 	// GENERELLT ARGUMENT betyder att det ska vara i någon form av argument till funktionen. Just nu bara dummydata
-		// 1.Skapa ny nod
+	// 1.Skapa ny nod
 	node* p_node = Newnode(x_coordinate, y_coordinate); // 1.
-		// 2.Uppdatera gammal nod
+	// 2.Uppdatera gammal nod
 	p_robot_node->links[robot_dir].length = length; // 2a. Uppdatera längd
 	p_robot_node->links[robot_dir].p_node = p_node; // 2b. Koppla ny nod till gammal nod
-		// 3.Uppdatera ny nod
+	// 3.Uppdatera ny nod
 	for(uint8_t i = 0; i < NUMBER_OF_LINKS; i++)
 	{
 		p_node->links[i].open = ((open_walls >> (3 - i)) & 0x01); // 3a. Sätt rätt .open till TRUE
@@ -118,9 +149,9 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].p_node = p_robot_node; // 3b. Koppla gammal nod till ny nod
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].length = length; // 3c. Längd för vägen bakåt satt
 	p_robot_node = p_node;// 4.
-		// 5. Nollställ avstånd (kanske sker utanför funktionen)
-		// 6. Ta styrbslut och return (sker utanför funktionen)
-	enable_node_editing = FALSE;	
+	// 5. Nollställ avstånd (kanske sker utanför funktionen)
+	// 6. Ta styrbslut och return (sker utanför funktionen)
+	enable_node_editing = FALSE;
 }
 
 // Create_goal
@@ -178,8 +209,8 @@ uint8_t Find_index_of_node(node* p_node)
 //Hjälpfunktion till Dijkstras, hittar den nod som har lägst kostnad och som inte är avsökt.
 uint8_t Find_low_cost_index()
 {
-	uint8_t temp_cost = INF;
-	uint8_t temp_index = INF;
+	uint8_t temp_cost = COMMUNICATION_INFINITY;
+	uint8_t temp_index = COMMUNICATION_INFINITY;
 	for(uint8_t i = 0; i < all_nodes_size; i++)
 	{
 		if(all_nodes[i]->searched == FALSE && all_nodes[i]->cost < temp_cost)
@@ -202,7 +233,7 @@ uint8_t Find_shortest_path(node* p_node1, node* p_node2)
 	for(uint8_t i = 0; i < all_nodes_size; i++)
 	{
 		all_nodes[i]->searched = FALSE;
-		all_nodes[i]->cost = INF;// =102 m =~ inf
+		all_nodes[i]->cost = COMMUNICATION_INFINITY;// =102 m =~ COMMUNICATION_INFINITY
 		all_nodes[i]->p_pre_dijk = NULL;
 	}
 	if (p_node1 == p_node2)
@@ -289,23 +320,23 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 {
 	//indikerar bakre sensorer en korsning
 
-		
-		if (p_robot_node->p_pre_dijk == NULL)
+	
+	if (p_robot_node->p_pre_dijk == NULL)
+	{
+		following_path = FALSE;
+		for (uint8_t i = 0; i < NUMBER_OF_LINKS; i++)
 		{
-			following_path = FALSE;
-			for (uint8_t i = 0; i < NUMBER_OF_LINKS; i++)
+			if (p_robot_node->links[i].length == 0 && p_robot_node->links[i].open)
 			{
-				if (p_robot_node->links[i].length == 0 && p_robot_node->links[i].open)
-				{
-					Do_turn(i);
-					break;
-				}
+				Do_turn(i);
+				break;
 			}
 		}
-		else
-		{
-			Do_turn(Get_dijkpointers_cardinal_direction(p_robot_node));
-		}
+	}
+	else
+	{
+		Do_turn(Get_dijkpointers_cardinal_direction(p_robot_node));
+	}
 	//}
 }
 
@@ -510,14 +541,14 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 				Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			}
 			break;
-		
+			
 			case 1: // Fortsätter leta efter väg. Level i Easy_find_unexplored_node
 			if (enable_node_editing)
 			{
 				Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			}
 			break;
-		
+			
 			case 2: // Lassie åker hem. Level i Sensor_values_has_arrived
 			Find_shortest_path(all_nodes[0], p_robot_node);
 			following_path = TRUE;
@@ -526,7 +557,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			
 			case 3: // Väntar på proviant. [Level i avbrott från knapp]
 			// [Styrbeslut stanna]
-					
+			
 			case 4: // Åk till mål. Level i Sensor_values_has_arrived
 			// [Grip med gripklo]
 			// [Kort delay]
