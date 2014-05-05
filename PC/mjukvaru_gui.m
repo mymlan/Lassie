@@ -156,43 +156,50 @@ function figure1_KeyPressFcn(hObject, eventdata, handles)
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
 switch eventdata.Key
-    case 'uparrow'
-        set(handles.kommando,'String','Fram')
-        
-        %%Här vill vi lägga kommandot för forward (0x01) i buffert
-        fwrite(handles.BT, uint8(1));
-        
-        
-    case 'downarrow'
+    case 'w'
+        set(handles.kommando,'String','Fram') 
+        %Kommandot för forward är 0x01
+        fwrite(handles.BT, uint8(1));       
+    case 's'
         set(handles.kommando,'String','Back')
-        
-        %%Här vill vi lägga kommandot för backward (0x02) i buffert
-        fwrite(handles.BT, uint8(2));
-        
-    case 'leftarrow'
-        set(handles.kommando,'String','Rotera vänster')
-        
-        %%Här vill vi lägga kommandot för rotate_left (0x06) i buffert
-        fwrite(handles.BT, uint8(6));
-        
-    case 'rightarrow'
+        %Kommandot för backward är 0x02
+        fwrite(handles.BT, uint8(2));  
+    case 'd'
+        set(handles.kommando,'String','Rotera vänster') 
+        %Kommandot för rotate_left är 0x06
+        fwrite(handles.BT, uint8(6));       
+    case 'a'
         set(handles.kommando,'String','Rotera höger')
-        
-        %%Här vill vi lägga kommandot för rotate_right (0x05) i buffert
+        %Kommandot för rotate_right är 0x05
         fwrite(handles.BT, uint8(5));
+    case 'q'
+        set(handles.kommando,'String','Sväng vänster')
+        %Kommandot för turn_left är 0x04
+        fwrite(handles.BT, uint8(4));
+    case 'e'
+        set(handles.kommando,'String','Sväng höger')
+        %Kommandot för turn_right är 0x03
+        fwrite(handles.BT, uint8(3)); 
+    case 'space'
+        set(handles.kommando,'String','Stanna')
+        %Kommandot för stop är 0x00
+        fwrite(handles.BT, uint8(0)); 
+        
 end
 
-
-% --- Executes on key release with focus on figure1 and none of its controls.
-function figure1_KeyReleaseFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  structure with the following fields (see FIGURE)
-%	Key: name of the key that was released, in lower case
-%	Character: character interpretation of the key(s) that was released
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) released
-% handles    structure with handles and user data (see GUIDATA)
-set(handles.kommando,'String','Stop')
-fwrite(handles.BT, uint8(0));
+% Nedan är utkommenterad kod för vad som händer då vi släpper en tanjent. I nuläget
+% räcker det med att trycka en gång så gör Lassie tills nytt manuellt
+% kommando kommer.
+% % --- Executes on key release with focus on figure1 and none of its controls.
+% function figure1_KeyReleaseFcn(hObject, eventdata, handles)
+% % hObject    handle to figure1 (see GCBO)
+% % eventdata  structure with the following fields (see FIGURE)
+% %	Key: name of the key that was released, in lower case
+% %	Character: character interpretation of the key(s) that was released
+% %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) released
+% % handles    structure with handles and user data (see GUIDATA)
+% set(handles.kommando,'String','Stop')
+% fwrite(handles.BT, uint8(0));
 
 
 
