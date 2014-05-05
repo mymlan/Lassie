@@ -7,9 +7,11 @@
 #define Baudrate 2400
 #define F_CPU 18432000UL
 #define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)
-uint8_t RFIDtag[12];
+volatile uint8_t RFID_tag_read[10];
+volatile uint8_t RFID_tag_correct[10];
 volatile uint8_t RFID_count = 0;
-volatile uint8_t A;
+volatile uint8_t RFID_start_read = 0;
+
 volatile uint16_t reflex_count = 0;
 volatile unsigned char test;
 volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
@@ -48,19 +50,48 @@ void USART_init(){
 }
 
 ISR(USART0_RX_vect)
-{
-	RFIDtag[RFID_count] = UDR0;
-	RFID_count++;
-	A = UDR0;
+{	
+	if (RFID_count==10)
+	{
+		if (UDR0 == 13)
+		{
+			for (int i = 0; i <= 9; i++)
+			{
+				RFID_tag_correct[i] = RFID_tag_read[i];
+			}
+				if (RFID_tag_correct[9] == 68)
+				{
+					SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
+				}
+				
+				
+			RFID_count = 0;
+			RFID_start_read = 0;
+			//flagga till kom
+			
+		}
+		else
+		{
+			RFID_count = 0;
+		}
+	}
+ 	if (RFID_start_read == 1)
+	{
+		RFID_tag_read[RFID_count] = UDR0;
+		RFID_count++;
+	}
+	
+	if (UDR0 == 10)
+	{
+	RFID_start_read = 1;
+	}
 	//while ((UCSR0A &(1<<RXC0))==0){ //check if receiving is complete
 	//}
-	if (RFID_count==12){
-		//flagga till kom
-	}
 }
 
 ISR (ADC_vect)
-{
+{ 
+	count = 5;
 	switch (count)
 	{
 		
@@ -111,7 +142,7 @@ ISR (ADC_vect)
 		if ((-20 < angular_rate_total) & (angular_rate_total < 20))
 		{
 			angular_rate_value = ADCH;
-			angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY;
+			angular_rate_diff = (angular_rate_value - 132.84)*ANGULAR_RATE_SENSITIVITY;
 			angular_rate_total += (angular_rate_diff / 10000);
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2
 		} else

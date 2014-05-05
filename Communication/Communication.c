@@ -5,6 +5,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
+#include "Communication_map.h"
 #include "Communication_SPI.h"
 #include "Firefly.h"
 
@@ -16,6 +17,9 @@ int main(void)
 	SPI_Master_init();
 	USART_init();
 	sei();
+	
+	//timer (hämta sensordata)
+	//kart-tjofräs
 	
 	//SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
 	

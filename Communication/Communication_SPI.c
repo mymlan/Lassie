@@ -94,6 +94,8 @@ ISR(PCINT0_vect)
 		case ID_BYTE_ROTATION_FINISHED:
 		{
 			//Hantera att 90grader nåtts, i karta!
+			//fråga!(med variabel att kolla på)
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			break;
 		}
 		default:

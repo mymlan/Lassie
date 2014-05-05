@@ -5,7 +5,7 @@
     <ProjectVersion>6.1</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.C</ToolchainName>
     <ProjectGuid>{b5a1a395-81b9-4e41-9e36-4cb0f07875a1}</ProjectGuid>
-    <avrdevice>ATmega1284P</avrdevice>
+    <avrdevice>ATmega1284</avrdevice>
     <avrdeviceseries>none</avrdeviceseries>
     <OutputType>Executable</OutputType>
     <Language>C</Language>
@@ -117,12 +117,6 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Sensor_cm_converter.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Sensor_cm_converter.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="Sensor.c">
       <SubType>compile</SubType>
     </Compile>
