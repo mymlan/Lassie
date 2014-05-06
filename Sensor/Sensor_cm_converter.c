@@ -91,6 +91,7 @@ ISR(USART0_RX_vect)
 
 ISR (ADC_vect)
 { 
+	count = 5;
 	switch (count)
 	{
 		
@@ -138,10 +139,10 @@ ISR (ADC_vect)
 		break;
 		
 		case(5):
-		if ((-20 < angular_rate_total) & (angular_rate_total < 20))
+		if ((-27.5 < angular_rate_total) & (angular_rate_total < 27.5))
 		{
 			angular_rate_value = ADCH;
-			angular_rate_diff = (angular_rate_value - 132.84)*ANGULAR_RATE_SENSITIVITY;
+			angular_rate_diff = (angular_rate_value - 133.1378)*ANGULAR_RATE_SENSITIVITY;
 			angular_rate_total += (angular_rate_diff / 10000);
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2
 		} else
@@ -171,7 +172,7 @@ ISR(ANALOG_COMP_vect){
 	ACSR |= (1<<ACI);//|(1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);
 }
 
- uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
+uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
@@ -337,31 +338,31 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 	
 	if (digital_distance <= 130 && digital_distance >= 92)
 	{
-		cm_value = ((digital_distance-206)/-7.6);
+		cm_value = (((digital_distance-206)*10) / -76);
 	}
 	else if (digital_distance <= 92 && digital_distance >= 72)
 	{
-		cm_value = ((digital_distance-152)/-4);
+		cm_value = ((digital_distance-152) / -4);
 	}
 	else if (digital_distance <= 72 && digital_distance >= 60)
 	{
-		cm_value = ((digital_distance-117)/-2.4);
+		cm_value = (((digital_distance-117)*10) / -24);
 	}
 	else if (digital_distance <= 60 && digital_distance >= 53)
 	{
-		cm_value = ((digital_distance-95)/-1.4);
+		cm_value = (((digital_distance-95)*10) / -14);
 	}
 	else if (digital_distance <= 53 && digital_distance >= 35)
 	{
-		cm_value = ((digital_distance-86)/-1.1);
+		cm_value = (((digital_distance-86)*10) / -11);
 	}
 	else if (digital_distance <= 35 && digital_distance >= 30)
 	{
-		cm_value = ((digital_distance-50)/-0.25);
+		cm_value = (((digital_distance-50)*10) / -3);
 	}
 	else
 	{
-		cm_value = 100;
+		cm_value = 255;
 	}
 	return cm_value;
 }

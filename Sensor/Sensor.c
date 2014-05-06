@@ -49,7 +49,7 @@ int main(void)
 			//Skicka distans
 			uint8_t distance[1];
 			uint8_t moved_distance = 0;
-			moved_distance = ((reflex_count*13) / 10);
+			moved_distance = ((reflex_count*16) / 10);
 			distance[0] = moved_distance;
 			SPI_sensor_send(ID_BYTE_DISTANCE, distance);
 		}
