@@ -6,15 +6,16 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "Steering_functions.h"
+#include "../CommonLibrary/Common.h"
 
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
-double BASE_SPEED = 40000; // Halvfart, HÖGRE värde ger HÖGRE hastighet
-double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double K_P = 0.0025; // Proportionella konstanten
-double K_D = 0.3; // Deriveringskonstanten
+double BASE_SPEED = 50000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
+double left_speed_factor = 1; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double right_speed_factor = 1; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double K_P = 0.003; // Proportionella konstanten, 0.0025 från dennis
+double K_D = 1.5; // Deriveringskonstanten, 0.3 från dennis
 double adjusted_speed;
 
 //-----------------PORTDEFINITIONER----------------//
@@ -146,8 +147,8 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: u
 	{
 		adjusted_speed = -0.3;
 	}
-	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
-	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
+	OCR1A = BASE_SPEED * right_speed_factor * (1 - adjusted_speed); // Höger motor gräns
+	OCR1B = BASE_SPEED * left_speed_factor *(1 + adjusted_speed); // Vänster motor gräns
 	
 	
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.

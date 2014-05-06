@@ -14,7 +14,7 @@ volatile uint8_t RFID_start_read = 0;
 
 volatile uint16_t reflex_count = 0;
 volatile unsigned char test;
-volatile uint8_t sensor1, sensor2, sensor3, sensor4, sensor5;
+volatile uint8_t  sensor1, sensor2, sensor3, sensor4, sensor5;
 
 volatile uint8_t count=0;
 
@@ -127,8 +127,8 @@ ISR (ADC_vect)
 		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
-		angle_corridor = 90 - (((((atan2((sensor3-sensor4), 78))*180) / 3.14) + ((((atan2((sensor2-sensor1), 78))*180) / 3.14))) / 2);
-		diff_from_middle_corridor = ((cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4))) - (((cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) + (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 + tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor2))) / 2) + 200; //Beräknar avståndet från den väggen i en korridor 
+		angle_corridor = 90 - (((atan2((sensor3-sensor4), 78))*180) / 3.14);// + ((((atan2((sensor2-sensor1), 78))*180) / 3.14))) / 2);
+		diff_from_middle_corridor = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4));// - (((cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) + (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 + tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor2))) / 2) + 200; //Beräknar avståndet från den väggen i en korridor 
 		if (diff_from_middle_corridor > 255)
 		{
 			diff_from_middle_corridor = 255;
@@ -279,7 +279,7 @@ uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 	}
 	else if (digital_distance <= 56 && digital_distance >= 41)
 	{
-		mm_value = (((digital_distance - 101)*1000) / -375);
+		mm_value = (((digital_distance - 101)*100) / -38);
 	}
 	else if (digital_distance <=41 && digital_distance >= 30)
 	{

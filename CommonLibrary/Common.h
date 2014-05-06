@@ -60,6 +60,9 @@
 #define REGULATED_BACKWARD (2)
 #define NO_NEED_TO_REGULATE (0)
 
+#define MAX_SPEED (65535)
+
+//comm-karta
 #define NORTH (0)
 #define EAST (1)
 #define SOUTH (2)
