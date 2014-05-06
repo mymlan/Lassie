@@ -91,7 +91,6 @@ ISR(USART0_RX_vect)
 
 ISR (ADC_vect)
 { 
-	count = 5;
 	switch (count)
 	{
 		

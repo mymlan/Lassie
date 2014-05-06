@@ -18,8 +18,8 @@ uint8_t test_ir_sensor_data[7];
 
 int main(void)
 {
-	//USART_init();
-  	//init_interrupts();
+	USART_init();
+  	init_interrupts();
 	SPI_sensor_init();
 	sei();
 	
