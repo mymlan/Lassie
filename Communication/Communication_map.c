@@ -548,9 +548,15 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
 	enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
+	
 	if(sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front > 10)// hade räckt med bakre, men säkrare att kolla alla.
 	{
 		enable_node_editing = TRUE;
+		
+		//if (TRUE) // SKA ÄNDRAS när vi börjar levla upp. Kan ge oönskade åk rakt fram ordrar. // Ska lösa problemet med reglering i korsning men är ej klart.
+		//{
+		//	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		//}
 	}
 	
 	if (following_path)
@@ -577,7 +583,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 	{
 		switch(level)
 		{
-			case 0: // Lassie letare efter målet. [Avbrott att avsluta]
+			case 0: // Lassie letare efter målet. [Level i avbrott]
 			if (enable_node_editing)
 			{
 				Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
@@ -598,10 +604,10 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			break;
 			
 			case 3: // Väntar på proviant. [Level i avbrott från knapp]
-			// [Styrbeslut stanna]
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			
 			case 4: // Åk till mål. Level i Sensor_values_has_arrived
-			// [Grip med gripklo]
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
 			// [Kort delay]
 			Find_shortest_path(goal_node, all_nodes[0]);
 			following_path = TRUE;
@@ -609,10 +615,10 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			break;
 			
 			case 5: // Stanna, vänta, loss, levla. Level här.
-			// [Stopp]
-			// [Delay]
-			// [Gripklo släpp]
-			// [Kort elay]
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			// [Kort delay]
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_OPEN_CLAW);
+			// [Kort delay]
 			level++; // Ev. bugg till senare: Lassie ska åka samma väg tillbaka.
 			break;
 			
@@ -623,7 +629,7 @@ void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, 
 			break;
 			
 			case 7: // Inget. Vi är klara. Ingen levling.
-			// [Stop]
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			break;
 		}
 	}
