@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include "../CommonLibrary/Common.h"
 #include "Communication_map.h"
+#include "Communication_SPI.h"
 
+// Newnode
+// Allokerar minne för noden och sätter vissa egenskaper för noden.
 node* Newnode(uint8_t x_coordinate_in, uint8_t y_coordinate_in)
 {	
 	node *p_node = malloc(sizeof(node)); // Allokerar minne
@@ -115,7 +118,6 @@ uint8_t What_is_open(uint8_t left, uint8_t right, uint8_t front)
 	return ERROR_IN_WHAT_IS_OPEN; //något har gått fel // man returnerar egentligen bara 0 när att gått bra. Andra siffror betyrer vissa felmeddelanden
 }
 
-
 // Create_origin
 // Funktionen skapar en origonod som den returnerar en pekare till (Det är tänkt att robot_node sätts till detta returvärde när den skapas)
 void Create_origin(uint8_t open_walls)
@@ -135,7 +137,6 @@ void Create_origin(uint8_t open_walls)
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
 void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uint8_t open_walls)
 {
-	// GENERELLT ARGUMENT betyder att det ska vara i någon form av argument till funktionen. Just nu bara dummydata
 	// 1.Skapa ny nod
 	node* p_node = Newnode(x_coordinate, y_coordinate); // 1.
 	// 2.Uppdatera gammal nod
@@ -274,6 +275,16 @@ uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, 
 	return (robot_dir + turn) % NUMBER_OF_LINKS;
 }
 
+// Wait_for_90_degree_rotation
+// Funktionen loopar till sensor meddelar 90 grader klart
+void Wait_for_90_degree_rotation()
+{
+	while (finished_90_degrees == FALSE) // Sätts till TRUE av KOM i ett avbrott
+	{
+	}
+	// finished_90_degrees = FALSE; // Ska läggas till
+}
+
 // Do_turn
 // Funktonen uför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
 void Do_turn(uint8_t cardinal_direction)
@@ -281,23 +292,41 @@ void Do_turn(uint8_t cardinal_direction)
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
-		//Trun right order
-		robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
-		break;
+		{
+			// Trun right order
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Wait_for_90_degree_rotation();
+			
+			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
+			break;
+		}
 		case 2:
-		// Backa order
-		robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
-		break;
+		{
+			// Rotation 180 degrees order
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Wait_for_90_degree_rotation(); // 90 grader
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Wait_for_90_degree_rotation(); // ytterligare 90 grader
+			
+			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
+			break;
+		}
 		case 1:
-		//Turn left order
-		robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
-		break;
+		{
+			// Turn left order
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			
+			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
+			break;
+		}
 		case 0:
-		robot_dir = (robot_dir + 4) % NUMBER_OF_LINKS;
-		// Åk fram order
-		break;
+		{
+			break;
+		}
 	}
-	// Åk fram order
+	// Åk fram oreglerat order
+	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
 }
 
 // Get_dijkpointers_cardinal_direction
@@ -337,7 +366,6 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 	{
 		Do_turn(Get_dijkpointers_cardinal_direction(p_robot_node));
 	}
-	//}
 }
 
 // Hittar en nod som har en outforskad öppning
@@ -379,17 +407,29 @@ node* Smarter_find_unexplored_node(node* p_node)
 	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
+// Get_length
+// Funktionen loopar tills length kommer, och returnerar då length
+uint8_t Get_length()
+{
+	SPI_Master_send_to_sensor(ID_BYTE_GIVE_DISTANCE);
+	while (valid_length == FALSE) // Sätts till TRUE av KOM i ett avbrott
+	{
+	}
+	//valid_length = FALSE;
+	return length;
+}
+
 // Search
 // Funktionen tar styrbeslut för sökning
 void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
-	int length = 84;
+	int length;
 	// -------- Detta är kartlagring och genomsökning ---------- //
-	// HÄNDELSE: Sensorvärde inkommit
 	// Indikerar sensorvärden återvändsgränd?
 	if (sensor_front < 10 && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul  (2 STÄLLEN)
+		length = Get_length();
 		// Uträkning av koordinater
 		uint8_t x_coordinate = p_robot_node->x_coordinate;
 		uint8_t y_coordinate = p_robot_node->y_coordinate;
@@ -429,6 +469,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	else if (sensor_back_left > SIDE_SENSOR_OPEN_LIMIT || sensor_back_right > SIDE_SENSOR_OPEN_LIMIT)
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul (2 STÄLLEN)
+		length = Get_length();
 		// Uträkning av koordinater
 		uint8_t x_coordinate = p_robot_node->x_coordinate;
 		uint8_t y_coordinate = p_robot_node->y_coordinate;
@@ -466,31 +507,32 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 			if (sensor_front > SIZE_OF_SQUARE_IN_CM)
 			{
 				// Ändra inte robot_dir
+				Do_turn(robot_dir);
 			}
 			// Annars, öppet höger?
 			else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
 			{
 				// Ge order om sväng höger
-				robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
-				// Vänta
-				// HÄNDELSE: 90 grader klart
-				// Kör rakt fram
+				Do_turn((robot_dir + 1) % NUMBER_OF_LINKS);
+				//robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS; // Ska antagligen tas bort
 			}
 			// Annars (öppet vänster)
 			else
 			{
 				// Ge order om svänga vänster
-				robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
-				// Vänta
-				// HÄNDELSE: 90 grader klart
-				// Kör rakt fram
+				Do_turn((robot_dir + 3) % NUMBER_OF_LINKS);
+				//robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS; // Ska antagligen tas bort
 			}
 		}
 		// Annars (gammal korsning)
 		else
 		{
 			// Uppdatera nod
-			Update_node(Exisiting_node_at(x, y), traveled_blocks);
+			c = x;
+			d = y;
+			e = x_coordinate;
+			f = y_coordinate;
+			Update_node(Exisiting_node_at(x_coordinate, y_coordinate), traveled_blocks);
 			// Åk utforskad väg till närmsta outforskade nod
 			Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
 			following_path = TRUE;
@@ -595,6 +637,9 @@ int Map_main(void)
 	following_path = 0;
 	level = 0;
 	enable_node_editing = 1;
+	finished_90_degrees = TRUE; // Ska ändras till FALSE senare
+	valid_length = TRUE; // Ska ändras till FALSE senare
+	length = 84; // Raden ska tas bort helt senare
 	
 	robot_dir = NORTH;
 	Create_origin(What_is_open(100, 100, 70)); // 0,0
@@ -641,7 +686,7 @@ int Map_main(void)
 	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 2,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 255, 255, 100); // 0,2 %%%%
+	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2 %%%%
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,2
@@ -663,7 +708,7 @@ int Map_main(void)
 	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 0,4
+  	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 0,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2

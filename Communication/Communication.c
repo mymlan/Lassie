@@ -18,6 +18,8 @@ int main(void)
 	USART_init();
 	sei();
 	
+	Map_main(); // KOMMENTERA BORT DENNA RAD OM NI INTE TESTAR KARTAN
+	
 	//timer (hämta sensordata)
 	//kart-tjofräs
 	

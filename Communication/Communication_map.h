@@ -28,6 +28,10 @@ int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 
 //int robot_dir = 0; // nord, öst, syd, väst
 
+//------------------VARIABLER FÖR INFO FRÅN BUSSEN----------------//
+uint8_t finished_90_degrees;
+uint8_t valid_length;
+uint8_t length;
 
 //-------------------- STRUCT-DEFINITIONER------------------------//
 typedef struct link_
@@ -38,8 +42,8 @@ typedef struct link_
 } link;
 typedef struct node_
 {
-	uint8_t x_coordinate;
-	uint8_t y_coordinate;
+	int8_t x_coordinate;
+	int8_t y_coordinate;
 	uint8_t cost;
 	uint8_t searched;
 	struct node_ *p_pre_dijk; // föregångare
