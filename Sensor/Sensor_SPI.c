@@ -1,26 +1,19 @@
+#define F_CPU (18432000L)
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 #include "../CommonLibrary/Common.h"
 #include "Sensor_SPI.h"
-
-static volatile uint8_t has_recieved_give_ir_sensor_data;
-static volatile uint8_t has_recieved_give_distance;
-static volatile uint8_t has_recieved_start_angular_rate_sensor;
+#include "Sensor_cm_converter.h"
 
 static volatile uint8_t error;
-static volatile uint8_t test2;
-static volatile uint8_t test3;
 
 void SPI_sensor_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	DDRB = 0x41; //sätter MISO till  utgång och även PB0 till utgång, flagga SPI
-
-	has_recieved_give_ir_sensor_data = 0;
-	has_recieved_give_distance = 0;
-	has_recieved_start_angular_rate_sensor = 0;
-	
+		
 	error = 0;
 }
 //Avbrottsrutin SPI transmission complete
@@ -30,37 +23,25 @@ ISR(SPI_STC_vect)
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_GIVE_IR_SENSOR_DATA:
-			has_recieved_give_ir_sensor_data = 1;
+			//_delay_us(10); eventuellt
+			SPI_sensor_send_sensor_data(ir_sensor_data);
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
-			has_recieved_give_distance = 1;
+		{
+			//_delay_us(10); eventuellt
+			uint8_t distance = ((reflex_count*16) / 10);
+			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 			break;
+		}
 		case ID_BYTE_START_ANGULAR_RATE_SENSOR:
-			has_recieved_start_angular_rate_sensor = 1;
+			ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor)
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
+			next_sensor_to_be_converted = ANGULAR_RATE;
 			break;
 		default:
 			error = 1;
 			break;
 	}
-}
-
-uint8_t SPI_sensor_should_give_ir_sensor_data(void)
-{
-	uint8_t result = has_recieved_give_ir_sensor_data;
-	has_recieved_give_ir_sensor_data = 0;
-	return result;
-}
-uint8_t SPI_sensor_should_give_distance(void)
-{
-	uint8_t result = has_recieved_give_distance;
-	has_recieved_give_distance = 0;
-	return result;
-}
-uint8_t SPI_sensor_should_start_angular_rate_sensor(void)
-{
-	uint8_t result = has_recieved_start_angular_rate_sensor;
-	has_recieved_start_angular_rate_sensor = 0;
-	return result;
 }
 
 /* void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
