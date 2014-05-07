@@ -11,9 +11,9 @@
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
-double BASE_SPEED = 50000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
-double left_speed_factor = 1; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double right_speed_factor = 1; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double BASE_SPEED = 40000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
+double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double K_P = 0.003; // Proportionella konstanten, 0.0025 från dennis
 double K_D = 1.5; // Deriveringskonstanten, 0.3 från dennis
 double adjusted_speed;

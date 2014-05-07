@@ -17,7 +17,7 @@ int main(void)
 	USART_init();
 	sei();
 	
-	Map_main(); // KOMMENTERA BORT DENNA RAD OM NI INTE TESTAR KARTAN
+	//Map_main(); // KOMMENTERA BORT DENNA RAD OM NI INTE TESTAR KARTAN
 	
 	//timer (hämta sensordata)
 	/*
@@ -28,6 +28,8 @@ int main(void)
 			Update_map(communication_sensor_data[0], uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 		}
 	}*/
+	
+	
 	
 	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
     while(1)
