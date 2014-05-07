@@ -12,6 +12,8 @@ void Rotate_right();
 void Rotate_left();
 void Turn_right();
 void Turn_left();
+void Tight_turn_right();
+void Tight_turn_left();
 void Open_claw();
 void Close_claw();
 

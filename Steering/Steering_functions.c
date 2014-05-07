@@ -121,6 +121,26 @@ void Turn_left()
 	OCR1B = BASE_SPEED * left_speed_factor;
 }
 
+// Sväng Höger
+void Tight_turn_right()
+{
+	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1.5;
+	right_speed_factor = 0; // Ska prövas fram, 1.8 så länge
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
+}
+
+// Sväng Vänster
+void Tight_turn_left()
+{
+	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 0;
+	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
+}
+
 // Öppna Gripklo
 void Open_claw()
 {

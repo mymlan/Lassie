@@ -293,7 +293,7 @@ void Do_turn(uint8_t cardinal_direction)
 		{
 			// Trun right order
 			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
@@ -316,7 +316,7 @@ void Do_turn(uint8_t cardinal_direction)
 		{
 			// Turn left order
 			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_LEFT);
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
