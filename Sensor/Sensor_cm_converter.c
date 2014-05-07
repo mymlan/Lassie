@@ -17,7 +17,7 @@ volatile unsigned char test;
 //volatile uint8_t  sensor1, sensor2, sensor3, sensor4, sensor5;
 
 static volatile int diff_from_middle_corridor; // Fick det inte att fungera med uint8_t
-static volatile uint8_t angle_corridor; //
+static volatile uint8_t angle_corridor;
 
 static volatile uint8_t angular_rate_value;
 static volatile float angular_rate_total = 0;
@@ -26,13 +26,11 @@ static volatile float angular_rate_diff;
 void init_interrupts()
 {
 	ACSR = (1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);  //ACD=0 AC på, ACBG=0 external comparator pin AIN0, ACIE=1 interrupt enable, ACIC=0 Timer/Counter disabled, ACIS0..1=1 interrupt on rising/falling output edge
-	//DDRD = 1<<DDD6;
 	PORTD |= 1<<PORTD6;
 	ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); // Set the ADMUX
 	ADCSRA = (1<<ADIE)|(1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); //Set Prescaler to 128, Set ADCSRA to enable interrupts
-	
 	ADCSRA |= (1<<ADSC); //Start ADC
-	//DIDR1 = (1<<AIN1D)|(1<<AIN0D); //
+	
 }
 
 void USART_init(){
@@ -63,7 +61,8 @@ ISR(USART0_RX_vect)
 			{
 				RFID_tag_correct[i] = RFID_tag_read[i];
 			}
-			/*if (RFID_tag_correct[9] == 68)
+			//Ifall vi vill kunna identifiera en specifik RFID så ska vi kolla igenom den avlästa RFIDn med ett antal kända RFID-nummer
+			/*if (RFID_tag_correct[9] == 68) 
 			{
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
 			}
@@ -98,43 +97,43 @@ ISR (ADC_vect)
 		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
 		//sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4 för att AD-omvandla left_back IR-sensor
 		break;
 		
 		case(1):
 		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
 		//sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5 för att AD-omvandla right_front IR-sensor
 		break;
 		
 		case(2):
 		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
 		//sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6 för att AD-omvandla right_back IR-sensor
 		break;
 		
 		case(3):
 		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
 		//sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7 för att AD-omvandla front_long IR-sensor
 		break;
 		
 		case(4):
 		ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH);
 		//sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		count = 0; //nollställer count
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
 		angle_corridor = 90 - calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
-		diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor, ir_sensor_data[1], ir_sensor_data[3]); 
+		diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor, ir_sensor_data[1], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
 		if (diff_from_middle_corridor > 255)
 		{
 			diff_from_middle_corridor = 255;
 		}
-		ir_sensor_data[5] = angle_corridor;//angle_corridor;
-		ir_sensor_data[6] = diff_from_middle_corridor;//diff_from_middle_corridor;
+		ir_sensor_data[5] = angle_corridor; //lägger in vinkel i korridoren på plats 6 i ir_sensor_data;
+		ir_sensor_data[6] = diff_from_middle_corridor;//lägger in avvikelsen på plats 7 i ir_sensor_data;
 		break;
 		
 		case(5):
@@ -156,7 +155,7 @@ ISR (ADC_vect)
 		break;
 	}
 	
-	ADCSRA |= (1<<ADSC); //startar omvandling
+	ADCSRA |= (1<<ADSC); //startar ny AD-omvandling
 	
 	
 }
@@ -169,9 +168,10 @@ ISR(ANALOG_COMP_vect){
 		PORTD |= (1<<PORTD6);
 	}
 	reflex_count = reflex_count+1;
-	ACSR |= (1<<ACI);//|(1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);
+	ACSR |= (1<<ACI);
 }
 
+//Funktion som omvandlar 
 uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
