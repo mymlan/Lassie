@@ -39,7 +39,7 @@ ISR(SPI_STC_vect)
 		case ID_BYTE_GIVE_DISTANCE:
 			has_recieved_give_distance = 1;
 			break;
-		case ID_BYTE_START_CALC_ANGLE:
+		case ID_BYTE_START_ANGULAR_RATE_SENSOR:
 			has_recieved_start_angular_rate_sensor = 1;
 			break;
 		default:
