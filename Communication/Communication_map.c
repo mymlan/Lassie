@@ -411,7 +411,7 @@ node* Smarter_find_unexplored_node(node* p_node)
 // Funktionen loopar tills length kommer, och returnerar då length
 uint8_t Get_length()
 {
-	SPI_Master_send_to_sensor(ID_BYTE_GIVE_DISTANCE);
+	SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_DISTANCE);
 	while (valid_length == FALSE) // Sätts till TRUE av KOM i ett avbrott
 	{
 	}

@@ -124,7 +124,7 @@ static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 *  Skickar id_byte från Master till sensor Slave.
 *  Då endast meddelanden om 1 byte ska till sensor.
 */
-void SPI_Master_send_to_sensor(uint8_t id_byte)
+void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
 {
 	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
