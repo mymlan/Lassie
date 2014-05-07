@@ -23,12 +23,12 @@ ISR(SPI_STC_vect)
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_GIVE_IR_SENSOR_DATA:
-			//_delay_us(10); eventuellt
+			_delay_us(10); //eventuellt
 			SPI_sensor_send_sensor_data(ir_sensor_data);
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 		{
-			//_delay_us(10); eventuellt
+			_delay_us(10); //eventuellt
 			uint8_t distance = ((reflex_count*16) / 10);
 			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 			break;
