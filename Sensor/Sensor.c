@@ -36,9 +36,7 @@ int main(void)
 		if(SPI_sensor_should_give_distance())
 		{
 			uint8_t distance;
-			uint8_t moved_distance = 0;
-			moved_distance = ((reflex_count*16) / 10);
-			distance = moved_distance;
+			distance = ((reflex_count*16) / 10);			
 			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 		}
 		else if (SPI_sensor_should_give_ir_sensor_data())
@@ -48,7 +46,7 @@ int main(void)
 		else if (SPI_sensor_should_start_angular_rate_sensor())
 		{
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
-			next_sensor_to_be_converted = 5;
+			next_sensor_to_be_converted = ANGULAR_RATE;
 		} 
 		else
 		{}
