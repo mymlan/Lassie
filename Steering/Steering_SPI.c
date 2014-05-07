@@ -147,12 +147,19 @@ ISR(SPI_STC_vect)
 				case COMMAND_ROTATE_LEFT: Rotate_left();
 				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
+				case COMMAND_TIGHT_TURN_RIGHT: Tight_turn_right();
+				last_auto_decision = NO_NEED_TO_REGULATE;
+				break;
+				case COMMAND_TIGHT_TURN_LEFT: Tight_turn_left();
+				last_auto_decision = NO_NEED_TO_REGULATE;
+				break;
 				case COMMAND_OPEN_CLAW: Open_claw();
 				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
 				case COMMAND_CLOSE_CLAW: Close_claw();
 				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
+				
 				default: Stop();
 				error = 1;
 				last_auto_decision = NO_NEED_TO_REGULATE;

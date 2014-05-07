@@ -210,8 +210,8 @@ uint8_t Find_index_of_node(node* p_node)
 //Hjälpfunktion till Dijkstras, hittar den nod som har lägst kostnad och som inte är avsökt.
 uint8_t Find_low_cost_index()
 {
-	uint8_t temp_cost = COMMUNICATION_INFINITY;
-	uint8_t temp_index = COMMUNICATION_INFINITY;
+	uint8_t temp_cost = DIJKSTRA_INFINITY;
+	uint8_t temp_index = DIJKSTRA_INFINITY;
 	for(uint8_t i = 0; i < all_nodes_size; i++)
 	{
 		if(all_nodes[i]->searched == FALSE && all_nodes[i]->cost < temp_cost)
@@ -234,7 +234,7 @@ uint8_t Find_shortest_path(node* p_node1, node* p_node2)
 	for(uint8_t i = 0; i < all_nodes_size; i++)
 	{
 		all_nodes[i]->searched = FALSE;
-		all_nodes[i]->cost = COMMUNICATION_INFINITY;// =102 m =~ COMMUNICATION_INFINITY
+		all_nodes[i]->cost = DIJKSTRA_INFINITY;// =102 m =~ DIJKSTRA_INFINITY
 		all_nodes[i]->p_pre_dijk = NULL;
 	}
 	if (p_node1 == p_node2)
@@ -279,10 +279,8 @@ uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, 
 // Funktionen loopar till sensor meddelar 90 grader klart
 void Wait_for_90_degree_rotation()
 {
-	while (finished_90_degrees == FALSE) // Sätts till TRUE av KOM i ett avbrott
-	{
-	}
-	// finished_90_degrees = FALSE; // Ska läggas till
+	while(SPI_map_should_handle_rotation_finished() == FALSE)
+	{}
 }
 
 // Do_turn
@@ -294,7 +292,8 @@ void Do_turn(uint8_t cardinal_direction)
 		case 3:
 		{
 			// Trun right order
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
@@ -303,8 +302,10 @@ void Do_turn(uint8_t cardinal_direction)
 		case 2:
 		{
 			// Rotation 180 degrees order
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // 90 grader
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
 			
@@ -314,7 +315,8 @@ void Do_turn(uint8_t cardinal_direction)
 		case 1:
 		{
 			// Turn left order
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_LEFT);
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
@@ -412,11 +414,10 @@ node* Smarter_find_unexplored_node(node* p_node)
 uint8_t Get_length()
 {
 	SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_DISTANCE);
-	while (valid_length == FALSE) // Sätts till TRUE av KOM i ett avbrott
+	while (SPI_map_should_handle_new_distance() == FALSE) // Sätts till TRUE av KOM i ett avbrott
 	{
 	}
-	//valid_length = FALSE;
-	return length;
+	return communication_distance;
 }
 
 // Search
@@ -426,7 +427,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	int length;
 	// -------- Detta är kartlagring och genomsökning ---------- //
 	// Indikerar sensorvärden återvändsgränd?
-	if (sensor_front < 10 && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
+	if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul  (2 STÄLLEN)
 		length = Get_length();
@@ -545,7 +546,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 // Denna kod körs varje gång sensorvärden kommer. Koden kan senare ev. flyttas till mainloopen när allt fungerar.
 // När sensorvärden kommer, kör denna kod. Koden avgör om man är i en korsning och beroende på om det är en ny eller gammal korsning skapas eller uppdateras noden.
 // Det finns avsatta rader där strybeslut skickas till styrmodulen.
-void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
 	enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
 	
@@ -643,103 +644,100 @@ int Map_main(void)
 	following_path = 0;
 	level = 0;
 	enable_node_editing = 1;
-	finished_90_degrees = TRUE; // Ska ändras till FALSE senare
-	valid_length = TRUE; // Ska ändras till FALSE senare
-	length = 84; // Raden ska tas bort helt senare
 	
 	robot_dir = NORTH;
 	Create_origin(What_is_open(100, 100, 70)); // 0,0
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,1
+	Update_map(70, 100, 100, 100, 100); // 0,1
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2
+	Update_map(70, 255, 255, 255, 255); // 0,2
 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,3
+	Update_map(70, 100, 100, 100, 100); // 0,3
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 0,4
+	Update_map(70, 100, 255, 100, 255); // 0,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
+	Update_map(70, 100, 100, 100, 100); // 0,5
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 0,6
+	Update_map(5, 100, 100, 100, 100); // 0,6
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,5
+	Update_map(70, 100, 100, 100, 100); // 0,5
+	Update_map(70, 100, 100, 100, 100); // 0,5
+	Update_map(70, 100, 100, 100, 100); // 0,5
+	Update_map(70, 100, 100, 100, 100); // 0,5
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 0,4
+	Update_map(70, 255, 100, 255, 100); // 0,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 2,4
+	Update_map(70, 100, 255, 100, 255); // 2,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 255, 255, 100, 255); // 4,4 %%%%%
+	Update_map(20, 255, 255, 100, 255); // 4,4 %%%%%
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 100, 255, 100, 255); // 4,2
+	Update_map(20, 100, 255, 100, 255); // 4,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 2,2
+	Update_map(70, 100, 255, 100, 255); // 2,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2 %%%%
+	Update_map(70, 255, 255, 255, 255); // 0,2 %%%%
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,2
+	Update_map(70, 255, 100, 255, 100); // 2,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 255, 255, 255, 255); //2,4 
+	Update_map(20, 255, 255, 255, 255); //2,4 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 4,4
+	Update_map(20, 255, 255, 255, 255); // 4,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(5, 100, 100, 100, 100); // 4,6
+	Update_map(5, 100, 100, 100, 100); // 4,6
 	
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 255, 100, 255); // 4,4
+	Update_map(70, 100, 255, 100, 255); // 4,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 100, 255, 100); // 2,4
+	Update_map(70, 255, 100, 255, 100); // 2,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-  	Sensor_values_has_arrived(20, 255, 255, 255, 255); // 0,4
+  	Update_map(20, 255, 255, 255, 255); // 0,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); // 0,2
+	Update_map(70, 255, 255, 255, 255); // 0,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 100, 255, 100, 255); // -2,2
+	Update_map(20, 100, 255, 100, 255); // -2,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 255, 100, 255, 100); // -2,4
+	Update_map(20, 255, 100, 255, 100); // -2,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(5, 100, 100, 100, 100); // -4,4
+	Update_map(5, 100, 100, 100, 100); // -4,4
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 100, 255, 100, 255); // -2,4
+	Update_map(20, 100, 255, 100, 255); // -2,4
 	
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(20, 255, 100, 255, 100); // -2,2
+	Update_map(20, 255, 100, 255, 100); // -2,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); //0,2 
+	Update_map(70, 255, 255, 255, 255); //0,2 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 0,0
+	Update_map(70, 100, 100, 100, 100); // 0,0
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	
@@ -747,25 +745,25 @@ int Map_main(void)
 	
 	
 	
-	Sensor_values_has_arrived(70, 255, 100, 255, 100); //0,2 
+	Update_map(70, 255, 100, 255, 100); //0,2 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 1,2
+	Update_map(70, 100, 100, 100, 100); // 1,2
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 100, 255, 100); //2,2 
+	Update_map(70, 255, 100, 255, 100); //2,2 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 2,3
+	Update_map(70, 100, 100, 100, 100); // 2,3
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 255, 255, 255, 255); //2,4 
+	Update_map(70, 255, 255, 255, 255); //2,4 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(70, 100, 100, 100, 100); // 2,5
+	Update_map(70, 100, 100, 100, 100); // 2,5
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Sensor_values_has_arrived(5, 100, 100, 100, 100); //2,6 
+	Update_map(5, 100, 100, 100, 100); //2,6 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	

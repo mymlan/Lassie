@@ -11,9 +11,9 @@
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
-double BASE_SPEED = 50000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
-double left_speed_factor = 1; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double right_speed_factor = 1; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double BASE_SPEED = 65000/2; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
+double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double K_P = 0.003; // Proportionella konstanten, 0.0025 från dennis
 double K_D = 1.5; // Deriveringskonstanten, 0.3 från dennis
 double adjusted_speed;
@@ -67,8 +67,8 @@ void Stop()
 void Forward()
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 1; // Mellan 0 och 2
-	right_speed_factor = 1; // Mellan 0 och 2
+	left_speed_factor = 1.5; // Mellan 0 och 2
+	right_speed_factor = 1.5; // Mellan 0 och 2
 	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
 	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
 }
@@ -77,8 +77,8 @@ void Forward()
 void Backward()
 {
 	PORTD = (0<< PORTD2) | (0<< PORTD3);
-	OCR1A = BASE_SPEED * 0.5; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * 0.5;
+	OCR1A = BASE_SPEED * 1.5; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * 1.5;
 }
 
 // Rotera Höger
@@ -116,6 +116,26 @@ void Turn_left()
 {
 	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
 	left_speed_factor = 0.5;
+	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
+}
+
+// Sväng Höger
+void Tight_turn_right()
+{
+	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1.5;
+	right_speed_factor = 0; // Ska prövas fram, 1.8 så länge
+	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
+	OCR1B = BASE_SPEED * left_speed_factor;
+}
+
+// Sväng Vänster
+void Tight_turn_left()
+{
+	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 0;
 	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
 	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
 	OCR1B = BASE_SPEED * left_speed_factor;

@@ -28,11 +28,6 @@ int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 
 //int robot_dir = 0; // nord, öst, syd, väst
 
-//------------------VARIABLER FÖR INFO FRÅN BUSSEN----------------//
-uint8_t finished_90_degrees;
-uint8_t valid_length;
-uint8_t length;
-
 //-------------------- STRUCT-DEFINITIONER------------------------//
 typedef struct link_
 {
@@ -70,7 +65,7 @@ void Follow_path();
 node* Easy_find_unexplored_node();
 node* Smarter_find_unexplored_node(node* p_node);
 void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
-void Sensor_values_has_arrived(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 
 int Map_main(void);
 

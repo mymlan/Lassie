@@ -10,8 +10,10 @@
 
 static volatile uint8_t error;
 
-uint8_t communication_sensor_data[7];
-uint8_t distance;
+static volatile uint8_t communication_has_recieved_sensor_data;
+static volatile uint8_t communication_has_recieved_distance;
+static volatile uint8_t communication_has_recieved_rotation_finished;
+static volatile uint8_t communication_has_recieved_rfid;
 
 void SPI_Master_init(void)
 {
@@ -27,7 +29,13 @@ void SPI_Master_init(void)
 	PCIFR = 0x01;
 	
 	error = 0;
-	distance = 0;
+	communication_distance = 0;
+	rfid_id = 0;
+	
+	communication_has_recieved_sensor_data = 0;
+	communication_has_recieved_distance = 0;
+	communication_has_recieved_rotation_finished = 0;
+	communication_has_recieved_rfid = 0;
 }
 
 /* static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
@@ -61,26 +69,56 @@ ISR(PCINT0_vect)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
 		SPI_Master_recieve_ir_sensor_data();
-		
 		SPI_Master_send_sensor_data_to_steering(communication_sensor_data);
 		USART_send_sensor_data_to_PC(communication_sensor_data);
+		communication_has_recieved_sensor_data = 1;
 		break;
 		case ID_BYTE_DISTANCE:
-		distance = SPI_Master_recieve_data_byte_from_sensor();
-		USART_send_byte_to_PC(ID_BYTE_DISTANCE, distance);
+		communication_distance = SPI_Master_recieve_data_byte_from_sensor();
+		USART_send_byte_to_PC(ID_BYTE_DISTANCE, communication_distance);
+		communication_has_recieved_distance = 1;
 		break;
 		case ID_BYTE_ROTATION_FINISHED:
-		{
-			//Hantera att 90grader nåtts, i karta!
-			//fråga!(med variabel att kolla på)
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			break;
-		}
+		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		communication_has_recieved_rotation_finished = 1;
+		break;
+		case ID_BYTE_FOUND_RFID:
+		rfid_id = SPI_Master_recieve_data_byte_from_sensor();
+		USART_send_byte_to_PC(ID_BYTE_FOUND_RFID, rfid_id);
+		communication_has_recieved_rfid = 1;
 		default:
 		error = 1;
 		break;
 	}
 	sei();
+}
+
+uint8_t SPI_map_should_handle_new_sensor_data(void)
+{
+	uint8_t result = communication_has_recieved_sensor_data;
+	communication_has_recieved_sensor_data = 0;
+	return result;
+}
+
+uint8_t SPI_map_should_handle_new_distance(void)
+{
+	uint8_t result = communication_has_recieved_distance;
+	communication_has_recieved_distance = 0;
+	return result;
+}
+
+uint8_t SPI_map_should_handle_rotation_finished(void)
+{
+	uint8_t result = communication_has_recieved_rotation_finished;
+	communication_has_recieved_rotation_finished = 0;
+	return result;
+}
+
+uint8_t SPI_map_should_handle_rfid(void)
+{
+	uint8_t result = communication_has_recieved_rfid;
+	communication_has_recieved_rfid = 0;
+	return result;
 }
 
 /* static void SPI_Master_transmit_data_byte(uint8_t data_byte)
@@ -94,10 +132,6 @@ static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 	_delay_us(10);
 }
 
-/* void SPI_Master_send_to_sensor(uint8_t id_byte)
-*  Skickar id_byte från Master till sensor Slave.
-*  Då endast meddelanden om 1 byte ska till sensor.
-*/
 void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
 {
 	cli();
@@ -106,7 +140,6 @@ void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
 	COMMON_SET_PIN(PORTB, PORTB4);
 	sei();
 }
-
 
 void SPI_Master_send_sensor_data_to_steering(uint8_t *data_ptr)
 {

@@ -4,14 +4,13 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 #include "../CommonLibrary/Common.h"
-#define Baudrate 2400
-#define F_CPU 18432000UL
-#define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)
-volatile uint8_t RFID_tag_read[10];
-volatile uint8_t RFID_tag_correct[10];
-volatile uint8_t RFID_count = 0;
-volatile uint8_t RFID_start_read = 0;
-
+#define Baudrate 2400  //Bits per second hos RFID
+#define F_CPU 18432000UL  //Clock freq. hos MC
+#define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)  //Baud rate generator (prescaler) för USART
+volatile uint8_t RFID_tag_read[10];  //Array med 10 bytes där RFID ID lagras
+volatile uint8_t RFID_tag_correct[10];  //Avläst ID på RFID läggs in här om korrekt avläsning skett
+volatile uint8_t RFID_count = 0;  //Räknare för att kontrollera att rätt antal bytes lästs in från RFID
+volatile uint8_t RFID_start_read = 0;  //Kontrollerar startbit innan bytes lägg in på RFID_tag_read
 
 volatile unsigned char test;
 //volatile uint8_t  sensor1, sensor2, sensor3, sensor4, sensor5;
@@ -26,7 +25,7 @@ static volatile float angular_rate_diff;
 void init_interrupts()
 {
 	ACSR = (1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);  //ACD=0 AC på, ACBG=0 external comparator pin AIN0, ACIE=1 interrupt enable, ACIC=0 Timer/Counter disabled, ACIS0..1=1 interrupt on rising/falling output edge
-	PORTD |= 1<<PORTD6;
+	PORTD |= 1<<PORTD6;  //Sätter PORTD6 (pinne 20) till HIGH som används till spänningsdelaren hos reflexsensorn
 	ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); // Set the ADMUX
 	ADCSRA = (1<<ADIE)|(1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); //Set Prescaler to 128, Set ADCSRA to enable interrupts
 	ADCSRA |= (1<<ADSC); //Start ADC
@@ -42,7 +41,6 @@ void USART_init(){
 	//eventuellt prescale räkning på buad?!?!?!
 	UBRR0H = (unsigned char)(Baud_Prescale>>8);//set upper 8 bit of baudrate
 	UBRR0L = (unsigned char)Baud_Prescale; //set rest of bits of baudrate
-	sei();
 }
 
 void init_variable()
@@ -53,13 +51,13 @@ void init_variable()
 
 ISR(USART0_RX_vect)
 {	
-	if (RFID_count==10)
+	if (RFID_count==10)  //kollar om korrekt startbit
 	{
-		if (UDR0 == 13)
+		if (UDR0 == 13)  //kollar om korrekt stopbit
 		{
 			for (int i = 0; i <= 9; i++)
 			{
-				RFID_tag_correct[i] = RFID_tag_read[i];
+				RFID_tag_correct[i] = RFID_tag_read[i];  //Laddar över korrekt avläst RFID ID
 			}
 			//Ifall vi vill kunna identifiera en specifik RFID så ska vi kolla igenom den avlästa RFIDn med ett antal kända RFID-nummer
 			/*if (RFID_tag_correct[9] == 68) 
@@ -67,8 +65,8 @@ ISR(USART0_RX_vect)
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
 			}
 			*/
-			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
-			RFID_count = 0;
+			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
+			RFID_count = 0; 
 			RFID_start_read = 0;
 		}
 		else
@@ -76,12 +74,13 @@ ISR(USART0_RX_vect)
 			RFID_count = 0;
 		}
 	}
- 	if (RFID_start_read == 1)
+	//Lägger in avlästa bytes om korrekt startbit hittats
+ 	if (RFID_start_read == 1)  
 	{
 		RFID_tag_read[RFID_count] = UDR0;
 		RFID_count++;
 	}
-	
+	//Meddelar resten av ISR att en korrekt startbit hittats
 	if (UDR0 == 10)
 	{
 		RFID_start_read = 1;
@@ -150,6 +149,7 @@ ISR (ADC_vect)
 			next_sensor_to_be_converted = IR_LEFT_FRONT; //sätter count till 0 för att återgå till AD-omvandling av IR-sensorerna
 			reflex_count = 0; //nollställer avläsningen av avståndet för att kunna påbörja ny avläsning
 			SPI_sensor_send_rotation_finished(); //skickar meddelande till KOM att rotationen är klar
+			ACSR |= (1>>ACD); //Startar Analog Comparator (reflexsensorn)
 		}
 		
 		break;
@@ -161,14 +161,15 @@ ISR (ADC_vect)
 }
 
 ISR(ANALOG_COMP_vect){
-	if (PORTD & (1<<PORTD6)){
-		PORTD &= 0xbf;
+	//Tröskelvärdet höjs resp. sänks om interruptet startars på låg resp. hög 
+	if (PORTD & (1<<PORTD6)){ 
+		PORTD |= (1>>PORTD6);  
 	}
 	else{
-		PORTD |= (1<<PORTD6);
+		PORTD |= (1<<PORTD6);  
 	}
-	reflex_count = reflex_count+1;
-	ACSR |= (1<<ACI);
+	reflex_count = reflex_count+1;  //Räknar upp 
+	ACSR |= (1<<ACI);  //Tar bort eventuella interrupts på kö (endast ett ska räknas varje gång)
 }
 
 //Funktioner som omvandlar sensor utdata till avstånd i mm
