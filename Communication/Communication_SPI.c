@@ -9,11 +9,9 @@
 #include "Firefly.h"
 
 static volatile uint8_t error;
-static volatile uint8_t test1;
-static volatile uint8_t test2;
-static volatile uint8_t test3;
 
-uint8_t test_sensor_data[7];
+uint8_t communication_sensor_data[7];
+uint8_t distance;
 
 void SPI_Master_init(void)
 {
@@ -29,9 +27,7 @@ void SPI_Master_init(void)
 	PCIFR = 0x01;
 	
 	error = 0;
-	test1 = 0;
-	test2 = 0;
-	test3 = 0;
+	distance = 0;
 }
 
 /* static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
@@ -48,11 +44,11 @@ static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
 	return SPDR;
 }
 
-static void SPI_Master_recieve_sensor_data(uint8_t *sensor_data)
+static void SPI_Master_recieve_ir_sensor_data()
 {
 	for(int8_t i = (NUMBER_OF_BYTES_IR_SENSOR_DATA - 1); i >= 0; i--)
 	{
-		sensor_data[i] = SPI_Master_recieve_data_byte_from_sensor();
+		communication_sensor_data[i] = SPI_Master_recieve_data_byte_from_sensor();
 	}
 }
 
@@ -61,36 +57,18 @@ ISR(PCINT0_vect)
 {
 	cli(); // Avaktiverar avbrott under hämtning
 	uint8_t byte_from_SPI = SPI_Master_recieve_data_byte_from_sensor();
-	test1 = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
-		{
-			uint8_t sensor_data[7];
-			SPI_Master_recieve_sensor_data(sensor_data);
-			
-			test_sensor_data[0] = sensor_data[0];
-			test_sensor_data[1] = sensor_data[1];
-			test_sensor_data[2] = sensor_data[2];
-			test_sensor_data[3] = sensor_data[3];
-			test_sensor_data[4] = sensor_data[4];
-			test_sensor_data[5] = sensor_data[5];
-			test_sensor_data[6] = sensor_data[6];
-			
-			SPI_Master_send_sensor_data_to_steering(sensor_data);
-			USART_send_sensor_data_to_PC(sensor_data);
-			break;
-		}
+		SPI_Master_recieve_ir_sensor_data();
+		
+		SPI_Master_send_sensor_data_to_steering(communication_sensor_data);
+		USART_send_sensor_data_to_PC(communication_sensor_data);
+		break;
 		case ID_BYTE_DISTANCE:
-		{
-			_delay_us(10);
-			uint8_t distance = SPI_Master_recieve_data_byte_from_sensor();
-			test3 = distance;
-			(void)distance; //löser att den inte används, gör om till void
-			USART_send_byte_to_PC(ID_BYTE_DISTANCE, distance);
-			// skicka till PC
-			break;
-		}
+		distance = SPI_Master_recieve_data_byte_from_sensor();
+		USART_send_byte_to_PC(ID_BYTE_DISTANCE, distance);
+		break;
 		case ID_BYTE_ROTATION_FINISHED:
 		{
 			//Hantera att 90grader nåtts, i karta!
@@ -100,13 +78,9 @@ ISR(PCINT0_vect)
 		}
 		default:
 		error = 1;
-		PORTD = 0;
-		PORTD = 0x20;
-		PORTD = 0;
 		break;
 	}
 	sei();
-	
 }
 
 /* static void SPI_Master_transmit_data_byte(uint8_t data_byte)
@@ -130,7 +104,6 @@ void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	SPI_Master_transmit_data_byte(id_byte); //Skickar adressbyten till sensor
 	COMMON_SET_PIN(PORTB, PORTB4);
-	//_delay_us(10); //ger tid till sensor att spara undan SPDR
 	sei();
 }
 

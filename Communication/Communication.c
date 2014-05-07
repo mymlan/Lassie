@@ -9,7 +9,6 @@
 #include "Communication_SPI.h"
 #include "Firefly.h"
 
-
 int main(void)
 {
 	COMMON_SET_PIN(PORTA, PORTA7);
