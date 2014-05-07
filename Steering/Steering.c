@@ -1,9 +1,5 @@
 
-#define F_CPU 18432000UL
-
-#include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 #include "Steering_SPI.h"
 #include "Steering_functions.h"
 
