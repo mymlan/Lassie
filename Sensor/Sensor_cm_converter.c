@@ -177,6 +177,10 @@ uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
+	if (digital_distance >= 144)
+	{
+		mm_value =20;
+	}
 	if (digital_distance <= 144 && digital_distance >= 104)
 	{
 		mm_value = ((digital_distance - 224) / -2);
@@ -219,7 +223,10 @@ uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance)
 {
 	uint8_t mm_value;
-	
+	if (digital_distance >= 142)
+	{
+		mm_value =20;
+	}
 	if (digital_distance <= 142 && digital_distance >= 103)
 	{
 		mm_value = (((digital_distance - 220)*100) / -195);
@@ -263,6 +270,10 @@ uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
+	if (digital_distance >= 150)
+	{
+		mm_value =20;
+	}
 	if (digital_distance <= 150 && digital_distance >= 108)
 	{
 		mm_value = (((digital_distance - 234)*10) / -21);
@@ -298,6 +309,10 @@ uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 {
 	int mm_value;
 	
+	if (digital_distance >= 155)
+	{
+		mm_value =20;
+	}
 	if (digital_distance <= 155 && digital_distance >= 110)
 	{
 		mm_value = (((digital_distance - 245)*100) / -225);
