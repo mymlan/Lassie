@@ -9,7 +9,6 @@
 #include "Communication_SPI.h"
 #include "Firefly.h"
 
-
 int main(void)
 {
 	COMMON_SET_PIN(PORTA, PORTA7);
@@ -21,56 +20,21 @@ int main(void)
 	Map_main(); // KOMMENTERA BORT DENNA RAD OM NI INTE TESTAR KARTAN
 	
 	//timer (hämta sensordata)
-	//kart-tjofräs
-	
-	//SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
-	
-	//uint8_t test_sensor_data[7];
-	
-	/*test_sensor_data[0] = 10;//plockar ut värdet, alt stoppar in. 0-5
-	test_sensor_data[1] = 11;
-	test_sensor_data[2] = 12;
-	test_sensor_data[3] = 13;
-	test_sensor_data[4] = 14;
-	test_sensor_data[5] = 15;
-	test_sensor_data[6] = 3;
-	*/
-	/*SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-	_delay_ms(1000);
-	
-	SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
-	
-	//SPI_Master_send_to_steering(ID_BYTE_IR_SENSOR_DATA, test_sensor_data);
-	
-	_delay_ms(2000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);*/
-	
 	/*
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_FORWARD);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_BACKWARD);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_OPEN_CLAW);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_TURN_RIGHT);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_TURN_LEFT);
-	_delay_ms(1000);
-	SPI_Master_send_command_to_steering(ID_BYTE_MANUAL_DECISIONS, COMMAND_STOP);
-	*/
+	while(1)
+	{
+		if(SPI_map_should_handle_new_sensor_data())
+		{
+			Update_map(communication_sensor_data[0], uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+		}
+	}*/
 	
 	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
     while(1)
     {
 		_delay_ms(50);
 		
-		SPI_Master_send_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
+		SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
     }
 	return 0;
 }

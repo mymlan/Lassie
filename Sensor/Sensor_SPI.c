@@ -22,24 +22,20 @@ void SPI_sensor_init(void)
 	has_recieved_start_angular_rate_sensor = 0;
 	
 	error = 0;
-	test2 = 0;
-	test3 = 0;
 }
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
-	test2 = 1;
 	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_GIVE_IR_SENSOR_DATA:
 			has_recieved_give_ir_sensor_data = 1;
-			test3 = 1;
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 			has_recieved_give_distance = 1;
 			break;
-		case ID_BYTE_START_CALC_ANGLE:
+		case ID_BYTE_START_ANGULAR_RATE_SENSOR:
 			has_recieved_start_angular_rate_sensor = 1;
 			break;
 		default:

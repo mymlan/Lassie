@@ -294,9 +294,10 @@ void Do_turn(uint8_t cardinal_direction)
 		case 3:
 		{
 			// Trun right order
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-			Wait_for_90_degree_rotation();
-			
+			while(SPI_map_should_handle_rotation_finished() == FALSE){}
+				
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
 			break;
 		}
@@ -411,7 +412,7 @@ node* Smarter_find_unexplored_node(node* p_node)
 // Funktionen loopar tills length kommer, och returnerar då length
 uint8_t Get_length()
 {
-	SPI_Master_send_to_sensor(ID_BYTE_GIVE_DISTANCE);
+	SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_DISTANCE);
 	while (valid_length == FALSE) // Sätts till TRUE av KOM i ett avbrott
 	{
 	}
