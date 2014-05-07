@@ -47,8 +47,9 @@ int main(void)
 		}
 		else if (SPI_sensor_should_start_angular_rate_sensor())
 		{
+			ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor)
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
-			count = 5;
+			next_sensor_to_be_converted = 5;
 		} 
 		else
 		{}

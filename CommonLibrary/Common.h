@@ -45,6 +45,12 @@
 #define NUMBER_OF_BYTES_IR_SENSOR_DATA (7)
 
 //Sensor
+#define IR_LEFT_FRONT (0x00)
+#define IR_LEFT_BACK (0x01)
+#define IR_RIGHT_FRONT (0x02)
+#define IR_RIGHT_BACK (0x03)
+#define IR_FRONT_LONG (0x04)
+#define ANGULAR_RATE (0x05)
 #define ANGULAR_RATE_SENSITIVITY (1.28)
 #define ANGULAR_RATE_OFFSET (133.1378)
 

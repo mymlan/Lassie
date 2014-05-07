@@ -15,6 +15,6 @@ int calculate_diff_from_middle_corridor(uint8_t angle_corridor, uint8_t sensor2,
 
 uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
 volatile uint16_t reflex_count;
-volatile uint8_t count;
+volatile uint8_t next_sensor_to_be_converted;
 
 #endif
