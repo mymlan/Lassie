@@ -47,7 +47,7 @@
 
 //Sensor
 #define ANGULAR_RATE_SENSITIVITY (1.28)
-#define ANGULAR_RATE_OFFSET (133)
+#define ANGULAR_RATE_OFFSET (133.1378)
 
 #define RFID_1 (1)
 #define RFID_2 (2)

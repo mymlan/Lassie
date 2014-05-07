@@ -12,18 +12,16 @@ volatile uint8_t RFID_tag_correct[10];
 volatile uint8_t RFID_count = 0;
 volatile uint8_t RFID_start_read = 0;
 
-volatile uint16_t reflex_count = 0;
+
 volatile unsigned char test;
-volatile uint8_t  sensor1, sensor2, sensor3, sensor4, sensor5;
+//volatile uint8_t  sensor1, sensor2, sensor3, sensor4, sensor5;
 
-volatile uint8_t count=0;
+static volatile int diff_from_middle_corridor; // Fick det inte att fungera med uint8_t
+static volatile uint8_t angle_corridor; //
 
-volatile int diff_from_middle_corridor; // fick det inte att fungera med uint8_t
-volatile uint8_t angle_corridor;
-
-volatile uint8_t angular_rate_value;
-volatile float angular_rate_total = 0;
-volatile float angular_rate_diff;
+static volatile uint8_t angular_rate_value;
+static volatile float angular_rate_total = 0;
+static volatile float angular_rate_diff;
 
 void init_interrupts()
 {
@@ -49,6 +47,12 @@ void USART_init(){
 	sei();
 }
 
+void init_variable()
+{
+	reflex_count = 0;
+	count = 0;
+}
+
 ISR(USART0_RX_vect)
 {	
 	if (RFID_count==10)
@@ -59,16 +63,14 @@ ISR(USART0_RX_vect)
 			{
 				RFID_tag_correct[i] = RFID_tag_read[i];
 			}
-				if (RFID_tag_correct[9] == 68)
-				{
-					SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
-				}
-				
-				
+			/*if (RFID_tag_correct[9] == 68)
+			{
+				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
+			}
+			*/
+			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
 			RFID_count = 0;
 			RFID_start_read = 0;
-			//flagga till kom
-			
 		}
 		else
 		{
@@ -83,53 +85,50 @@ ISR(USART0_RX_vect)
 	
 	if (UDR0 == 10)
 	{
-	RFID_start_read = 1;
+		RFID_start_read = 1;
 	}
-	//while ((UCSR0A &(1<<RXC0))==0){ //check if receiving is complete
-	//}
 }
 
 ISR (ADC_vect)
 { 
-	count = 5;
 	switch (count)
 	{
 		
 		case(0):
 		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
-		sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
+		//sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4
 		break;
 		
 		case(1):
 		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
-		sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
+		//sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5
 		break;
 		
 		case(2):
 		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
-		sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
+		//sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6
 		break;
 		
 		case(3):
 		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
-		sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
+		//sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
 		count++; //adderar 1 till count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7
 		break;
 		
 		case(4):
 		ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH);
-		sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
+		//sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		count = 0; //nollställer count
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3
-		angle_corridor = 90 - (((atan2((sensor3-sensor4), 78))*180) / 3.14);// + ((((atan2((sensor2-sensor1), 78))*180) / 3.14))) / 2);
-		diff_from_middle_corridor = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4));// - (((cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) + (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 + tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor2))) / 2) + 200; //Beräknar avståndet från den väggen i en korridor 
+		angle_corridor = 90 - calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
+		diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor, ir_sensor_data[1], ir_sensor_data[3]); 
 		if (diff_from_middle_corridor > 255)
 		{
 			diff_from_middle_corridor = 255;
@@ -139,18 +138,19 @@ ISR (ADC_vect)
 		break;
 		
 		case(5):
-		if ((-27.5 < angular_rate_total) & (angular_rate_total < 27.5))
+		if ((-27.5 < angular_rate_total) & (angular_rate_total < 27.5)) //kollar om roboten roterat 90 grader i någon riktning
 		{
-			angular_rate_value = ADCH;
-			angular_rate_diff = (angular_rate_value - 133.1378)*ANGULAR_RATE_SENSITIVITY;
-			angular_rate_total += (angular_rate_diff / 10000);
-			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2
+			angular_rate_value = ADCH; //läser av vinkelhastigheten
+			angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY; //beräknar förändringen av roterad vinkel sedan sedan förra avläsningen
+			angular_rate_total += (angular_rate_diff / 10000); //Addera förändringen av roterad vinkel till den totala roterade vinkeln
+			//ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2 för  avläsning av vinkelhastighetssensorn
 		} else
 		{
-			angular_rate_total = 0;
-			count = 0;
-			reflex_count = 0;
-			SPI_sensor_send_rotation_finished();
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 så att IR vänster fram börjar AD-omvandlas
+			angular_rate_total = 0; //sätter roterad vinkel till 0 när roboten roterat 90 grader i någon riktning
+			count = 0; //sätter count till 0 för att återgå till AD-omvandling av IR-sensorerna
+			reflex_count = 0; //nollställer avläsningen av avståndet för att kunna påbörja ny avläsning
+			SPI_sensor_send_rotation_finished(); //skickar meddelande till KOM att rotationen är klar
 		}
 		
 		break;
@@ -365,4 +365,18 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 		cm_value = 255;
 	}
 	return cm_value;
+}
+
+uint8_t calculate_angle_corridor(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4)
+{
+	uint8_t angle_in_corridor;
+	angle_in_corridor = (((((atan2((sensor3-sensor4), 78))*180) / 3.14) + ((((atan2((sensor2-sensor1), 78))*180) / 3.14))) / 2);
+	return angle_in_corridor;
+}
+
+int calculate_diff_from_middle_corridor(uint8_t angle_corridor, uint8_t sensor2, uint8_t sensor4)
+{
+	int diff_from_middle_corridor_mm;
+	diff_from_middle_corridor_mm = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) - (((cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) + (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 + tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor2))) / 2) + 200; //avvikelsen från mitten i en korridor
+	return diff_from_middle_corridor_mm;
 }

@@ -23,39 +23,30 @@ int main(void)
 	SPI_sensor_init();
 	sei();
 	
-	test_ir_sensor_data[0] = 10;
-	test_ir_sensor_data[1] = 11;
-	test_ir_sensor_data[2] = 12;
-	test_ir_sensor_data[3] = 13;
-	test_ir_sensor_data[4] = 14;
-	test_ir_sensor_data[5] = 3;
-	test_ir_sensor_data[6] = 5;
-	
-	while(1)
+	/*while(1)
 	{
 		if(SPI_sensor_should_give_ir_sensor_data())
 		{
-			test1 = 1;
 			SPI_sensor_send_sensor_data(ir_sensor_data);
 		}
-	}
+	}*/
 	
 	 
-	/*
+	
     while(1)
 	{
 		if(SPI_sensor_should_give_distance()) //skriv klart denna
 		{
 			//Skicka distans
-			uint8_t distance[1];
+			uint8_t distance;
 			uint8_t moved_distance = 0;
 			moved_distance = ((reflex_count*16) / 10);
-			distance[0] = moved_distance;
-			SPI_sensor_send(ID_BYTE_DISTANCE, distance);
+			distance = moved_distance;
+			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 		}
 		else if (SPI_sensor_should_give_ir_sensor_data())
 		{
-			SPI_sensor_send(ID_BYTE_GIVE_IR_SENSOR_DATA, ir_sensor_data);		
+			SPI_sensor_send_sensor_data(ir_sensor_data);		
 		}
 		else if (SPI_sensor_should_start_angular_rate_sensor())
 		{
@@ -64,7 +55,7 @@ int main(void)
 		} 
 		else
 		{}
-	}*/
+	}
 	
 	/*if {start_angle}
 		{
