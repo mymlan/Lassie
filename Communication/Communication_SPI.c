@@ -10,10 +10,6 @@
 
 static volatile uint8_t error;
 
-uint8_t communication_sensor_data[7];
-volatile uint8_t communication_distance;
-volatile uint8_t rfid_id;
-
 static volatile uint8_t communication_has_recieved_sensor_data;
 static volatile uint8_t communication_has_recieved_distance;
 static volatile uint8_t communication_has_recieved_rotation_finished;

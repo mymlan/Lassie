@@ -28,11 +28,6 @@ int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
 
 //int robot_dir = 0; // nord, öst, syd, väst
 
-//------------------VARIABLER FÖR INFO FRÅN BUSSEN----------------//
-uint8_t finished_90_degrees;
-uint8_t valid_length;
-uint8_t length;
-
 //-------------------- STRUCT-DEFINITIONER------------------------//
 typedef struct link_
 {

@@ -2,6 +2,10 @@
 #ifndef _COMMUNICATION_SPI_H
 #define _COMMUNICATION_SPI_H
 
+uint8_t communication_sensor_data[7];
+volatile uint8_t communication_distance;
+volatile uint8_t rfid_id;
+
 void SPI_Master_init(void);
 
 void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte);

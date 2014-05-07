@@ -279,10 +279,8 @@ uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, 
 // Funktionen loopar till sensor meddelar 90 grader klart
 void Wait_for_90_degree_rotation()
 {
-	while (finished_90_degrees == FALSE) // Sätts till TRUE av KOM i ett avbrott
-	{
-	}
-	// finished_90_degrees = FALSE; // Ska läggas till
+	while(SPI_map_should_handle_rotation_finished() == FALSE)
+	{}
 }
 
 // Do_turn
@@ -296,16 +294,18 @@ void Do_turn(uint8_t cardinal_direction)
 			// Trun right order
 			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-			while(SPI_map_should_handle_rotation_finished() == FALSE){}
-				
+			Wait_for_90_degree_rotation();
+			
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
 			break;
 		}
 		case 2:
 		{
 			// Rotation 180 degrees order
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // 90 grader
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
 			
@@ -315,6 +315,7 @@ void Do_turn(uint8_t cardinal_direction)
 		case 1:
 		{
 			// Turn left order
+			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
 			
@@ -413,11 +414,10 @@ node* Smarter_find_unexplored_node(node* p_node)
 uint8_t Get_length()
 {
 	SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_DISTANCE);
-	while (valid_length == FALSE) // Sätts till TRUE av KOM i ett avbrott
+	while (SPI_map_should_handle_new_distance() == FALSE) // Sätts till TRUE av KOM i ett avbrott
 	{
 	}
-	//valid_length = FALSE;
-	return length;
+	return communication_distance;
 }
 
 // Search
@@ -644,9 +644,6 @@ int Map_main(void)
 	following_path = 0;
 	level = 0;
 	enable_node_editing = 1;
-	finished_90_degrees = TRUE; // Ska ändras till FALSE senare
-	valid_length = TRUE; // Ska ändras till FALSE senare
-	length = 84; // Raden ska tas bort helt senare
 	
 	robot_dir = NORTH;
 	Create_origin(What_is_open(100, 100, 70)); // 0,0
