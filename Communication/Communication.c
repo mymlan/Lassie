@@ -20,17 +20,20 @@ int main(void)
 	//Map_main(); // KOMMENTERA BORT DENNA RAD OM NI INTE TESTAR KARTAN
 	
 	//timer (hämta sensordata)
+	
 	/*
+	// Startar map-kod
 	while(1)
 	{
 		if(SPI_map_should_handle_new_sensor_data())
 		{
-			Update_map(communication_sensor_data[0], uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+			Update_map(communication_sensor_data[4], communication_sensor_data[0], communication_sensor_data[2], communication_sensor_data[1], communication_sensor_data[3]);
 		}
-	}*/
+	}
+	*/
 	
 	
-	
+	// Startar testreglering
 	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
     while(1)
     {
