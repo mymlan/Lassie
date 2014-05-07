@@ -107,12 +107,100 @@ set(handles.ir_h_f,'String',5.2)
 set(handles.ir_v_b,'String',8.0)
 set(handles.ir_h_b,'String',4.4)
 
-%Här plottas värdena upp
-plot([1,2],'yellow')
-plot(handles.IR2_tid,'red')
-plot(handles.IR3_tid,'green')
-plot(handles.IR4_tid,'blue')
-plot(handles.IR5_tid,'black')
+% get_sensor_data = true;
+% 
+% ID_BYTE_IR_SENSOR_DATA = 1;
+% ID_BYTE_DISTANCE = 3;
+% ID_BYTE_AUTO_DECISIONS = 8;
+% 
+% number_of_sensor_data_collected = 0;
+% number_of_distance_collected = 0;
+% % För att göra processen så effektiv som möjligt är det bättre att allokera
+% % minne till alla vektorer innan loopen så de inte behöver växa under
+% % tiden. Om vi kör roboten i 20 min = 1200 sek = 1200000 ms och hämtar
+% % sensordata var 40e ms kommer vi få arayer som är 30000 värden långa.
+% IR_infront = zeros(1,50000);
+% IR_right_front = zeros(1,50000);
+% IR_right_back = zeros(1,50000);
+% IR_left_front = zeros(1,50000);
+% IR_left_back = zeros(1,50000);
+% regulator_error = zeros(1,50000);
+% regulator_angle = zeros(1,50000);
+% distance = zeros(1,50000);
+% 
+% 
+% while get_sensor_data
+%     id_byte = fread(handles.BT); 
+%     
+%   %for j = 1:1 %denna forloop är för testning 
+%       
+%     switch id_byte
+%         case ID_BYTE_IR_SENSOR_DATA
+%             number_of_sensor_data_collected = number_of_sensor_data_collected + 1;
+%             number_of_bytes_in_sensor_data = 7; 
+%             for i = 1:number_of_bytes_in_sensor_data
+%                 byte = fread(handles.BT);
+%                 switch i
+%                     case 7
+%                         regulator_error(number_of_sensor_data_collected) = byte; 
+%                     case 6
+%                         regulator_angle(number_of_sensor_data_collected) = byte;  
+%                     case 5
+%                         IR_infront(number_of_sensor_data_collected) = byte; 
+%                     case 4
+%                         IR_right_back(number_of_sensor_data_collected) = byte; 
+%                     case 3
+%                         IR_right_front(number_of_sensor_data_collected) = byte; 
+%                     case 2
+%                         IR_left_back(number_of_sensor_data_collected) = byte; 
+%                     case 1
+%                         IR_left_front(number_of_sensor_data_collected) = byte; 
+%                 end
+%             end
+%         case ID_BYTE_DISTANCE
+%           number_of_distance_collected = number_of_distance_collected + 1;
+%           byte = fread(handles.BT);
+%           distance(number_of_distance_collected) = byte;
+%         case ID_BYTE_AUTO_DECISIONS
+%           byte = fread(handles.BT); 
+%           %Kan ha en textruta där det står kanske
+%     end
+%     
+%     %Tanken var att jag inte behöver plotta hela vektorn utan bara de 100
+%     %senaste värdena. Hur ska jag då plotta alla i samma ruta
+%     start_value_of_plot_array = 1
+%      if(number_of_sensor_data_collected > 100)
+%          start_value_of_plot_array = number_of_sensor_data_collected - 100;
+%      end
+%     IR_infront_plot = IR_infront(start_value_of_plot_array:number_of_sensor_data_collected);
+%     IR_right_front_plot = IR_right_front(start_value_of_plot_array:number_of_sensor_data_collected);
+%     IR_right_back_plot = IR_right_back(start_value_of_plot_array:number_of_sensor_data_collected);
+%     IR_left_front_plot = IR_left_front(start_value_of_plot_array:number_of_sensor_data_collected);
+%     IR_left_back_plot = IR_left_back(start_value_of_plot_array:number_of_sensor_data_collected);
+%     
+%     axes(handles.axes1)
+%     title('IR-värden över tid')
+%     set(handles.ir_f,'String',20.7)
+%     set(handles.ir_v_f,'String',3.1)
+%     set(handles.ir_h_f,'String',5.2)
+%     set(handles.ir_v_b,'String',8.0)
+%     set(handles.ir_h_b,'String',4.4)
+%     
+%     hold off 
+%     plot(IR_left_back_plot,'black')
+%     axes(handles.axes4)
+%     plot(IR_left_front_plot,'blue')
+%     axes(handles.axes5)
+%     plot(IR_right_back_plot,'green')
+%     axes(handles.axes6)
+%     plot(IR_infront_plot,'yellow')  
+%     axes(handles.axes7)
+%     plot(IR_right_front_plot,'red')
+%     
+%   %end 
+%     
+%    get_sensor_data = false;       
+% end
 
 axes(handles.axes2)
 title('Representation av labyrint')
@@ -146,11 +234,11 @@ switch eventdata.Key
         set(handles.kommando,'String','Back')
         %Kommandot för backward är 0x02
         fwrite(handles.BT, uint8(2));  
-    case 'd'
+    case 'aeee'
         set(handles.kommando,'String','Rotera vänster') 
         %Kommandot för rotate_left är 0x06
         fwrite(handles.BT, uint8(6));       
-    case 'a'
+    case 'd'
         set(handles.kommando,'String','Rotera höger')
         %Kommandot för rotate_right är 0x05
         fwrite(handles.BT, uint8(5));
@@ -166,24 +254,34 @@ switch eventdata.Key
         set(handles.kommando,'String','Stanna')
         %Kommandot för stop är 0x00
         fwrite(handles.BT, uint8(0)); 
+    case 'x'
+        set(handles.kommando,'String','greppa med gripklo')
+        %Kommandot för open_claw är 0x08
+        fwrite(handles.BT, uint8(8)); 
+    case 'z'
+        set(handles.kommando,'String','öppna gripklo')
+        %Kommandot för close_claw är 0x07
+        fwrite(handles.BT, uint8(7)); 
         
 end
 
-% Nedan är utkommenterad kod för vad som händer då vi släpper en tanjent. I nuläget
-% räcker det med att trycka en gång så gör Lassie tills nytt manuellt
-% kommando kommer.
-% % --- Executes on key release with focus on figure1 and none of its controls.
-% function figure1_KeyReleaseFcn(hObject, eventdata, handles)
-% % hObject    handle to figure1 (see GCBO)
-% % eventdata  structure with the following fields (see FIGURE)
-% %	Key: name of the key that was released, in lower case
-% %	Character: character interpretation of the key(s) that was released
-% %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) released
-% % handles    structure with handles and user data (see GUIDATA)
-% set(handles.kommando,'String','Stop')
-% fwrite(handles.BT, uint8(0));
 
+% --- Executes on key release with focus on figure1 and none of its controls.
+function figure1_KeyReleaseFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see FIGURE)
+%	Key: name of the key that was released, in lower case
+%	Character: character interpretation of the key(s) that was released
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) released
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.kommando,'String','Stop')
+%fwrite(handles.BT, uint8(0));
 
+% ---
+% function Bytes_available_in_buffer(handles)
+% fprintf(handles.BT,'*IDN?')
+%     %byte = fread(handles.BT);
+    
 
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
@@ -197,6 +295,9 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 set(handles.bt_info, 'String', 'Wait...');
 BT = Bluetooth('Koppel', 1); % Channel är möjligtvis inte alltid 1
 disp('Blåtansobjekt skapat.')
+% BT.BytesAvailableFcnCount = 1;
+% BT.BytesAvailableFcnMode = 'byte';
+% BT.BytesAvailableFcn = {'Bytes_available_in_buffer', handles};
 fopen(BT);
 disp('Kommunikationskanal öppnad.')
 set(handles.bt_info, 'String', get(BT, 'status'));
