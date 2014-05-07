@@ -49,7 +49,7 @@ int main(void)
 		{
 			ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor)
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
-			count = 5;
+			next_sensor_to_be_converted = 5;
 		} 
 		else
 		{}
