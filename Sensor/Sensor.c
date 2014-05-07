@@ -13,9 +13,6 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 
-static volatile uint8_t test1;
-uint8_t test_ir_sensor_data[7];
-
 int main(void)
 {
 	USART_init();
