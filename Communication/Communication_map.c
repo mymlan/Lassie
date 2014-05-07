@@ -326,6 +326,8 @@ void Do_turn(uint8_t cardinal_direction)
 		{
 			break;
 		}
+		default:
+		break;
 	}
 	// Åk fram oreglerat order
 	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
@@ -457,6 +459,8 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 				x_coordinate = x_coordinate - traveled_blocks;
 				break;
 			}
+			default:
+			break;
 		}
 		// Skapa nod
 		Create_node(x_coordinate, y_coordinate, traveled_blocks, What_is_open(sensor_front_left, sensor_front_right, sensor_front));
@@ -548,7 +552,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 // Det finns avsatta rader där strybeslut skickas till styrmodulen.
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
-	enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
+	//enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
 	
 	if(sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front > 10)// hade räckt med bakre, men säkrare att kolla alla.
 	{

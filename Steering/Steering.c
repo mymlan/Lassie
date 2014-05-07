@@ -15,8 +15,6 @@ int main(void)
 	Initialize_pwm();
 	sei();
 	
-	
-	
 	while(1)
 	{
 		;
