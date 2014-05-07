@@ -3,18 +3,15 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 #include "../CommonLibrary/Common.h"
 #include "Steering_SPI.h"
 #include "Steering_functions.h"
-#include <util/delay.h>
 
 static volatile uint8_t last_auto_decision;
 
 static volatile uint8_t error;
-static volatile uint8_t test;
-static volatile uint8_t test2;
-static volatile uint8_t test3;
-static volatile uint8_t test4;
+
 static volatile uint8_t sensor_data[7];
 
 void SPI_steering_init(void)
@@ -22,18 +19,9 @@ void SPI_steering_init(void)
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	DDRB = 0x40; //Sätter MISO till utgång
 	
-	DDRD = 0x30; //utgångar på PD4 och PD5
-	PORTD = 0; //test
-	PORTD = 0x20; //test
-	PORTD = 0; //test
-	
 	last_auto_decision = NO_NEED_TO_REGULATE;
 
 	error = 0;
-	test = 0;
-	test2 = 0;
-	test3 = 0;
-	test4 = 0;
 }
 
 static void SPI_steering_recieve_sensor_data(volatile uint8_t *sensor_data)
@@ -64,10 +52,8 @@ static uint8_t SPI_steering_recieve_byte(void)
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
-	test = 1;
 	cli();
 	uint8_t byte_from_SPI = SPDR;
-	test2 = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
@@ -92,9 +78,7 @@ ISR(SPI_STC_vect)
 		}
 		case ID_BYTE_MANUAL_DECISIONS:
 		{
-			test3 = 1;
 			uint8_t manual_decision = SPI_steering_recieve_byte();
-			test4 = manual_decision;
 			switch(manual_decision)
 			{
 				case COMMAND_STOP: Stop();
@@ -159,7 +143,6 @@ ISR(SPI_STC_vect)
 				case COMMAND_CLOSE_CLAW: Close_claw();
 				last_auto_decision = NO_NEED_TO_REGULATE;
 				break;
-				
 				default: Stop();
 				error = 1;
 				last_auto_decision = NO_NEED_TO_REGULATE;
