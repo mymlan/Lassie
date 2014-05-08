@@ -204,6 +204,7 @@ disp('Blåtansobjekt skapat.')
 % BT.BytesAvailableFcnCount = 1;
 % BT.BytesAvailableFcnMode = 'byte';
 % BT.BytesAvailableFcn = {'Bytes_available_in_buffer', handles};
+%set(BT, 'Timeout', 30);
 fopen(BT);
 disp('Kommunikationskanal öppnad.')
 set(handles.bt_info, 'String', get(BT, 'status'));
@@ -233,13 +234,58 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+IR_front_long = zeros(1,20);
+IR_right_front = zeros(1,20);
+IR_right_back = zeros(1,20);
+IR_left_front = zeros(1,20);
+IR_left_back = zeros(1,20);
+regulator_error = zeros(1,20);
+regulator_angle = zeros(1,20);
 
-for i = 1:10
-byte = fread(handles.BT,1);
-disp(byte)
-disp(i)
-axes(handles.axes4)
-plot(IR_left_front_plot,'blue')
+disp('bytes available')
+disp(handles.BT.BytesAvailable)
+
+for i = 1:20
+
+id_byte = fread(handles.BT,1);
+if id_byte == 1
+    for j = 1:7
+        switch j
+            case 1
+                byte = fread(handles.BT,1);
+                regulator_error(i) = byte;
+            case 2
+                byte = fread(handles.BT,1);
+                regulator_angle(i) = byte;
+            case 3
+                byte = fread(handles.BT,1);
+                IR_front_long(i) = byte;
+            case 4
+                byte = fread(handles.BT,1);
+                IR_right_back(i) = byte;
+            case 5
+                byte = fread(handles.BT,1);
+                IR_right_front(i) = byte;
+            case 6
+                byte = fread(handles.BT,1);
+                IR_left_back(i) = byte;     
+            case 7
+                byte = fread(handles.BT,1);
+                IR_left_front(i) = byte;
+            otherwise 
+                disp('error in switch')
+        end
+    end
+else
+    disp('error')
 end
+end
+disp(IR_left_front)
+disp(IR_left_back)
+disp(IR_right_front)
+disp(IR_right_back)
+disp(IR_front_long)
+disp(regulator_angle)
+disp(regulator_error)
 disp('test')
 
