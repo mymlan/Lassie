@@ -158,7 +158,7 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: u
 
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
-	adjusted_speed = K_P * (regulator_error - 200) + K_D * tan((- regulator_angle + 90) * 3.1415 / 180.0f);
+	adjusted_speed = K_P * (regulator_error - 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
 	if (adjusted_speed >= 0.3)
 	{
 		adjusted_speed = 0.3;
