@@ -125,8 +125,8 @@ ISR (ADC_vect)
 		//sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
-		angle_corridor = 90 - calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
-		diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor, ir_sensor_data[1], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
+		angle_corridor = calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
+		diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor - 90, ir_sensor_data[1], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
 		if (diff_from_middle_corridor > 255)
 		{
 			diff_from_middle_corridor = 255;
@@ -385,18 +385,30 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 
 //Funktion som beräknar vinkeln roboten har i en korridor
 
-uint8_t calculate_angle_corridor(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4)
+uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
-	uint8_t angle_in_corridor;
-	angle_in_corridor = (((((atan2((sensor3-sensor4), 78))*180) / 3.14) + ((((atan2((sensor2-sensor1), 78))*180) / 3.14))) / 2);
-	return angle_in_corridor;
+	int8_t angle_in_corridor_right;
+	int8_t angle_in_corridor_left;
+	
+	angle_in_corridor_right = atan2(right_back - right_front, SIDE_IR_DISTANCE) * 180 / 3.14;
+	angle_in_corridor_left = atan2(left_front - left_back, SIDE_IR_DISTANCE) * 180 / 3.14;
+	
+	return 90 + angle_in_corridor_right;
+	return 90 + angle_in_corridor_left;
+	return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
 }
 
 //Funktion som beräknar avvikelse från mitten i korridoren
 
-int calculate_diff_from_middle_corridor(uint8_t angle_corridor, uint8_t sensor2, uint8_t sensor4)
+uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_back, uint8_t right_back)
 {
-	int diff_from_middle_corridor_mm;
-	diff_from_middle_corridor_mm = (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) - (((cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 - tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor4)) + (cos(((angle_corridor*3.14) / 180.0f) - 1.57))*((100 + tan((angle_corridor*3.14 / 180.0f) - 1.57)*38 + sensor2))) / 2) + 200; //avvikelsen från mitten i en korridor
-	return diff_from_middle_corridor_mm;
+	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
+	int8_t little_add_on_left = HALF_ROBOT_LENGTH + tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
+	
+	uint16_t diff_from_right_wall = (little_add_on_right + right_back) * cos(angle_corridor * 3.14 / 180.0f);
+	uint16_t diff_from_left_wall = (little_add_on_left + left_back) * cos(angle_corridor * 3.14 / 180.0f);
+	
+	return diff_from_right_wall - 100;
+	return diff_from_left_wall - 100;
+	return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
 }
