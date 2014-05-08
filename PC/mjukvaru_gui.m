@@ -130,6 +130,8 @@ function figure1_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
+set(handles.styrform, 'String', 'Manuell')
+
 switch eventdata.Key
     case 'w'
         set(handles.kommando,'String','Fram') 
@@ -234,57 +236,66 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-IR_front_long = zeros(1,20);
-IR_right_front = zeros(1,20);
-IR_right_back = zeros(1,20);
-IR_left_front = zeros(1,20);
-IR_left_back = zeros(1,20);
-regulator_error = zeros(1,20);
-regulator_angle = zeros(1,20);
+IR_front_long = zeros(1,10);
+IR_right_front = zeros(1,10);
+IR_right_back = zeros(1,10);
+IR_left_front = zeros(1,10);
+IR_left_back = zeros(1,10);
+regulator_error = zeros(1,10);
+regulator_angle = zeros(1,10);
 
 disp('bytes available')
 disp(handles.BT.BytesAvailable)
 
-for i = 1:20
+for i = 1:10
 
 id_byte = fread(handles.BT,1);
-if id_byte == 1
-    for j = 1:7
-        switch j
-            case 1
-                byte = fread(handles.BT,1);
-                regulator_error(i) = byte;
-            case 2
-                byte = fread(handles.BT,1);
-                regulator_angle(i) = byte;
-            case 3
-                byte = fread(handles.BT,1);
-                IR_front_long(i) = byte;
-            case 4
-                byte = fread(handles.BT,1);
-                IR_right_back(i) = byte;
-            case 5
-                byte = fread(handles.BT,1);
-                IR_right_front(i) = byte;
-            case 6
-                byte = fread(handles.BT,1);
-                IR_left_back(i) = byte;     
-            case 7
-                byte = fread(handles.BT,1);
-                IR_left_front(i) = byte;
-            otherwise 
-                disp('error in switch')
+switch id_byte 
+  case 1 %sensorvärden
+        for j = 1:7
+            switch j
+                case 1
+                    byte = fread(handles.BT,1);
+                    regulator_error(i) = byte;
+                case 2
+                    byte = fread(handles.BT,1);
+                    regulator_angle(i) = byte;
+                case 3
+                    byte = fread(handles.BT,1);
+                    IR_front_long(i) = byte;
+                case 4
+                    byte = fread(handles.BT,1);
+                    IR_right_back(i) = byte;
+                case 5
+                    byte = fread(handles.BT,1);
+                    IR_right_front(i) = byte;
+                case 6
+                    byte = fread(handles.BT,1);
+                    IR_left_back(i) = byte;     
+                case 7
+                    byte = fread(handles.BT,1);
+                    IR_left_front(i) = byte;
+                    set(handles.ir_v_f,'String',byte)
+    %                 axes(handles.axes1)
+    %                 plot(IR_left_front, 'blue')
+                otherwise 
+                    disp('error i switch för sensordata')
+            end
         end
-    end
-else
-    disp('error')
+    case 8 %auto_decisions
+        set(handles.styrform, 'String', 'Autonom')
+        byte = fread(handles.BT,1)
+        set(handles.kommando, 'String', 'Något')
+    otherwise
+        disp('error i switch för id-byte')
 end
 end
+
 disp(IR_left_front)
 disp(IR_left_back)
-disp(IR_right_front)
-disp(IR_right_back)
-disp(IR_front_long)
+% disp(IR_right_front)
+% disp(IR_right_back)
+% disp(IR_front_long)
 disp(regulator_angle)
 disp(regulator_error)
 disp('test')
