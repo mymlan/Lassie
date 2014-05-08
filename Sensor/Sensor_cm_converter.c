@@ -393,8 +393,9 @@ uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t 
 	angle_in_corridor_right = atan2(right_back - right_front, SIDE_IR_DISTANCE) * 180 / 3.14;
 	angle_in_corridor_left = atan2(left_front - left_back, SIDE_IR_DISTANCE) * 180 / 3.14;
 	
-	return 90 + angle_in_corridor_right;
 	return 90 + angle_in_corridor_left;
+	return 90 + angle_in_corridor_right;
+	
 	return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
 }
 
@@ -408,7 +409,7 @@ uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_
 	uint16_t diff_from_right_wall = (little_add_on_right + right_back) * cos(angle_corridor * 3.14 / 180.0f);
 	uint16_t diff_from_left_wall = (little_add_on_left + left_back) * cos(angle_corridor * 3.14 / 180.0f);
 	
-	return diff_from_right_wall - 100;
 	return diff_from_left_wall - 100;
+	return diff_from_right_wall - 100;
 	return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
 }

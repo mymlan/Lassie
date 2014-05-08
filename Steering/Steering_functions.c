@@ -11,7 +11,7 @@
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
-double BASE_SPEED = 65000/2; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
+double BASE_SPEED = 40000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
 double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double K_P = 0.003; // Proportionella konstanten, 0.0025 från dennis
@@ -158,7 +158,7 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: u
 
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
-	adjusted_speed = K_P * (regulator_error - 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
+	adjusted_speed = K_P * (- regulator_error + 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
 	if (adjusted_speed >= 0.3)
 	{
 		adjusted_speed = 0.3;
@@ -167,8 +167,8 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: u
 	{
 		adjusted_speed = -0.3;
 	}
-	OCR1A = BASE_SPEED * right_speed_factor * (1 - adjusted_speed); // Höger motor gräns
-	OCR1B = BASE_SPEED * left_speed_factor *(1 + adjusted_speed); // Vänster motor gräns
+	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
+	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
 	
 	
 	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
@@ -180,101 +180,4 @@ void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 + adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns
-}
-
-//-----------------DIVERSE FUNKTIONER----------------//
-// Pausning / Delay
-void Delay_seconds(int seconds)
-{
-	for (int i = 0; i < seconds; i++)
-	{
-		for (int j = 0; j < 10000; j++)
-		{
-			_delay_ms(1);
-		}
-	}
-}
-
-// Test
-void Testprogram()
-{
-	Forward_regulated(0, 0);
-	Delay_seconds(2);
-	
-	Stop();
-}
-
-//gustavs testfunktion
-void gusfunk()
-{
-	//full fart framåt:
-	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 2; // Mellan 0 och 2
-	right_speed_factor = 2; // Mellan 0 och 2
-	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
-	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
-	
-	Delay_seconds(1);
-	
-	//medelfart
-	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 1; // Mellan 0 och 2
-	right_speed_factor = 1; // Mellan 0 och 2
-	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
-	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
-	
-	Delay_seconds(2);
-	
-	//långsamt
-	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 0.2; // Mellan 0 och 2
-	right_speed_factor = 0.2; // Mellan 0 och 2
-	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
-	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
-	
-	Delay_seconds(4);
-	Stop();
-	
-}
-
-// Tom loop
-void Loop()
-{
-	while (1)
-	{}
-}
-
-//-------------AVBROTTSRUTIN---------------------//
-ISR(INT2_vect) // TRYCKKNAPP på PB3
-{
-	//TODO: en case(styrbeslut)
-
-	int styrbeslut = 42;
-	switch(styrbeslut)
-	{
-		case 0: Stop();
-		break;
-		case 1: Forward();
-		break;
-		case 2: Backward();
-		break;
-		case 3: Rotate_right();
-		break;
-		case 4: Rotate_left();
-		break;
-		case 5: Turn_right();
-		break;
-		case 6: Turn_left();
-		break;
-		case 7: Open_claw();
-		break;
-		case 8: Close_claw();
-		break;
-		case 42: Testprogram();
-		break;
-		case 123: gusfunk();
-		break;
-		default: Stop();
-		break;
-	}
 }
