@@ -129,10 +129,10 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Sensor.c">
+    <Compile Include="Sensor_cm_converter.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Sensor_cm_converter.c">
+    <Compile Include="Sensor.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Sensor_cm_converter.h">
