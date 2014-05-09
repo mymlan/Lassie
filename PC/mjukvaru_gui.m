@@ -256,6 +256,8 @@ id_byte = fread(handles.BT,1);
 switch id_byte 
   case 1 %sensorvärden
         for j = 1:7
+            %Ev lägga in en while här, men känns onödigt om felmeddelandet
+            %aldrig uppstår
            byte = fread(handles.BT,1);
             switch j
                 case 1
