@@ -100,7 +100,7 @@ ISR (ADC_vect)
 		break;
 		
 		case(IR_LEFT_BACK):
-		ir_sensor_data[1] = S2_convert_sensor_value__left_back(ADCH);
+		ir_sensor_data[1] = S2_convert_sensor_value_left_back(ADCH);
 		//sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
 		next_sensor_to_be_converted = IR_RIGHT_FRONT; //adderar 1 till sensor_which_AD_converted
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5 för att AD-omvandla right_front IR-sensor
@@ -177,89 +177,89 @@ uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance >= 144)
+	if (digital_distance >= 144) //Ger ut avståndet 20mm för alla digit_distance över 144
 	{
 		mm_value =20;
 	}
-	if (digital_distance <= 144 && digital_distance >= 104)
+	if (digital_distance <= 144 && digital_distance >= 104) //För digital_distance mellan 104-144 ges avstånd 40-60mm
 	{
 		mm_value = ((digital_distance - 224) / -2);
 	}
-	else if (digital_distance <=104 && digital_distance >= 80)
+	else if (digital_distance <=104 && digital_distance >= 80) //För digital_distance mellan 80-104 ges avstånd 60-80mm
 	{
 		mm_value = (((digital_distance - 176)*10) / -12);
 	}
-	else if (digital_distance <= 80 && digital_distance >= 66)
+	else if (digital_distance <= 80 && digital_distance >= 66) //För digital_distance mellan 80-66 ges avstånd 80-100mm
 	{
 		mm_value = ((digital_distance - 136)*10/ -7);
 	}
-	else if (digital_distance <= 66 && digital_distance >= 55)
+	else if (digital_distance <= 66 && digital_distance >= 55) //För digital_distance mellan 55-66 ges avstånd 100-120mm
 	{
 		mm_value = (((digital_distance - 121)*100) / -55);
 	}
-	else if (digital_distance <= 55 && digital_distance >= 47)
+	else if (digital_distance <= 55 && digital_distance >= 47) //För digital_distance mellan 47-55 ges avstånd 120-140mm
 	{
 		mm_value = (((digital_distance - 103)*10) / -4);
 	}
-	else if (digital_distance <= 47 && digital_distance >= 43)
+	else if (digital_distance <= 47 && digital_distance >= 43) //För digital_distance mellan 43-47 ges avstånd 140-160mm
 	{
 		mm_value = (((digital_distance - 75)*10) / -2);
 	}
-	else if (digital_distance <= 43 && digital_distance >= 37)
+	else if (digital_distance <= 43 && digital_distance >= 37) //För digital_distance mellan 37-42 ges avstånd 160-180mm
 	{
 		mm_value = (((digital_distance - 91)*10) / -3);
 	}
-	else if (digital_distance <= 37 && digital_distance >= 30)
+	else if (digital_distance <= 37 && digital_distance >= 30) //För digital_distance mellan 30-37 ges avstånd 180-220mm
 	{
 		mm_value = (((digital_distance - 68)*100) / -17);
 	}
-	else
+	else //Ger ut avståndet 255mm för alla digit_distance under 30
 	{
 		mm_value = 255;
 	}
 	return mm_value;
 }
 
-uint8_t S2_convert_sensor_value__left_back(uint8_t digital_distance)
+uint8_t S2_convert_sensor_value_left_back(uint8_t digital_distance)
 {
 	uint8_t mm_value;
-	if (digital_distance >= 142)
+	if (digital_distance >= 142) //Ger ut avståndet 20mm för alla digit_distance över 142
 	{
 		mm_value =20;
 	}
-	if (digital_distance <= 142 && digital_distance >= 103)
+	if (digital_distance <= 142 && digital_distance >= 103) //För digital_distance mellan 103-142 ges avstånd 40-60mm
 	{
 		mm_value = (((digital_distance - 220)*100) / -195);
 	}
-	else if (digital_distance <=103 && digital_distance >= 80)
+	else if (digital_distance <=103 && digital_distance >= 80) //För digital_distance mellan 80-103 ges avstånd 60-80mm
 	{
-		mm_value = (((digital_distance - 172)*100) / -172);
+		mm_value = (((digital_distance - 172)*100) / -115);
 	}
-	else if (digital_distance <= 80 && digital_distance >= 65)
+	else if (digital_distance <= 80 && digital_distance >= 65) //För digital_distance mellan 80-65 ges avstånd 80-100mm
 	{
 		mm_value = (((digital_distance - 140)*100) / -75);
 	}
-	else if (digital_distance <= 65 && digital_distance >= 55)
+	else if (digital_distance <= 65 && digital_distance >= 55) //För digital_distance mellan 55-65 ges avstånd 100-120mm
 	{
 		mm_value = (((digital_distance - 115)*10) / -5);
 	}
-	else if (digital_distance <= 55 && digital_distance >= 47)
+	else if (digital_distance <= 55 && digital_distance >= 47) //För digital_distance mellan 47-55 ges avstånd 120-140mm
 	{
 		mm_value = (((digital_distance - 103)*10) / -4);
 	}
-	else if (digital_distance <= 47 && digital_distance >= 41)
+	else if (digital_distance <= 47 && digital_distance >= 41) //För digital_distance mellan 41-47 ges avstånd 140-160mm
 	{
 		mm_value = (((digital_distance - 89)*10) / -3);
 	}
-	else if (digital_distance <= 41 && digital_distance >= 35)
+	else if (digital_distance <= 41 && digital_distance >= 35) //För digital_distance mellan 35-41 ges avstånd 160-180mm
 	{
-		mm_value = (((digital_distance - 53)*10) / -3);
+		mm_value = (((digital_distance - 89)*10) / -3);
 	}
-	else if (digital_distance <= 35 && digital_distance >= 31)
+	else if (digital_distance <= 35 && digital_distance >= 31) //För digital_distance mellan 31-35 ges avstånd 180-220mm
 	{
-		mm_value = (((digital_distance - 42)*10) / -2);
+		mm_value = (((digital_distance - 53)*10) / -1);
 	}
-	else
+	else //Ger ut avståndet 255mm för alla digit_distance under 31
 	{
 		mm_value = 255;
 	}
@@ -270,35 +270,35 @@ uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance >= 150)
+	if (digital_distance >= 150) //Ger ut avståndet 20mm för alla digit_distance över 150
 	{
 		mm_value =20;
 	}
-	if (digital_distance <= 150 && digital_distance >= 108)
+	if (digital_distance <= 150 && digital_distance >= 108) //För digital_distance mellan 108-150 ges avstånd 40-60mm
 	{
 		mm_value = (((digital_distance - 234)*10) / -21);
 	}
-	else if (digital_distance <=108 && digital_distance >= 83)
+	else if (digital_distance <=108 && digital_distance >= 83) //För digital_distance mellan 83-108 ges avstånd 60-80mm
 	{
 		mm_value = (((digital_distance - 183)*100) / -125);
 	}
-	else if (digital_distance <= 83 && digital_distance >= 68)
+	else if (digital_distance <= 83 && digital_distance >= 68) //För digital_distance mellan 68-83 ges avstånd 80-100mm
 	{
 		mm_value = (((digital_distance - 143)*100) / -75);
 	}
-	else if (digital_distance <= 68 && digital_distance >= 56)
+	else if (digital_distance <= 68 && digital_distance >= 56) //För digital_distance mellan 56-68 ges avstånd 100-120mm
 	{
 		mm_value = (((digital_distance - 128)*10) / -6);
 	}
-	else if (digital_distance <= 56 && digital_distance >= 41)
+	else if (digital_distance <= 56 && digital_distance >= 41) //För digital_distance mellan 41-56 ges avstånd 120-160mm
 	{
 		mm_value = (((digital_distance - 101)*100) / -38);
 	}
-	else if (digital_distance <=41 && digital_distance >= 30)
+	else if (digital_distance <=41 && digital_distance >= 30) //För digital_distance mellan 30-41 ges avstånd 160-222mm
 	{
 		mm_value = (((digital_distance - 70)*100) / -18);
 	}
-	else
+	else //Ger ut avståndet 255mm för alla digit_distance under 30
 	{
 		mm_value = 255;
 	}
@@ -309,39 +309,39 @@ uint8_t S4_convert_sensor_value_right_back(uint8_t digital_distance)
 {
 	int mm_value;
 	
-	if (digital_distance >= 155)
+	if (digital_distance >= 155) //Ger ut avståndet 20mm för alla digit_distance över 144
 	{
 		mm_value =20;
 	}
-	if (digital_distance <= 155 && digital_distance >= 110)
+	if (digital_distance <= 155 && digital_distance >= 110) //För digital_distance mellan 110-152 ges avstånd 40-60mm
 	{
 		mm_value = (((digital_distance - 245)*100) / -225);
 	}
-	else if (digital_distance <=110 && digital_distance >= 84)
+	else if (digital_distance <=110 && digital_distance >= 84) //För digital_distance mellan 84-110 ges avstånd 60-80mm
 	{
 		mm_value = (((digital_distance - 188)*10) / -13);
 	}
-	else if (digital_distance <= 84 && digital_distance >= 68)
+	else if (digital_distance <= 84 && digital_distance >= 68) //För digital_distance mellan 68-84 ges avstånd 80-100mm
 	{
 		mm_value = (((digital_distance - 148)*10) / -8);
 	}
-	else if (digital_distance <= 68 && digital_distance >= 56)
+	else if (digital_distance <= 68 && digital_distance >= 56) //För digital_distance mellan 56-68 ges avstånd 100-120mm
 	{
 		mm_value = (((digital_distance - 128)*10) / -6);
 	}
-	else if (digital_distance <= 56 && digital_distance >= 48)
+	else if (digital_distance <= 56 && digital_distance >= 48) //För digital_distance mellan 48-56 ges avstånd 120-140mm
 	{
 		mm_value = (((digital_distance - 104)*10) / -4);
 	}
-	else if (digital_distance <= 48 && digital_distance >= 40)
+	else if (digital_distance <= 48 && digital_distance >= 40) //För digital_distance mellan 40-48 ges avstånd 140-160mm
 	{
 		mm_value = (((digital_distance - 104)*10) / -4);
 	}
-	else if (digital_distance <= 40 && digital_distance >= 29)
+	else if (digital_distance <= 40 && digital_distance >= 29) //För digital_distance mellan 29-40 ges avstånd 160-233mm
 	{
 		mm_value = (((digital_distance - 64)*100) / -15);
 	}
-	else
+	else //Ger ut avståndet 255mm för alla digit_distance under 29
 	{
 		mm_value = 255;
 	}
@@ -352,31 +352,35 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 {
 	int cm_value;
 	
-	if (digital_distance <= 130 && digital_distance >= 92)
+	if (digital_distance >= 130) //Ger ut avståndet 5cm för alla digit_distance över 130
+	{
+		cm_value = 5;
+	}	
+	if (digital_distance <= 130 && digital_distance >= 92) //För digital_distance mellan 92-130 ges avstånd 10-15cm
 	{
 		cm_value = (((digital_distance-206)*10) / -76);
 	}
-	else if (digital_distance <= 92 && digital_distance >= 72)
+	else if (digital_distance <= 92 && digital_distance >= 72) //För digital_distance mellan 72-92 ges avstånd 10-15cm
 	{
 		cm_value = ((digital_distance-152) / -4);
 	}
-	else if (digital_distance <= 72 && digital_distance >= 60)
+	else if (digital_distance <= 72 && digital_distance >= 60) //För digital_distance mellan 60-72 ges avstånd 15-20cm
 	{
 		cm_value = (((digital_distance-117)*10) / -24);
 	}
-	else if (digital_distance <= 60 && digital_distance >= 53)
+	else if (digital_distance <= 60 && digital_distance >= 53) //För digital_distance mellan 53-60 ges avstånd 20-30cm
 	{
 		cm_value = (((digital_distance-95)*10) / -14);
 	}
-	else if (digital_distance <= 53 && digital_distance >= 35)
+	else if (digital_distance <= 53 && digital_distance >= 35) //För digital_distance mellan 35-53 ges avstånd 30-50cm
 	{
-		cm_value = (((digital_distance-86)*10) / -11);
+		cm_value = (((digital_distance-80)*10) / -9);
 	}
-	else if (digital_distance <= 35 && digital_distance >= 30)
+	else if (digital_distance <= 35 && digital_distance >= 30) //För digital_distance mellan 30-35 ges avstånd 50-67cm
 	{
 		cm_value = (((digital_distance-50)*10) / -3);
 	}
-	else
+	else //Ger ut avståndet 255cm för alla digit_distance under 30
 	{
 		cm_value = 255;
 	}
