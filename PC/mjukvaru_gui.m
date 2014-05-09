@@ -24,7 +24,7 @@ function varargout = mjukvaru_gui(varargin)
 
 % Edit the above text to modify the response to help mjukvaru_gui
 
-% Last Modified by GUIDE v2.5 07-May-2014 16:21:35
+% Last Modified by GUIDE v2.5 09-May-2014 14:03:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -98,7 +98,7 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-axes(handles.axes1)
+axes(handles.ir_front_long)
 title('IR-värden över tid')
 hold on
 set(handles.ir_f,'String',20.7)
@@ -236,18 +236,18 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-IR_front_long = zeros(1,10);
-IR_right_front = zeros(1,10);
-IR_right_back = zeros(1,10);
-IR_left_front = zeros(1,10);
-IR_left_back = zeros(1,10);
-regulator_error = zeros(1,10);
-regulator_angle = zeros(1,10);
+IR_front_long = zeros(1,500);
+IR_right_front = zeros(1,500);
+IR_right_back = zeros(1,500);
+IR_left_front = zeros(1,500);
+IR_left_back = zeros(1,500);
+regulator_error = zeros(1,500);
+regulator_angle = zeros(1,500);
 
 disp('bytes available')
 disp(handles.BT.BytesAvailable)
 
-for i = 1:10
+for i = 1:500
 while handles.BT.BytesAvailable == 0
     %disp('no bytes available')
 end
@@ -262,8 +262,10 @@ switch id_byte
             switch j
                 case 1
                     regulator_error(i) = byte;
+                    set(handles.error,'String',byte)                   
                 case 2
                     regulator_angle(i) = byte;
+                    set(handles.angle,'String',byte)
                 case 3
                     IR_front_long(i) = byte;
                     set(handles.ir_f,'String',byte)
@@ -331,17 +333,38 @@ switch id_byte
             otherwise
                 disp('error i auto_decisions')
         end
+    case 12 %Map coordinates
+        disp('uppdate map')
+        %Hur vill vi representera kartan
+        %x_coordinate = fread(handles.BT,1);
+        %y_coordinate = fread(handles.BT,1);
     otherwise
         disp('error i switch för id-byte')
 end
+
+start_value_to_plot_array = 1;
+if(size(IR_front_long)> 100)
+    start_value_to_plot_array = size(IR_front_long) - 100;
+end
+axes(handles.ir_front_long)
+plot(IR_front_long(start_value_to_plot_array:size(IR_front_long)))
+axes(handles.ir_right_back)
+plot(IR_right_back(start_value_to_plot_array:size(IR_right_back)))
+axes(handles.ir_right_front)
+plot(IR_right_front(start_value_to_plot_array:size(IR_right_front)))
+axes(handles.ir_left_back)
+plot(IR_left_back(start_value_to_plot_array:size(IR_right_front)))
+axes(handles.ir_left_front)
+plot(IR_left_front(start_value_to_plot_array:size(IR_left_front)))
+drawnow()
 end
 
-disp(IR_left_front)
-disp(IR_left_back)
-disp(IR_right_front)
-disp(IR_right_back)
+% disp(IR_left_front)
+% disp(IR_left_back)
+% disp(IR_right_front)
+% disp(IR_right_back)
 % disp(IR_front_long)
-disp(regulator_angle)
-disp(regulator_error)
-disp('test')
+% disp(regulator_angle)
+% disp(regulator_error)
+disp('all data du ville hämta är hämtad')
 

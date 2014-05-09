@@ -58,3 +58,12 @@ void USART_send_byte_to_PC(uint8_t id_byte, uint8_t value)
 	USART_transmit_byte_to_PC(value);
 	sei();
 }
+
+void USART_send_map_coordinates_to_PC(uint8_t id_byte, int8_t x_coordinate, int8_t y_coordinate)
+{
+	cli();
+	USART_transmit_byte_to_PC(id_byte);
+	USART_transmit_byte_to_PC(x_coordinate);
+	USART_transmit_byte_to_PC(y_coordinate);
+	sei();
+}
