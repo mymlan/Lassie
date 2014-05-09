@@ -248,8 +248,11 @@ disp('bytes available')
 disp(handles.BT.BytesAvailable)
 
 for i = 1:10
-
+while handles.BT.BytesAvailable == 0
+    %disp('no bytes available')
+end
 id_byte = fread(handles.BT,1);
+%disp(id_byte)
 switch id_byte 
   case 1 %sensorvärden
         for j = 1:7
@@ -261,17 +264,20 @@ switch id_byte
                     regulator_angle(i) = byte;
                 case 3
                     IR_front_long(i) = byte;
+                    set(handles.ir_f,'String',byte)
                 case 4
                     IR_right_back(i) = byte;
+                    set(handles.ir_h_f,'String',byte)
                 case 5
                     IR_right_front(i) = byte;
+                    set(handles.ir_h_b,'String',byte)
                 case 6
-                    IR_left_back(i) = byte;     
+                    IR_left_back(i) = byte;
+                    set(handles.ir_v_b,'String',byte)
                 case 7
                     IR_left_front(i) = byte;
                     set(handles.ir_v_f,'String',byte)
-    %                 axes(handles.axes1)
-    %                 plot(IR_left_front, 'blue')
+                    drawnow()
                 otherwise 
                     disp('error i switch för sensordata')
             end
@@ -279,25 +285,47 @@ switch id_byte
     case 8 %auto_decisions
         set(handles.styrform, 'String', 'Autonom')
         byte = fread(handles.BT,1);
+        disp(byte)
         switch byte
             case 0 %Stop
                 set(handles.kommando, 'String', 'Stanna')
+                drawnow() %Tvingar GUI att uppdatera sig
             case 1 %Forward
                 set(handles.kommando, 'String', 'Fram')
+                drawnow()
             case 2 %Backward
                 set(handles.kommando, 'String', 'Back')
+                drawnow()
             case 3 %Turn Right
                 set(handles.kommando, 'String', 'Sväng höger')
+                drawnow()
             case 4 %Turn left
                 set(handles.kommando, 'String', 'Sväng vänster')
+                drawnow()
             case 5 %Rotate Right
                 set(handles.kommando, 'String', 'Rotera höger')
+                drawnow()
             case 6 %Rotera vänster
                 set(handles.kommando, 'String', 'Rotera vänster')
+                drawnow()
             case 7 %Close claw
                 set(handles.kommando, 'String', 'Greppa med gripklo')
+                drawnow()
             case 8 %Open claw
                 set(handles.kommando, 'String', 'öppna gripklo')
+                drawnow()
+            case 9 %Forward not regulated
+                set(handles.kommando, 'String', 'Fram, ej reglerad')
+                drawnow()
+            case 10 %Backward not regulated
+                set(handles.kommando, 'String', 'Back, ej reglerad')
+                drawnow()
+            case 11 %Tight turn right
+                set(handles.kommando, 'String', 'Snäv högersväng')
+                drawnow()   
+            case 12 %Tight turn left
+                set(handles.kommando, 'String', 'Snäv vänstersväng')
+                drawnow() 
             otherwise
                 disp('error i auto_decisions')
         end
@@ -308,8 +336,8 @@ end
 
 disp(IR_left_front)
 disp(IR_left_back)
-% disp(IR_right_front)
-% disp(IR_right_back)
+disp(IR_right_front)
+disp(IR_right_back)
 % disp(IR_front_long)
 disp(regulator_angle)
 disp(regulator_error)
