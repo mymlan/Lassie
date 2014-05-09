@@ -14,9 +14,9 @@
 #define COMMON_TOGGLE_PIN(PORT, PIN) (PORT ^= (1 << PIN))
 
 //ID-bytes:
-#define ID_BYTE_IR_SENSOR_DATA (0x01)//7byte
-#define ID_BYTE_DISTANCE (0x03)//1byte cm
-#define ID_BYTE_ROTATION_FINISHED (0x06) //inget meddelande!
+#define ID_BYTE_IR_SENSOR_DATA (0x01)
+#define ID_BYTE_DISTANCE (0x03)
+#define ID_BYTE_ROTATION_FINISHED (0x06)
 #define ID_BYTE_FOUND_RFID (0x0B)
 
 #define ID_BYTE_MANUAL_DECISIONS (0x07)
@@ -26,7 +26,7 @@
 #define ID_BYTE_START_ANGULAR_RATE_SENSOR (0x04)
 #define ID_BYTE_GIVE_IR_SENSOR_DATA (0x09)
 
-#define MASTER_RECIEVED_BYTE (0x0A)
+#define ID_BYTE_MAP_COORDINATES (0x0C)
 
 //Kommando till styrmodulen
 
