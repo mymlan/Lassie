@@ -33,7 +33,6 @@ void Initialize_interrupt()
 	EICRA |= (0<<ISC20) | (1<<ISC21); // Ger avbrott på låg flank
 	
 	MCUCR = 0x03;
-	//GICR = 0x40; //External input, Från labb
 }
 
 void Initialize_pwm()
