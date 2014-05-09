@@ -314,6 +314,18 @@ switch id_byte
             case 8 %Open claw
                 set(handles.kommando, 'String', 'öppna gripklo')
                 drawnow()
+            case 9 %Forward not regulated
+                set(handles.kommando, 'String', 'Fram, ej reglerad')
+                drawnow()
+            case 10 %Backward not regulated
+                set(handles.kommando, 'String', 'Back, ej reglerad')
+                drawnow()
+            case 11 %Tight turn right
+                set(handles.kommando, 'String', 'Snäv högersväng')
+                drawnow()   
+            case 12 %Tight turn left
+                set(handles.kommando, 'String', 'Snäv vänstersväng')
+                drawnow() 
             otherwise
                 disp('error i auto_decisions')
         end
