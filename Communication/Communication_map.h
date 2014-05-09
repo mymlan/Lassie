@@ -66,7 +66,7 @@ node* Easy_find_unexplored_node();
 node* Smarter_find_unexplored_node(node* p_node);
 void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
-
+void Map_init(void);
 int Map_main(void);
 
 #endif

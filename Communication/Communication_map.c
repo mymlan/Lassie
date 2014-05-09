@@ -62,6 +62,7 @@ uint8_t What_is_open(uint8_t left, uint8_t right, uint8_t front)
 		{
 			buffer = buffer + 1;
 		}
+		test_variable_b = buffer;
 		return buffer;
 	}
 	else if(robot_dir == EAST)//om vi åker österut
@@ -125,6 +126,7 @@ void Create_origin(uint8_t open_walls)
 {
 	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
 	node* p_node = Newnode(0, 0); // Skapa nod
+	
 	p_node->start = TRUE; // Sätt nod till startnod
 	
 	for(uint8_t i = 0; i < NUMBER_OF_LINKS; i++) // Detta kanske ändras eller tas bort
@@ -559,7 +561,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 {
 	//enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
 	
-	if(sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front > 10)// hade räckt med bakre, men säkrare att kolla alla.
+	if(sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front > 20)// hade räckt med bakre, men säkrare att kolla alla.
 	{
 		enable_node_editing = TRUE;
 		
@@ -645,16 +647,21 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 	}
 }
 
-// Map_main
-// Innehållet kan ev. mergas med riktiga main när allt fungerar
-int Map_main(void)
+//initieringsfunktion, ska köras i början av huvudloopen i Communication.c
+void Map_init()
 {
 	all_nodes_size = 0;
 	following_path = 0;
 	level = 0;
 	enable_node_editing = 1;
-	
 	robot_dir = NORTH;
+}
+
+// Map_main
+// Innehållet kan ev. mergas med riktiga main när allt fungerar
+int Map_main()
+{
+
 	Create_origin(What_is_open(100, 100, 70)); // 0,0
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;

@@ -121,7 +121,7 @@ ISR (ADC_vect)
 		break;
 		
 		case(IR_FRONT_LONG):
-		ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH);
+		ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH); //S5_convert_sensor_value_front_long(ADCH);
 		//sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
 		next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
 		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
