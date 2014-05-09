@@ -91,68 +91,61 @@ ISR (ADC_vect)
 { 
 	switch (next_sensor_to_be_converted)
 	{
-		
 		case(IR_LEFT_FRONT):
-		ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
-		//sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
-		next_sensor_to_be_converted = IR_LEFT_BACK; //adderar 1 till sensor_which_AD_converted
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4 för att AD-omvandla left_back IR-sensor
-		break;
-		
+			ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
+			//sensor1 = S1_convert_sensor_value_left_front(ADCH); //sensor1 får det AD-omvandlade värdet
+			next_sensor_to_be_converted = IR_LEFT_BACK; //adderar 1 till sensor_which_AD_converted
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4 för att AD-omvandla left_back IR-sensor
+			break;
 		case(IR_LEFT_BACK):
-		ir_sensor_data[1] = S2_convert_sensor_value_left_back(ADCH);
-		//sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
-		next_sensor_to_be_converted = IR_RIGHT_FRONT; //adderar 1 till sensor_which_AD_converted
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5 för att AD-omvandla right_front IR-sensor
-		break;
-		
+			ir_sensor_data[1] = S2_convert_sensor_value_left_back(ADCH);
+			//sensor2 = S2_convert_sensor_value__left_back(ADCH); //sensor2 får det AD-omvandlade värdet
+			next_sensor_to_be_converted = IR_RIGHT_FRONT; //adderar 1 till sensor_which_AD_converted
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5 för att AD-omvandla right_front IR-sensor
+			break;
 		case(IR_RIGHT_FRONT):
-		ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
-		//sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
-		next_sensor_to_be_converted = IR_RIGHT_BACK; //adderar 1 till sensor_which_AD_converted
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6 för att AD-omvandla right_back IR-sensor
-		break;
-		
+			ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
+			//sensor3 = S3_convert_sensor_value_right_front(ADCH); //sensor3 får det AD-omvandlade värdet
+			next_sensor_to_be_converted = IR_RIGHT_BACK; //adderar 1 till sensor_which_AD_converted
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6 för att AD-omvandla right_back IR-sensor
+			break;
 		case(IR_RIGHT_BACK):
-		ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
-		//sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
-		next_sensor_to_be_converted = IR_FRONT_LONG; //adderar 1 till sensor_which_AD_converted
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7 för att AD-omvandla front_long IR-sensor
-		break;
-		
+			ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
+			//sensor4 = S4_convert_sensor_value_right_back(ADCH); //sensor4 får det AD-omvandlade värdet
+			next_sensor_to_be_converted = IR_FRONT_LONG; //adderar 1 till sensor_which_AD_converted
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7 för att AD-omvandla front_long IR-sensor
+			break;
 		case(IR_FRONT_LONG):
-		ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH);
-		//sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
-		next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
-		angle_corridor = calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
-		diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor - 90, ir_sensor_data[1], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
-		if (diff_from_middle_corridor > 255)
-		{
-			diff_from_middle_corridor = 255;
-		}
-		ir_sensor_data[5] = angle_corridor; //lägger in vinkel i korridoren på plats 6 i ir_sensor_data;
-		ir_sensor_data[6] = diff_from_middle_corridor;//lägger in avvikelsen på plats 7 i ir_sensor_data;
-		break;
-		
+			ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH);
+			//sensor5 = S5_convert_sensor_value_front_long(ADCH); //sensor5 får det AD-omvandlade värdet
+			next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
+			angle_corridor = calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
+			diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor - 90, ir_sensor_data[1], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
+			if (diff_from_middle_corridor > 255)
+			{
+				diff_from_middle_corridor = 255;
+			}
+			ir_sensor_data[5] = angle_corridor; //lägger in vinkel i korridoren på plats 6 i ir_sensor_data;
+			ir_sensor_data[6] = diff_from_middle_corridor;//lägger in avvikelsen på plats 7 i ir_sensor_data;
+			break;
 		case(ANGULAR_RATE):
-		if ((-27.5 < angular_rate_total) & (angular_rate_total < 27.5)) //kollar om roboten roterat 90 grader i någon riktning
-		{
-			angular_rate_value = ADCH; //läser av vinkelhastigheten
-			angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY; //beräknar förändringen av roterad vinkel sedan sedan förra avläsningen
-			angular_rate_total += (angular_rate_diff / 10000); //Addera förändringen av roterad vinkel till den totala roterade vinkeln
-			//ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2 för  avläsning av vinkelhastighetssensorn
-		} else
-		{
-			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 så att IR vänster fram börjar AD-omvandlas
-			angular_rate_total = 0; //sätter roterad vinkel till 0 när roboten roterat 90 grader i någon riktning
-			next_sensor_to_be_converted = IR_LEFT_FRONT; //sätter count till 0 för att återgå till AD-omvandling av IR-sensorerna
-			reflex_count = 0; //nollställer avläsningen av avståndet för att kunna påbörja ny avläsning
-			SPI_sensor_send_rotation_finished(); //skickar meddelande till KOM att rotationen är klar
-			ACSR |= (1>>ACD); //Startar Analog Comparator (reflexsensorn)
-		}
-		
-		break;
+			if ((-27.5 < angular_rate_total) & (angular_rate_total < 27.5)) //kollar om roboten roterat 90 grader i någon riktning
+			{
+				angular_rate_value = ADCH; //läser av vinkelhastigheten
+				angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY; //beräknar förändringen av roterad vinkel sedan sedan förra avläsningen
+				angular_rate_total += (angular_rate_diff / 10000); //Addera förändringen av roterad vinkel till den totala roterade vinkeln
+				//ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2 för  avläsning av vinkelhastighetssensorn
+			} else
+			{
+				ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 så att IR vänster fram börjar AD-omvandlas
+				angular_rate_total = 0; //sätter roterad vinkel till 0 när roboten roterat 90 grader i någon riktning
+				next_sensor_to_be_converted = IR_LEFT_FRONT; //sätter count till 0 för att återgå till AD-omvandling av IR-sensorerna
+				reflex_count = 0; //nollställer avläsningen av avståndet för att kunna påbörja ny avläsning
+				SPI_sensor_send_rotation_finished(); //skickar meddelande till KOM att rotationen är klar
+				ACSR |= (1>>ACD); //Startar Analog Comparator (reflexsensorn)
+			}
+			break;
 	}
 	
 	ADCSRA |= (1<<ADSC); //startar ny AD-omvandling

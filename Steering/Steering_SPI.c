@@ -12,8 +12,6 @@ static volatile uint8_t last_auto_decision;
 
 static volatile uint8_t error;
 
-static volatile uint8_t sensor_data[7];
-
 void SPI_steering_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
@@ -24,7 +22,7 @@ void SPI_steering_init(void)
 	error = 0;
 }
 
-static void SPI_steering_recieve_sensor_data(volatile uint8_t *sensor_data)
+static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 	while(number_of_bytes_in_data != 0)
@@ -58,20 +56,21 @@ ISR(SPI_STC_vect)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
 		{
+			uint8_t sensor_data[7];
 			SPI_steering_recieve_sensor_data(sensor_data);
 			switch(last_auto_decision)
 			{
 				case NO_NEED_TO_REGULATE:
-				break;
+					break;
 				case REGULATED_FORWARD:
-				Forward_regulated(sensor_data[5], sensor_data[6]);
-				break;
+					Forward_regulated(sensor_data[5], sensor_data[6]);
+					break;
 				case REGULATED_BACKWARD:
-				Backward_regulated(sensor_data[5], sensor_data[6]);
-				break;
+					Backward_regulated(sensor_data[5], sensor_data[6]);
+					break;
 				default:
-				error = 1;
-				break;
+					error = 1;
+					break;
 			}
 			
 			break;
@@ -82,26 +81,26 @@ ISR(SPI_STC_vect)
 			switch(manual_decision)
 			{
 				case COMMAND_STOP: Stop();
-				break;
+					break;
 				case COMMAND_FORWARD: Forward();
-				break;
+					break;
 				case COMMAND_BACKWARD: Backward();
-				break;
+					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
-				break;
+					break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
-				break;
+					break;
 				case COMMAND_TURN_RIGHT: Turn_right();
-				break;
+					break;
 				case COMMAND_TURN_LEFT: Turn_left();
-				break;
+					break;
 				case COMMAND_OPEN_CLAW: Open_claw();
-				break;
+					break;
 				case COMMAND_CLOSE_CLAW: Close_claw();
-				break;
+					break;
 				default: Stop();
-				error = 1;
-				break;
+					error = 1;
+					break;
 			}
 			break;
 		}
@@ -111,42 +110,42 @@ ISR(SPI_STC_vect)
 			switch(auto_decision)
 			{
 				case COMMAND_STOP: Stop();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_FORWARD: Forward_regulated(90, 200);
-				last_auto_decision = REGULATED_FORWARD;
-				break;
+					last_auto_decision = REGULATED_FORWARD;
+					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 200);
-				last_auto_decision = REGULATED_BACKWARD;
-				break;
+					last_auto_decision = REGULATED_BACKWARD;
+					break;
 				case COMMAND_FORWARD_NOT_REGULATED: Forward_regulated(90, 200);
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_BACKWARD_NOT_REGULATED: Backward_regulated(90, 200);
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_TIGHT_TURN_RIGHT: Tight_turn_right();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_TIGHT_TURN_LEFT: Tight_turn_left();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_OPEN_CLAW: Open_claw();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_CLOSE_CLAW: Close_claw();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				default: Stop();
-				error = 1;
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					error = 1;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 			}
 			break;
 		}
