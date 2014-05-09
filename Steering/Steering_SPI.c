@@ -12,8 +12,6 @@ static volatile uint8_t last_auto_decision;
 
 static volatile uint8_t error;
 
-static volatile uint8_t sensor_data[7];
-
 void SPI_steering_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
@@ -24,7 +22,7 @@ void SPI_steering_init(void)
 	error = 0;
 }
 
-static void SPI_steering_recieve_sensor_data(volatile uint8_t *sensor_data)
+static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 	while(number_of_bytes_in_data != 0)
@@ -58,6 +56,7 @@ ISR(SPI_STC_vect)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
 		{
+			uint8_t sensor_data[7];
 			SPI_steering_recieve_sensor_data(sensor_data);
 			switch(last_auto_decision)
 			{
