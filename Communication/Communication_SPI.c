@@ -14,6 +14,7 @@ static volatile uint8_t communication_has_recieved_sensor_data;
 static volatile uint8_t communication_has_recieved_distance;
 static volatile uint8_t communication_has_recieved_rotation_finished;
 static volatile uint8_t communication_has_recieved_rfid;
+static volatile int8_t times_until_send_sensor_data_to_PC;
 
 void SPI_Master_init(void)
 {
@@ -36,6 +37,7 @@ void SPI_Master_init(void)
 	communication_has_recieved_distance = 0;
 	communication_has_recieved_rotation_finished = 0;
 	communication_has_recieved_rfid = 0;
+	times_until_send_sensor_data_to_PC = NUMBER_OF_SENSOR_DATA_TO_SKIP_TO_SEND_TO_PC;
 }
 
 /* static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
@@ -70,7 +72,15 @@ ISR(PCINT0_vect)
 		case ID_BYTE_IR_SENSOR_DATA:
 		SPI_Master_recieve_ir_sensor_data();
 		SPI_Master_send_sensor_data_to_steering(communication_sensor_data);
-		USART_send_sensor_data_to_PC(communication_sensor_data);
+		if(times_until_send_sensor_data_to_PC == 0)
+		{
+			USART_send_sensor_data_to_PC(communication_sensor_data);
+			times_until_send_sensor_data_to_PC = NUMBER_OF_SENSOR_DATA_TO_SKIP_TO_SEND_TO_PC;
+		}
+		else
+		{
+			times_until_send_sensor_data_to_PC--;
+		}
 		communication_has_recieved_sensor_data = 1;
 		break;
 		case ID_BYTE_DISTANCE:
