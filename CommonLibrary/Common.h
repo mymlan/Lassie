@@ -43,6 +43,8 @@
 #define COMMAND_BACKWARD_NOT_REGULATED (0x0A)
 #define COMMAND_TIGHT_TURN_RIGHT (0x0B)
 #define COMMAND_TIGHT_TURN_LEFT (0x0C)
+#define COMMAND_ROTATE_RIGHT_90_DEGREES (0x0D) //Lägg till manuella kommandon i matlab och styrmodulen!
+#define COMMAND_ROTATE_LEFT_90_DEGREES (0x0E) //kombinera för att testa vinkelhastighetssensorn!
 
 #define NUMBER_OF_BYTES_IR_SENSOR_DATA (7)
 #define NUMBER_OF_SENSOR_DATA_TO_SKIP_TO_SEND_TO_PC (4)
