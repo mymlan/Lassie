@@ -253,27 +253,21 @@ id_byte = fread(handles.BT,1);
 switch id_byte 
   case 1 %sensorvärden
         for j = 1:7
+           byte = fread(handles.BT,1);
             switch j
                 case 1
-                    byte = fread(handles.BT,1);
                     regulator_error(i) = byte;
                 case 2
-                    byte = fread(handles.BT,1);
                     regulator_angle(i) = byte;
                 case 3
-                    byte = fread(handles.BT,1);
                     IR_front_long(i) = byte;
                 case 4
-                    byte = fread(handles.BT,1);
                     IR_right_back(i) = byte;
                 case 5
-                    byte = fread(handles.BT,1);
                     IR_right_front(i) = byte;
                 case 6
-                    byte = fread(handles.BT,1);
                     IR_left_back(i) = byte;     
                 case 7
-                    byte = fread(handles.BT,1);
                     IR_left_front(i) = byte;
                     set(handles.ir_v_f,'String',byte)
     %                 axes(handles.axes1)
@@ -284,8 +278,29 @@ switch id_byte
         end
     case 8 %auto_decisions
         set(handles.styrform, 'String', 'Autonom')
-        byte = fread(handles.BT,1)
-        set(handles.kommando, 'String', 'Något')
+        byte = fread(handles.BT,1);
+        switch byte
+            case 0 %Stop
+                set(handles.kommando, 'String', 'Stanna')
+            case 1 %Forward
+                set(handles.kommando, 'String', 'Fram')
+            case 2 %Backward
+                set(handles.kommando, 'String', 'Back')
+            case 3 %Turn Right
+                set(handles.kommando, 'String', 'Sväng höger')
+            case 4 %Turn left
+                set(handles.kommando, 'String', 'Sväng vänster')
+            case 5 %Rotate Right
+                set(handles.kommando, 'String', 'Rotera höger')
+            case 6 %Rotera vänster
+                set(handles.kommando, 'String', 'Rotera vänster')
+            case 7 %Close claw
+                set(handles.kommando, 'String', 'Greppa med gripklo')
+            case 8 %Open claw
+                set(handles.kommando, 'String', 'öppna gripklo')
+            otherwise
+                disp('error i auto_decisions')
+        end
     otherwise
         disp('error i switch för id-byte')
 end
