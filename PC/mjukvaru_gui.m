@@ -262,8 +262,10 @@ switch id_byte
             switch j
                 case 1
                     regulator_error(i) = byte;
+                    set(handles.error,'String',byte)
                 case 2
                     regulator_angle(i) = byte;
+                    set(handles.angle,'String',byte)
                 case 3
                     IR_front_long(i) = byte;
                     set(handles.ir_f,'String',byte)
