@@ -1,9 +1,14 @@
-﻿#include <avr/io.h>
+﻿#define F_CPU 18432000UL
+
+#include <avr/io.h>
 #include <stdlib.h>
 #include "../CommonLibrary/Common.h"
 #include "Communication_map.h"
 #include "Communication_SPI.h"
 #include "Firefly.h"
+#include <util/delay.h>
+
+//uint8_t start_regulating = TRUE;
 
 // Newnode
 // Allokerar minne för noden och sätter vissa egenskaper för noden.
@@ -140,6 +145,8 @@ void Create_origin(uint8_t open_walls)
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
 void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uint8_t open_walls)
 {
+	//SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
+	//start_regulating = TRUE;
 	// 1.Skapa ny nod
 	node* p_node = Newnode(x_coordinate, y_coordinate); // 1.
 	// 2.Uppdatera gammal nod
@@ -172,6 +179,9 @@ void Create_goal(uint8_t x_coordinate, uint8_t y_coordinate,uint8_t length, uint
 // Uppdaterar given nod med värden som kopplar ihop noden med senaste nod
 void Update_node(node* p_node, uint8_t length)
 {
+	//SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
+	//start_regulating = TRUE;
+	
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].p_node = p_robot_node; // Ge noden pekar-info om förra noden
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].length = length; // Ge noden längd-info om förra noden
 	
@@ -287,14 +297,14 @@ void Wait_for_90_degree_rotation()
 }
 
 // Do_turn
-// Funktonen uför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
+// Funktonen utför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
 void Do_turn(uint8_t cardinal_direction)
 {
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
 		{
-			// Trun right order
+			// Turn right order
 			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
 			USART_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
@@ -321,7 +331,7 @@ void Do_turn(uint8_t cardinal_direction)
 		{
 			// Turn left order
 			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_LEFT);
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_TIGHT_TURN_LEFT);
 			USART_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_LEFT);
 			Wait_for_90_degree_rotation();
 			
@@ -439,7 +449,11 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul  (2 STÄLLEN)
+		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		_delay_ms(1);
 		length = Get_length();
+		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		_delay_ms(1);
 		// Uträkning av koordinater
 		uint8_t x_coordinate = p_robot_node->x_coordinate;
 		uint8_t y_coordinate = p_robot_node->y_coordinate;
@@ -481,7 +495,11 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	else if (sensor_back_left > SIDE_SENSOR_OPEN_LIMIT || sensor_back_right > SIDE_SENSOR_OPEN_LIMIT)
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul (2 STÄLLEN)
+		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		_delay_ms(1);
 		length = Get_length();
+		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		_delay_ms(1);
 		// Uträkning av koordinater
 		uint8_t x_coordinate = p_robot_node->x_coordinate;
 		uint8_t y_coordinate = p_robot_node->y_coordinate;
@@ -561,9 +579,20 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 {
 	//enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
 	
-	if(sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front > 20)// hade räckt med bakre, men säkrare att kolla alla.
+	if(sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT)// hade räckt med bakre, men säkrare att kolla alla.
 	{
 		enable_node_editing = TRUE;
+		if (following_path && p_robot_node->p_pre_dijk == NULL)
+		{
+			following_path = FALSE;
+		}
+		/*
+		if (start_regulating)
+		{
+			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+			start_regulating = FALSE;
+		}
+		*/
 		
 		//if (TRUE) // SKA ÄNDRAS när vi börjar levla upp. Kan ge oönskade åk rakt fram ordrar. // Ska lösa problemet med reglering i korsning men är ej klart.
 		//{
@@ -573,8 +602,10 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 	
 	if (following_path)
 	{
+		// Korsning?
 		if (sensor_back_left > SIDE_SENSOR_OPEN_LIMIT || sensor_back_right > SIDE_SENSOR_OPEN_LIMIT || p_robot_node->p_pre_dijk->start)
 		{
+			// Får vi ändra nod?
 			if(enable_node_editing)
 			{
 				p_robot_node = p_robot_node->p_pre_dijk; // ska ju bara göras en gång per nod

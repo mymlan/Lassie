@@ -89,6 +89,7 @@ ISR(USART0_RX_vect)
 
 ISR (ADC_vect)
 { 
+	//next_sensor_to_be_converted = ANGULAR_RATE;
 	switch (next_sensor_to_be_converted)
 	{
 		case(IR_LEFT_FRONT):
@@ -116,7 +117,7 @@ ISR (ADC_vect)
 			next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
 			angle_corridor = calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
-			diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor - 90, ir_sensor_data[1], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
+			diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor - 90, ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
 			if (diff_from_middle_corridor > 255)
 			{
 				diff_from_middle_corridor = 255;
@@ -125,13 +126,15 @@ ISR (ADC_vect)
 			ir_sensor_data[6] = diff_from_middle_corridor;//lägger in avvikelsen på plats 7 i ir_sensor_data;
 			break;
 		case(ANGULAR_RATE):
-			if ((-27.5 < angular_rate_total) & (angular_rate_total < 27.5)) //kollar om roboten roterat 90 grader i någon riktning
+			if ((-26.9 < angular_rate_total) & (angular_rate_total < 22)) //kollar om roboten roterat 90 grader i någon riktning
 			{
 				angular_rate_value = ADCH; //läser av vinkelhastigheten
 				angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY; //beräknar förändringen av roterad vinkel sedan sedan förra avläsningen
 				angular_rate_total += (angular_rate_diff / 10000); //Addera förändringen av roterad vinkel till den totala roterade vinkeln
-				//ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2 för  avläsning av vinkelhastighetssensorn
-			} else
+				
+				ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1); // Sätter ADMUX till PA2 för  avläsning av vinkelhastighetssensorn
+			}
+			else
 			{
 				ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 så att IR vänster fram börjar AD-omvandlas
 				angular_rate_total = 0; //sätter roterad vinkel till 0 när roboten roterat 90 grader i någon riktning
@@ -387,15 +390,27 @@ uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t 
 	angle_in_corridor_right = atan2(right_back - right_front, SIDE_IR_DISTANCE) * 180 / 3.14;
 	angle_in_corridor_left = atan2(left_front - left_back, SIDE_IR_DISTANCE) * 180 / 3.14;
 	
-	
-	return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
-	return 90 + angle_in_corridor_left;
-	return 90 + angle_in_corridor_right;
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 90;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 90 + angle_in_corridor_right;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 90 + angle_in_corridor_left;
+	}
+	else
+	{
+		return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
+	}
 }
 
 //Funktion som beräknar avvikelse från mitten i korridoren
 
-uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_back, uint8_t right_back)
+uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
 	int8_t little_add_on_left = HALF_ROBOT_LENGTH + tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
@@ -403,7 +418,20 @@ uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_
 	uint16_t diff_from_right_wall = (little_add_on_right + right_back) * cos(angle_corridor * 3.14 / 180.0f);
 	uint16_t diff_from_left_wall = (little_add_on_left + left_back) * cos(angle_corridor * 3.14 / 180.0f);
 	
-	return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
-	return diff_from_left_wall - 100;
-	return diff_from_right_wall - 100;
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 100;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return diff_from_right_wall - 100;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 300 - diff_from_left_wall;
+	}
+	else
+	{
+		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
+	}	
 }

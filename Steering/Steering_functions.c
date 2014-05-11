@@ -11,7 +11,7 @@
 //-------------VARIABLER/KONSTANTER---------------//
 
 long int COUNTER_MAX = 65535;
-double BASE_SPEED = 40000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
+double BASE_SPEED = 35000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
 double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double K_P = 0.003; // Proportionella konstanten, 0.0025 från dennis
@@ -123,9 +123,9 @@ void Turn_left()
 // Sväng Höger
 void Tight_turn_right()
 {
-	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.5;
-	right_speed_factor = 0; // Ska prövas fram, 1.8 så länge
+	PORTD = (1<<PORTD2) | (0<<PORTD3); // Vänster - Höger
+	left_speed_factor = 1;
+	right_speed_factor = 0.6; // Ska prövas fram, 1.8 så länge
 	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
 	OCR1B = BASE_SPEED * left_speed_factor;
 }
@@ -133,9 +133,9 @@ void Tight_turn_right()
 // Sväng Vänster
 void Tight_turn_left()
 {
-	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 0;
-	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
+	PORTD = (0<<PORTD2) | (1<<PORTD3); // Vänster - Höger
+	left_speed_factor = 0.6;
+	right_speed_factor = 1; // Ska prövas fram, 1.8 så länge
 	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
 	OCR1B = BASE_SPEED * left_speed_factor;
 }
