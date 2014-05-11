@@ -201,7 +201,7 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 %Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
 %Device ID: 00066602D47F
 set(handles.bt_info, 'String', 'Wait...');
-BT = Bluetooth('Koppel', 1); % Channel är möjligtvis inte alltid 1
+BT = Bluetooth('FireFly-D47F', 1); % Channel är möjligtvis inte alltid 1
 disp('Blåtansobjekt skapat.')
 % BT.BytesAvailableFcnCount = 1;
 % BT.BytesAvailableFcnMode = 'byte';
@@ -236,23 +236,23 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-IR_front_long = zeros(1,500);
-IR_right_front = zeros(1,500);
-IR_right_back = zeros(1,500);
-IR_left_front = zeros(1,500);
-IR_left_back = zeros(1,500);
-regulator_error = zeros(1,500);
-regulator_angle = zeros(1,500);
+IR_front_long = zeros(1,1000);
+IR_right_front = zeros(1,1000);
+IR_right_back = zeros(1,1000);
+IR_left_front = zeros(1,1000);
+IR_left_back = zeros(1,1000);
+regulator_error = zeros(1,1000);
+regulator_angle = zeros(1,1000);
 
 disp('bytes available')
 disp(handles.BT.BytesAvailable)
 
-for i = 1:500
+for i = 1:60
 while handles.BT.BytesAvailable == 0
     %disp('no bytes available')
 end
 id_byte = fread(handles.BT,1);
-%disp(id_byte)
+disp(id_byte)
 switch id_byte 
   case 1 %sensorvärden
         for j = 1:7
@@ -286,10 +286,13 @@ switch id_byte
                     disp('error i switch för sensordata')
             end
         end
+    case 3 %distance
+        byte = fread(handles.BT,1);
+        set(handles.distance,'String',byte)
     case 8 %auto_decisions
         set(handles.styrform, 'String', 'Autonom')
         byte = fread(handles.BT,1);
-        disp(byte)
+        %disp(byte)
         switch byte
             case 0 %Stop
                 set(handles.kommando, 'String', 'Stanna')
