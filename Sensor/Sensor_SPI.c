@@ -23,12 +23,10 @@ ISR(SPI_STC_vect)
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_GIVE_IR_SENSOR_DATA:
-			_delay_us(10); //eventuellt
 			SPI_sensor_send_sensor_data(ir_sensor_data);
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 		{
-			_delay_us(10); //eventuellt
 			uint8_t distance = ((reflex_count*16) / 10);
 			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 			break;
@@ -65,7 +63,6 @@ void SPI_sensor_send_rotation_finished(void)
 void SPI_sensor_send_sensor_data(uint8_t *data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;	
-	cli();
 	SPI_sensor_slave_send_id_byte(ID_BYTE_IR_SENSOR_DATA);
 		
 	while(number_of_bytes_in_data != 0)
@@ -76,16 +73,13 @@ void SPI_sensor_send_sensor_data(uint8_t *data)
 			number_of_bytes_in_data--;
 		}
 	}
-	sei();	
 }
 
 void SPI_sensor_send_data_byte(uint8_t id_byte, uint8_t data_byte)
 {
-	cli();
 	SPI_sensor_slave_send_id_byte(id_byte);
 	if(SPSR & (1<<SPIF))
 	{
 		SPDR = data_byte;
 	}
-	sei();
 }
