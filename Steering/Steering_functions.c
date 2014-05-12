@@ -26,15 +26,7 @@ PORTD3: Höger riktning
 PORTD2: Vänster riktning
 */
 
-//-----------------INITIERINGSFUNKTIONER----------------//
-void Initialize_interrupt()
-{
-	EIMSK |= (1<<INT2); // Tillåter avbrott 2
-	EICRA |= (0<<ISC20) | (1<<ISC21); // Ger avbrott på låg flank
-	
-	MCUCR = 0x03;
-}
-
+//-----------------INITIERINGSFUNKTION----------------//
 void Initialize_pwm()
 {
 	// Motorer init
