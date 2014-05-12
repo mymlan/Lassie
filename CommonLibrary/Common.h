@@ -27,6 +27,7 @@
 #define ID_BYTE_GIVE_IR_SENSOR_DATA (0x09)
 
 #define ID_BYTE_MAP_COORDINATES (0x0C)
+#define ID_BYTE_MAP_PARAMETERS (0x0D)
 
 //Kommando till styrmodulen
 
