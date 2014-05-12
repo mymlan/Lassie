@@ -67,3 +67,17 @@ void USART_send_map_coordinates_to_PC(uint8_t id_byte, int8_t x_coordinate, int8
 	USART_transmit_byte_to_PC(y_coordinate);
 	sei();
 }
+
+void USART_send_map_parameters_to_PC(uint8_t robot_direction, uint8_t size_of_all_nodes, uint8_t following_path, uint8_t enable_node_editing, uint8_t level, uint8_t x_coordinate, uint8_t y_coordinates)
+{
+ cli();
+ USART_transmit_byte_to_PC(ID_BYTE_MAP_PARAMETERS);
+ USART_transmit_byte_to_PC(robot_direction);
+ USART_transmit_byte_to_PC(size_of_all_nodes);
+ USART_transmit_byte_to_PC(following_path);
+ USART_transmit_byte_to_PC(enable_node_editing);
+ USART_transmit_byte_to_PC(level);
+ USART_transmit_byte_to_PC(x_coordinate);
+ USART_transmit_byte_to_PC(y_coordinates); 
+ sei();
+}
