@@ -262,22 +262,28 @@ switch id_byte
             switch j
                 case 1
                     regulator_error(i) = byte;
-                    set(handles.error,'String',byte)                   
+                    set(handles.error,'String',byte)
+                    drawnow()
                 case 2
                     regulator_angle(i) = byte;
                     set(handles.angle,'String',byte)
+                    drawnow()
                 case 3
                     IR_front_long(i) = byte;
                     set(handles.ir_f,'String',byte)
+                    drawnow()
                 case 4
                     IR_right_back(i) = byte;
                     set(handles.ir_h_f,'String',byte)
+                    drawnow()
                 case 5
                     IR_right_front(i) = byte;
                     set(handles.ir_h_b,'String',byte)
+                    drawnow()
                 case 6
                     IR_left_back(i) = byte;
                     set(handles.ir_v_b,'String',byte)
+                    drawnow()
                 case 7
                     IR_left_front(i) = byte;
                     set(handles.ir_v_f,'String',byte)
@@ -341,6 +347,35 @@ switch id_byte
         %Hur vill vi representera kartan
         %x_coordinate = fread(handles.BT,1);
         %y_coordinate = fread(handles.BT,1);
+    case 13 %Map parameters
+        for k = 1:7
+          byte = fread(handles.BT,1);
+          switch k
+                case 1
+                    set(handles.robot_direction,'String',byte)
+                    drawnow()
+                case 2
+                    set(handles.size_all_nodes,'String',byte)
+                    drawnow()
+                case 3
+                    set(handles.following_path,'String',byte)
+                    drawnow()
+                case 4
+                    set(handles.enable_node_edit,'String',byte)
+                    drawnow()
+                case 5
+                    set(handles.level,'String',byte)
+                    drawnow()
+                case 6
+                    set(handles.x_coordinate,'String',byte)
+                    drawnow()
+                case 7
+                    set(handles.y_coordinate,'String',byte)
+                    drawnow()
+                otherwise 
+                    disp('error i switch för kartparametrar')
+          end
+        end
     otherwise
         disp('error i switch för id-byte')
 end
