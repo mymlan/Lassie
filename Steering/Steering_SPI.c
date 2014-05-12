@@ -110,20 +110,20 @@ ISR(SPI_STC_vect)
 			switch(auto_decision)
 			{
 				case COMMAND_STOP: Stop();
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_FORWARD: Forward_regulated(90, 100);
-				last_auto_decision = REGULATED_FORWARD;
-				break;
+					last_auto_decision = REGULATED_FORWARD;
+					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 100);
-				last_auto_decision = REGULATED_BACKWARD;
-				break;
+					last_auto_decision = REGULATED_BACKWARD;
+					break;
 				case COMMAND_FORWARD_NOT_REGULATED: Forward_regulated(90, 100);
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_BACKWARD_NOT_REGULATED: Backward_regulated(90, 100);
-				last_auto_decision = NO_NEED_TO_REGULATE;
-				break;
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
@@ -150,8 +150,8 @@ ISR(SPI_STC_vect)
 			break;
 		}
 		default:
-		error = 1;
-		break;
+			error = 1;
+			break;
 	}
 	sei();
 }
