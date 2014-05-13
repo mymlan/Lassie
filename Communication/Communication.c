@@ -9,15 +9,17 @@
 #include "Communication_SPI.h"
 #include "Firefly.h"
 int test_variable_e = 0;
+uint8_t testa = 0;
 int main(void)
 {
-	_delay_ms(2000);
+	//_delay_ms(2000);
 
 	SPI_Master_init();
 	USART_init();
-	
+	testa = (PINA & (1<<PINA4));
 	if(PORTA4 == MANUAL_DECISIONS_ACTIVATED)
 	{
+		COMMON_SET_PIN(PORTA,PORTA7);
 		sei();
 		while(1){}
 	}
