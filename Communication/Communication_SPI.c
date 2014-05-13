@@ -88,7 +88,7 @@ ISR(PCINT0_vect)
 			communication_has_recieved_distance = 1;
 			break;
 		case ID_BYTE_ROTATION_FINISHED:
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			//SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
 			communication_has_recieved_rotation_finished = 1;
 			break;
 		case ID_BYTE_FOUND_RFID:
