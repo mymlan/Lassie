@@ -130,7 +130,7 @@ uint8_t What_is_open(uint8_t left, uint8_t right, uint8_t front)
 void Create_origin(uint8_t open_walls)
 {
 	// Funktionen kan ändras beroende på hur start ser ut i labyrinten
-	node* p_node = Newnode(0, 0); // Skapa nod
+	node* p_node = Newnode(30, 0); // Skapa nod
 	
 	p_node->start = TRUE; // Sätt nod till startnod
 	
@@ -402,7 +402,10 @@ node* Easy_find_unexplored_node()
 			}
 		}
 	}
-	level++; // Level up 1->2
+	if(level == 1)
+	{
+		level++; // Level up 1->2	
+	}
 	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
