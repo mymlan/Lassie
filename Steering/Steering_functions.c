@@ -14,8 +14,8 @@ long int COUNTER_MAX = 65535;
 double BASE_SPEED = 35000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
 double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
 double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double K_P = 0.003; // Proportionella konstanten, 0.0025 från dennis
-double K_D = 1.5; // Deriveringskonstanten, 0.3 från dennis
+double K_P = 0.004; // Proportionella konstanten, 0.003 är bra
+double K_D = 1.5; // Deriveringskonstanten, 1.5 är bra
 double adjusted_speed;
 
 //-----------------PORTDEFINITIONER----------------//

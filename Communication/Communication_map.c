@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include <stdlib.h>
+#include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
 #include "Communication_map.h"
 #include "Communication_SPI.h"
@@ -292,8 +293,15 @@ uint8_t Get_cardinal_direction(uint8_t robot_dir, uint8_t turn) // no turn = 0, 
 // Funktionen loopar till sensor meddelar 90 grader klart
 void Wait_for_90_degree_rotation()
 {
-	while(SPI_map_should_handle_rotation_finished() == FALSE)
-	{}
+	cli();
+	uint8_t go = SPI_map_should_handle_rotation_finished();
+	sei();
+	while(go == FALSE)
+	{
+		cli();
+		go = SPI_map_should_handle_rotation_finished();
+		sei();
+	}
 }
 
 // Do_turn
@@ -452,7 +460,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul  (2 STÄLLEN)
-		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_1);
 		_delay_ms(1);
 		length = Get_length();
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
@@ -498,7 +506,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	else if (sensor_back_left > SIDE_SENSOR_OPEN_LIMIT || sensor_back_right > SIDE_SENSOR_OPEN_LIMIT)
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul (2 STÄLLEN)
-		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_2);
 		_delay_ms(1);
 		length = Get_length();
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
@@ -572,6 +580,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 			Follow_path();
 		}
 	}
+	Map_send_map_parameters_to_PC(robot_dir, all_nodes_size, following_path, enable_node_editing, level, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Sensor_values_has_arrived
@@ -650,7 +659,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 			
 			case 3: // Väntar på proviant. [Level i avbrott från knapp]
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_3);
 			
 			case 4: // Åk till mål. Level i Sensor_values_has_arrived
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
@@ -661,7 +670,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 			
 			case 5: // Stanna, vänta, loss, levla. Level här.
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_4);
 			// [Kort delay]
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_OPEN_CLAW);
 			// [Kort delay]
@@ -675,7 +684,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 			
 			case 7: // Inget. Vi är klara. Ingen levling.
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_5);
 			break;
 		}
 	}
