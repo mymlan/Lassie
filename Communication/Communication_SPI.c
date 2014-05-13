@@ -23,7 +23,7 @@ void SPI_Master_init(void)
 	SPCR = 0x51; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till master. 0x50
 	SPSR = 0x00; //Sätter SCK till fosc/4
 	COMMON_SET_PIN(PORTB, PORTB4); //initierar SS till hög
-	
+	COMMON_SET_PIN(PORTB, PORTB5); //initierar SS till hög
 	//Register för att möjliggöra PCINT5
 	PCMSK0 = 0x20;
 	PCICR = 0x01;
