@@ -27,6 +27,12 @@ PORTD2: Vänster riktning
 */
 
 //-----------------INITIERINGSFUNKTION----------------//
+void Initialize_error_pins()
+{
+	DDRA = 0xFF; // Alla port A pinnar ut.
+	PORTA = 0x00; // Inget error = 0
+}
+
 void Initialize_pwm()
 {
 	// Motorer init

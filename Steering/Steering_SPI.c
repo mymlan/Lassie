@@ -50,7 +50,6 @@ static uint8_t SPI_steering_recieve_byte(void)
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
 {
-	cli();
 	uint8_t byte_from_SPI = SPDR;
 	switch (byte_from_SPI)
 	{
@@ -142,6 +141,30 @@ ISR(SPI_STC_vect)
 				case COMMAND_CLOSE_CLAW: Close_claw();
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
+				case COMMAND_STOP_1: Stop();
+					 PORTA = 0x01; // Error
+					 last_auto_decision = NO_NEED_TO_REGULATE;
+					 break;
+				case COMMAND_STOP_2: Stop();
+					PORTA = 0x02; // Error
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
+				case COMMAND_STOP_3: Stop();
+					PORTA = 0x03; // Error
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
+				case COMMAND_STOP_4: Stop();
+					PORTA = 0x04; // Error
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;								
+				case COMMAND_STOP_5: Stop();
+					PORTA = 0x05; // Error
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
+				case COMMAND_STOP_6: Stop();
+					PORTA = 0x06; // Error
+					last_auto_decision = NO_NEED_TO_REGULATE;
+					break;
 				default: Stop();
 					error = 1;
 					last_auto_decision = NO_NEED_TO_REGULATE;
@@ -150,9 +173,9 @@ ISR(SPI_STC_vect)
 			break;
 		}
 		default:
+			PORTA = 0xE;
 			error = 1;
 			break;
 	}
-	sei();
 }
 

@@ -2,6 +2,7 @@
 #ifndef _STEERING_FUNCTIONS_H
 #define _STEERING_FUNCTIONS_H
 
+void Initialize_error_pins();
 void Initialize_pwm();
 
 void Stop();
