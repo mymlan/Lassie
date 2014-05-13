@@ -136,39 +136,39 @@ switch eventdata.Key
     case 'w'
         set(handles.kommando,'String','Fram') 
         %Kommandot för forward är 0x01
-        fwrite(handles.BT, uint8(1));       
+        fwrite(handles.BT, uint8(17));       
     case 's'
         set(handles.kommando,'String','Back')
         %Kommandot för backward är 0x02
-        fwrite(handles.BT, uint8(2));  
+        fwrite(handles.BT, uint8(18));  
     case 'a'
         set(handles.kommando,'String','Rotera vänster') 
         %Kommandot för rotate_left är 0x06
-        fwrite(handles.BT, uint8(6));       
+        fwrite(handles.BT, uint8(22));       
     case 'd'
         set(handles.kommando,'String','Rotera höger')
         %Kommandot för rotate_right är 0x05
-        fwrite(handles.BT, uint8(5));
+        fwrite(handles.BT, uint8(21));
     case 'q'
         set(handles.kommando,'String','Sväng vänster')
         %Kommandot för turn_left är 0x04
-        fwrite(handles.BT, uint8(4));
+        fwrite(handles.BT, uint8(20));
     case 'e'
         set(handles.kommando,'String','Sväng höger')
         %Kommandot för turn_right är 0x03
-        fwrite(handles.BT, uint8(3)); 
+        fwrite(handles.BT, uint8(19)); 
     case 'space'
         set(handles.kommando,'String','Stanna')
         %Kommandot för stop är 0x00
-        fwrite(handles.BT, uint8(0)); 
+        fwrite(handles.BT, uint8(16)); 
     case 'x'
         set(handles.kommando,'String','greppa med gripklo')
         %Kommandot för open_claw är 0x08
-        fwrite(handles.BT, uint8(8)); 
+        fwrite(handles.BT, uint8(24)); 
     case 'z'
         set(handles.kommando,'String','öppna gripklo')
         %Kommandot för close_claw är 0x07
-        fwrite(handles.BT, uint8(7)); 
+        fwrite(handles.BT, uint8(23)); 
         
 end
 
@@ -300,43 +300,43 @@ switch id_byte
         byte = fread(handles.BT,1);
         %disp(byte)
         switch byte
-            case 0 %Stop
+            case 16 %Stop
                 set(handles.kommando, 'String', 'Stanna')
                 drawnow() %Tvingar GUI att uppdatera sig
-            case 1 %Forward
+            case 17 %Forward
                 set(handles.kommando, 'String', 'Fram')
                 drawnow()
-            case 2 %Backward
+            case 18 %Backward
                 set(handles.kommando, 'String', 'Back')
                 drawnow()
-            case 3 %Turn Right
+            case 19 %Turn Right
                 set(handles.kommando, 'String', 'Sväng höger')
                 drawnow()
-            case 4 %Turn left
+            case 20 %Turn left
                 set(handles.kommando, 'String', 'Sväng vänster')
                 drawnow()
-            case 5 %Rotate Right
+            case 21 %Rotate Right
                 set(handles.kommando, 'String', 'Rotera höger')
                 drawnow()
-            case 6 %Rotera vänster
+            case 22 %Rotera vänster
                 set(handles.kommando, 'String', 'Rotera vänster')
                 drawnow()
-            case 7 %Close claw
+            case 23 %Close claw
                 set(handles.kommando, 'String', 'Greppa med gripklo')
                 drawnow()
-            case 8 %Open claw
+            case 24 %Open claw
                 set(handles.kommando, 'String', 'öppna gripklo')
                 drawnow()
-            case 9 %Forward not regulated
+            case 25 %Forward not regulated
                 set(handles.kommando, 'String', 'Fram, ej reglerad')
                 drawnow()
-            case 10 %Backward not regulated
+            case 26 %Backward not regulated
                 set(handles.kommando, 'String', 'Back, ej reglerad')
                 drawnow()
-            case 11 %Tight turn right
+            case 27 %Tight turn right
                 set(handles.kommando, 'String', 'Snäv högersväng')
                 drawnow()   
-            case 12 %Tight turn left
+            case 28 %Tight turn left
                 set(handles.kommando, 'String', 'Snäv vänstersväng')
                 drawnow() 
             otherwise
