@@ -7,6 +7,7 @@
 int main(void)
 {
 	// Initiering
+	Initialize_error_pins();
 	SPI_steering_init();
 	Initialize_pwm();
 	sei();
