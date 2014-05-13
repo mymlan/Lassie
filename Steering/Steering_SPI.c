@@ -173,7 +173,7 @@ ISR(SPI_STC_vect)
 			break;
 		}
 		default:
-			PORTA = 0xE;
+			PORTA = 0xEE;
 			error = 1;
 			break;
 	}
