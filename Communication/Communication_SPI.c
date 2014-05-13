@@ -65,7 +65,6 @@ static void SPI_Master_recieve_ir_sensor_data()
 // Avbrottsvektor som går hög då sensor har något att skicka. (röd flagga)
 ISR(PCINT0_vect)
 {
-	cli(); // Avaktiverar avbrott under hämtning
 	uint8_t byte_from_SPI = SPI_Master_recieve_data_byte_from_sensor();
 	switch (byte_from_SPI)
 	{
@@ -100,7 +99,6 @@ ISR(PCINT0_vect)
 			error = 1;
 			break;
 	}
-	sei();
 }
 
 uint8_t SPI_map_should_handle_new_sensor_data(void)
@@ -144,6 +142,13 @@ static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 
 void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
 {
+	COMMON_CLEAR_PIN(PORTB, PORTB4);
+	SPI_Master_transmit_data_byte(id_byte); //Skickar adressbyten till sensor
+	COMMON_SET_PIN(PORTB, PORTB4);
+}
+
+void SPI_map_send_id_byte_to_sensor(uint8_t id_byte)
+{
 	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB4);
 	SPI_Master_transmit_data_byte(id_byte); //Skickar adressbyten till sensor
@@ -151,11 +156,11 @@ void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
 	sei();
 }
 
+// Används endast i avbrottsvektor ovan, skickar vidare sensordata till styr
 void SPI_Master_send_sensor_data_to_steering(uint8_t *data_ptr)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
 	
-	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB3);
 	SPI_Master_transmit_data_byte(ID_BYTE_IR_SENSOR_DATA);
 	for(int8_t i = (number_of_bytes_in_data - 1); i >= 0; i--)
@@ -163,11 +168,18 @@ void SPI_Master_send_sensor_data_to_steering(uint8_t *data_ptr)
 		SPI_Master_transmit_data_byte(data_ptr[i]);
 	}
 	COMMON_SET_PIN(PORTB, PORTB3);
-	sei();
 }
 
 void SPI_Master_send_command_to_steering(uint8_t id_byte, uint8_t command)
 {	
+	COMMON_CLEAR_PIN(PORTB, PORTB3);
+	SPI_Master_transmit_data_byte(id_byte);
+	SPI_Master_transmit_data_byte(command);
+	COMMON_SET_PIN(PORTB, PORTB3);
+}
+
+void SPI_map_send_command_to_steering(uint8_t id_byte, uint8_t command)
+{
 	cli();
 	COMMON_CLEAR_PIN(PORTB, PORTB3);
 	SPI_Master_transmit_data_byte(id_byte);
@@ -175,4 +187,3 @@ void SPI_Master_send_command_to_steering(uint8_t id_byte, uint8_t command)
 	COMMON_SET_PIN(PORTB, PORTB3);
 	sei();
 }
-

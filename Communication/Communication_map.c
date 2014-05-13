@@ -145,7 +145,7 @@ void Create_origin(uint8_t open_walls)
 // Skapar en ny nod kopplad till robotpekaren enligt givna argument. Uppdaterar p_robot_node så returvärde behövs inte.
 void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uint8_t open_walls)
 {
-	//SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
+	//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
 	//start_regulating = TRUE;
 	// 1.Skapa ny nod
 	node* p_node = Newnode(x_coordinate, y_coordinate); // 1.
@@ -179,7 +179,7 @@ void Create_goal(uint8_t x_coordinate, uint8_t y_coordinate,uint8_t length, uint
 // Uppdaterar given nod med värden som kopplar ihop noden med senaste nod
 void Update_node(node* p_node, uint8_t length)
 {
-	//SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
+	//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD_NOT_REGULATED);
 	//start_regulating = TRUE;
 	
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].p_node = p_robot_node; // Ge noden pekar-info om förra noden
@@ -305,9 +305,9 @@ void Do_turn(uint8_t cardinal_direction)
 		case 3:
 		{
 			// Turn right order
-			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
-			USART_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
+			Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
@@ -316,12 +316,12 @@ void Do_turn(uint8_t cardinal_direction)
 		case 2:
 		{
 			// Rotation 180 degrees order
-			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-			USART_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // 90 grader
-			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
 			
 			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
@@ -330,9 +330,9 @@ void Do_turn(uint8_t cardinal_direction)
 		case 1:
 		{
 			// Turn left order
-			SPI_Master_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_TIGHT_TURN_LEFT);
-			USART_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_LEFT);
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_TIGHT_TURN_LEFT);
+			Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_LEFT);
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
@@ -346,8 +346,8 @@ void Do_turn(uint8_t cardinal_direction)
 		break;
 	}
 	// Åk fram oreglerat order
-	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD); // Not regulated kanske
-	USART_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD); // Not regulated kanske
+	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 }
 
 // Get_dijkpointers_cardinal_direction
@@ -432,7 +432,7 @@ node* Smarter_find_unexplored_node(node* p_node)
 // Funktionen loopar tills length kommer, och returnerar då length
 uint8_t Get_length()
 {
-	SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_DISTANCE);
+	SPI_map_send_id_byte_to_sensor(ID_BYTE_GIVE_DISTANCE);
 	while (SPI_map_should_handle_new_distance() == FALSE) // Sätts till TRUE av KOM i ett avbrott
 	{
 	}
@@ -449,10 +449,10 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT) // 10 cm så vi kommer nära väggen och klarar detektera en ev. RFID
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul  (2 STÄLLEN)
-		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 		_delay_ms(1);
 		length = Get_length();
-		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 		_delay_ms(1);
 		// Uträkning av koordinater
 		uint8_t x_coordinate = p_robot_node->x_coordinate;
@@ -495,10 +495,10 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 	else if (sensor_back_left > SIDE_SENSOR_OPEN_LIMIT || sensor_back_right > SIDE_SENSOR_OPEN_LIMIT)
 	{
 		// UPPDATERA LENGTH! Fixas vid anrop till sensormodul (2 STÄLLEN)
-		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 		_delay_ms(1);
 		length = Get_length();
-		SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 		_delay_ms(1);
 		// Uträkning av koordinater
 		uint8_t x_coordinate = p_robot_node->x_coordinate;
@@ -589,14 +589,14 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		/*
 		if (start_regulating)
 		{
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 			start_regulating = FALSE;
 		}
 		*/
 		
 		//if (TRUE) // SKA ÄNDRAS när vi börjar levla upp. Kan ge oönskade åk rakt fram ordrar. // Ska lösa problemet med reglering i korsning men är ej klart.
 		//{
-		//	SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		//	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 		//}
 	}
 	
@@ -647,10 +647,10 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 			
 			case 3: // Väntar på proviant. [Level i avbrott från knapp]
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			
 			case 4: // Åk till mål. Level i Sensor_values_has_arrived
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
 			// [Kort delay]
 			Find_shortest_path(goal_node, all_nodes[0]);
 			following_path = TRUE;
@@ -658,9 +658,9 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 			
 			case 5: // Stanna, vänta, loss, levla. Level här.
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			// [Kort delay]
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_OPEN_CLAW);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_OPEN_CLAW);
 			// [Kort delay]
 			level++; // Ev. bugg till senare: Lassie ska åka samma väg tillbaka.
 			break;
@@ -672,7 +672,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 			
 			case 7: // Inget. Vi är klara. Ingen levling.
-			SPI_Master_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			break;
 		}
 	}
