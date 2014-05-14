@@ -184,12 +184,7 @@ function figure1_KeyReleaseFcn(hObject, eventdata, handles)
 set(handles.kommando,'String','Stop')
 fwrite(handles.BT, uint8(0));
 
-% ---
-%  function Bytes_available_in_buffer(handles)
-%  byte = fread(handles.BT);
-%  disp('test')
    
-    
 
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
@@ -202,11 +197,16 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 %Device ID: 00066602D47F
 set(handles.bt_info, 'String', 'Wait...');
 BT = Bluetooth('FireFly-D47F', 1); % Channel är möjligtvis inte alltid 1
-disp('Blåtansobjekt skapat.')
+% disp('Blåtansobjekt skapat.')
 % BT.BytesAvailableFcnCount = 1;
 % BT.BytesAvailableFcnMode = 'byte';
 % BT.BytesAvailableFcn = {'Bytes_available_in_buffer', handles};
 %set(BT, 'Timeout', 30);
+
+% BT.BytesAvailableFcnCount = 1;
+% BT.BytesAvailableFcnMode = 'byte';
+% BT.BytesAvailableFcn = {'mycallback', handles};%@instrcallback; %
+
 fopen(BT);
 disp('Kommunikationskanal öppnad.')
 set(handles.bt_info, 'String', get(BT, 'status'));
