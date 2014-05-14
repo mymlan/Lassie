@@ -907,29 +907,28 @@ int Map_main()
 	return 0;
 }
 
+//---------------Påbörjar ny kod här-------------------//
 
+uint8_t Crossing(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+{
+	if(sensor_front_left > SIDE_SENSOR_OPEN_LIMIT && sensor_back_left > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return TRUE;
+	}
+	else if(sensor_front_right > SIDE_SENSOR_OPEN_LIMIT && sensor_back_right > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return TRUE;
+	}
+	else if(sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}	
+}
 
-
-//funktion hitta mål
-
-//funktion hitta närmsta väg(nod1 nod2)
-
-//funktion kör x meter
-
-//funktion fram x korsningar
-
-//funktion innan en korsning(2 sensorer)?
-
-//funktion i en korning(4 sensorer)?
-
-
-//funktion bästa väg hittad?
-
-//funktion åk väg(nod1 nod2)
-
-//funktion skicka kommando
-
-//funktion utför rotation
 
 // ev. funktion deleta allt allokerat minne mha free()
 // (kanske inte behövs då vi inte ska deleta enskilda noder, och kan reseta minnet mellan körningar)
