@@ -12,7 +12,7 @@ int test_variable_e = 0;
 uint8_t testa = 0;
 int main(void)
 {
-	//_delay_ms(1000);
+	_delay_ms(1000);
 
 	SPI_Master_init();
 	USART_init();
