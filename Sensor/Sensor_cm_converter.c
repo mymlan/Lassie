@@ -12,10 +12,7 @@ volatile uint8_t RFID_tag_correct[10];  //Avläst ID på RFID läggs in här om 
 volatile uint8_t RFID_count = 0;  //Räknare för att kontrollera att rätt antal bytes lästs in från RFID
 volatile uint8_t RFID_start_read = 0;  //Kontrollerar startbit innan bytes lägg in på RFID_tag_read
 
-volatile unsigned char test;
-//volatile uint8_t  sensor1, sensor2, sensor3, sensor4, sensor5;
-
-static volatile int diff_from_middle_corridor; // Fick det inte att fungera med uint8_t
+static volatile int diff_from_middle_corridor; 
 static volatile uint8_t angle_corridor;
 
 static volatile uint8_t angular_rate_value;
@@ -89,7 +86,6 @@ ISR(USART0_RX_vect)
 
 ISR (ADC_vect)
 { 
-	//next_sensor_to_be_converted = ANGULAR_RATE;
 	switch (next_sensor_to_be_converted)
 	{
 		case(IR_LEFT_FRONT):
@@ -154,7 +150,7 @@ ISR (ADC_vect)
 }
 
 ISR(ANALOG_COMP_vect){
-	//Tröskelvärdet höjs resp. sänks om interruptet startars på låg resp. hög 
+	//Tröskelvärdet höjs resp. sänks om interruptet startas på låg resp. hög 
 	if (PORTD & (1<<PORTD6)){ 
 		PORTD |= (1>>PORTD6);  
 	}

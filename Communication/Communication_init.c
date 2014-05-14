@@ -20,6 +20,7 @@ ISR(PCINT2_vect)
 	PCMSK2 |= (0 << PCINT16);
 }
 
+//if (målet_funnet){
 void init_button_deliver () //initieras när målet är funnet och genomsökningen är klar
 {
 	DDRD &= ~(1 << DDD4);
