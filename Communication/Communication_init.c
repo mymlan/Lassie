@@ -15,13 +15,13 @@ void init_button_search ()
 
 ISR(PCINT2_vect)
 {
-	//starta genom sökning av labyrint ??
+	//level++;
 	PCICR |= (0 << PCIE2);
 	PCMSK2 |= (0 << PCINT16);
 }
 
-//if (målet_funnet){
-void init_button_deliver () //initieras när målet är funnet och genomsökningen är klar
+
+void init_button_deliver()
 {
 	DDRD &= ~(1 << DDD4);
 	PORTD |= (1 << PORTD4);
@@ -32,7 +32,10 @@ void init_button_deliver () //initieras när målet är funnet och genomsökningen ä
 
 ISR(PCINT3_vect)
 {
-	//klar med genomsökning och  starta leverans av vara
+	//if(level == 4)
+	//{
+	//level++;
 	PCICR |= (0 << PCIE3);
 	PCMSK3 |= (0 << PCINT28);
+	//}
 }
