@@ -129,6 +129,9 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Communication_init.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Communication_init.c">
       <SubType>compile</SubType>
     </Compile>
