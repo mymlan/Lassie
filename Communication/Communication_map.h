@@ -65,8 +65,15 @@ void Follow_path();
 node* Easy_find_unexplored_node();
 node* Smarter_find_unexplored_node(node* p_node);
 void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
-void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Update_map_old(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 void Map_init(void);
 int Map_main(void);
-
+//---------Nya funktioner börjar här-----------------//
+uint8_t Crossing(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Following_path_at_crossing();
+uint8_t Get_new_x_coordinate(uint8_t length);
+uint8_t Get_new_y_coordinate(uint8_t length);
+uint8_t Number_of_traveled_blocks(uint8_t length);
+void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 #endif

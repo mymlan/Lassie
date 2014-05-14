@@ -51,6 +51,7 @@ static uint8_t SPI_steering_recieve_byte(void)
 ISR(SPI_STC_vect)
 {
 	uint8_t byte_from_SPI = SPDR;
+	PORTA = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
@@ -174,7 +175,7 @@ ISR(SPI_STC_vect)
 			break;
 		}
 		default:
-			PORTA = 0xEE;
+			//PORTA = 0xEE;
 			error = 1;
 			break;
 	}
