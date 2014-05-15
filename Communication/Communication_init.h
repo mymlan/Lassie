@@ -2,6 +2,20 @@
 #define _COMMUNICATION_INIT_H
 
 void init_button_search ();
-void init_buttin_deliver ();
+void init_button_deliver ();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif
