@@ -196,25 +196,27 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 %Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
 %Device ID: 00066602D47F
 
-% IR_front_long = zeros(1,1000);
-% handles.IR_front_long = IR_front_long;
-% 
+% IR_front_long2 = zeros(1,1000);
+% handles.IR_front_long2 = IR_front_long2;
+%  
 % number_of_sensor_data_collected = 1;
 % handles.number_of_sensor_data_collected = number_of_sensor_data_collected;
+
+sensor_data = zeros(7,1000);
+number_of_sensor_data_collected = 1;
 
 set(handles.bt_info, 'String', 'Wait...');
 BT = Bluetooth('FireFly-D47F', 1); % Channel är möjligtvis inte alltid 1
 disp('Blåtansobjekt skapat.')
 BT.BytesAvailableFcnCount = 1;
 BT.BytesAvailableFcnMode = 'byte';
-BT.BytesAvailableFcn = {'mycallback', BT, handles};
+BT.BytesAvailableFcn = {'mycallback', BT, sensor_data, number_of_sensor_data_collected ,handles};
 
 fopen(BT);
 disp('Kommunikationskanal öppnad.')
 set(handles.bt_info, 'String', get(BT, 'status'));
 set(handles.pushbutton3,'Enable','on')
 set(handles.pushbutton2,'Enable','off')
-
 handles.BT = BT;
 guidata(hObject, handles);
 
@@ -230,7 +232,6 @@ fclose(handles.BT);
 disp('Koppel frånkopplad')
 set(handles.pushbutton3,'Enable','off')
 set(handles.pushbutton2,'Enable','on')
-save('data_från_Lassie')
 set(handles.bt_info, 'String', 'Disonnected');
 
 

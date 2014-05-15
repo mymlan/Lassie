@@ -1,13 +1,8 @@
  
-function mycallback(hObject, eventdata, BT, handles)
+function mycallback(hObject, eventdata, BT, sensor_data, number_of_sensor_data_collected, handles)
 
-%  IR_right_front = zeros(1,1000);
-%  IR_right_back = zeros(1,1000);
-%  IR_left_front = zeros(1,1000);
-%  IR_left_back = zeros(1,1000);
-%  regulator_error = zeros(1,1000);
-%  regulator_angle = zeros(1,1000);
- 
+ %load('data_från_robot') %load och savwe fungerar, men känns som om det
+ %blir trögt..
  id_byte = fread(BT,1);
  disp(id_byte)
  switch id_byte 
@@ -18,39 +13,38 @@ function mycallback(hObject, eventdata, BT, handles)
             byte = fread(BT,1);
              switch j
                  case 1
-                     %regulator_error(i) = byte;
+                     sensor_data(j, number_of_sensor_data_collected) = byte;
                      set(handles.error,'String',byte)
                      drawnow()
                  case 2
-                     %regulator_angle(i) = byte;
+                     sensor_data(j, number_of_sensor_data_collected) = byte;
                      set(handles.angle,'String',byte)
                      drawnow()
                 case 3
-                    %handles.IR_front_long(handles.number_of_sensor_data_collected) = byte;
+                    sensor_data(j, number_of_sensor_data_collected) = byte;
                     set(handles.ir_f,'String',byte)
                     drawnow()
-                    %handles.number_of_sensor_data_collected = handles.number_of_sensor_data_collected + 1;
                 case 4
-                    %IR_right_back(i) = byte;
-                    set(handles.ir_h_f,'String',byte)
-                    drawnow()
-                case 5
-                    %IR_right_front(i) = byte;
+                    sensor_data(j, number_of_sensor_data_collected) = byte;
                     set(handles.ir_h_b,'String',byte)
                     drawnow()
+                case 5
+                    sensor_data(j, number_of_sensor_data_collected) = byte;
+                    set(handles.ir_h_f,'String',byte)
+                    drawnow()
                 case 6
-                    %IR_left_back(i) = byte;
+                    sensor_data(j, number_of_sensor_data_collected) = byte;
                     set(handles.ir_v_b,'String',byte)
                     drawnow()
                 case 7
-                    %IR_left_front(i) = byte;
+                    sensor_data(j, number_of_sensor_data_collected) = byte;
                     set(handles.ir_v_f,'String',byte)
                     drawnow()
                 otherwise 
                     disp('error i switch för sensordata')
             end
          end
-         
+     number_of_sensor_data_collected = number_of_sensor_data_collected + 1;
     case 3 %distance
         byte = fread(BT,1);
         set(handles.distance,'String',byte)
