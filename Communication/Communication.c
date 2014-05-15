@@ -8,6 +8,7 @@
 #include "Communication_map.h"
 #include "Communication_SPI.h"
 #include "Firefly.h"
+#include "Communication_init.h"
 int test_variable_e = 0;
 uint8_t testa = 0;
 int main(void)
@@ -16,6 +17,8 @@ int main(void)
 
 	SPI_Master_init();
 	USART_init();
+	init_button_search();
+	init_button_deliver();
 	testa = (PINA & (1<<PINA4));
 	if((PINA & (1<<PINA4)) == MANUAL_DECISIONS_ACTIVATED)
 	{
