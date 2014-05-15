@@ -175,7 +175,7 @@ ISR(SPI_STC_vect)
 			break;
 		}
 		default:
-			//PORTA = byte_from_SPI;
+			PORTA = 0xEE;
 			error = 1;
 			break;
 	}

@@ -202,7 +202,7 @@ node* Exisiting_node_at(uint8_t x_coordinate, uint8_t y_coordinate)
 	{
 		if (all_nodes[i]->x_coordinate == x_coordinate && all_nodes[i]->y_coordinate == y_coordinate)
 		{
-			return	all_nodes[i];
+			return all_nodes[i];
 		}
 	}
 	return NULL;
@@ -587,7 +587,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 // Denna kod körs varje gång sensorvärden kommer. Koden kan senare ev. flyttas till mainloopen när allt fungerar.
 // När sensorvärden kommer, kör denna kod. Koden avgör om man är i en korsning och beroende på om det är en ny eller gammal korsning skapas eller uppdateras noden.
 // Det finns avsatta rader där strybeslut skickas till styrmodulen.
-void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+void Update_map_old(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
 	//enable_node_editing = TRUE; // <----- Ska tas bort vid riktiga körningar!!!!!!!!!!!!!!!!!!!!!
 	
@@ -709,13 +709,18 @@ int Map_main()
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 100, 100, 100, 100); // 0,1
+	Update_map(70, 100, 100, 100, 100); // 0,1
+	Update_map(70, 100, 100, 100, 100); // 0,1
+	Update_map(70, 100, 100, 100, 100); // 0,1
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
-	Update_map(70, 255, 255, 255, 255); // 0,2
+	Update_map(30, 255, 255, 100, 100); // 0,2
+	Update_map(10, 255, 255, 255, 255); // 0,2
 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 100, 100, 100, 100); // 0,3
+	Update_map(70, 100, 100, 100, 100);
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 100, 255, 100, 255); // 0,4
@@ -735,24 +740,31 @@ int Map_main()
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 255, 100, 255, 100); // 0,4
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 100, 255, 100, 255); // 2,4
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(20, 255, 255, 100, 255); // 4,4 %%%%%
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(20, 100, 255, 100, 255); // 4,2
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 100, 255, 100, 255); // 2,2
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 255, 255, 255, 255); // 0,2 %%%%
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(70, 255, 100, 255, 100); // 2,2
+	Update_map(70, 100, 100, 100, 100); // 
 	a = p_robot_node->x_coordinate;
 	b = p_robot_node->y_coordinate;
 	Update_map(20, 255, 255, 255, 255); //2,4 
@@ -908,17 +920,20 @@ int Map_main()
 }
 
 //---------------Påbörjar ny kod här-------------------//
-
+//returnerar true om sensorerna känner av korsning, annars falskt.
 uint8_t Crossing(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
+	//Korsning åt vänster
 	if(sensor_front_left > SIDE_SENSOR_OPEN_LIMIT && sensor_back_left > SIDE_SENSOR_OPEN_LIMIT)
 	{
 		return TRUE;
 	}
+	//korsning åt höger
 	else if(sensor_front_right > SIDE_SENSOR_OPEN_LIMIT && sensor_back_right > SIDE_SENSOR_OPEN_LIMIT)
 	{
 		return TRUE;
 	}
+	//återvändsgränd
 	else if(sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT)
 	{
 		return TRUE;
@@ -929,6 +944,166 @@ uint8_t Crossing(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor
 	}	
 }
 
+// Funktion som körs om following path och korsning gäller
+void Following_path_at_crossing()
+{	
+	if(p_robot_node->p_pre_dijk == NULL) // Är korsningen vårt mål?
+	{
+		following_path = FALSE;
+		for(int i = 0; i < 4; i++)
+		{
+			if(p_robot_node->links[i].open == TRUE && p_robot_node->links[i].length == 0)
+			{
+				Do_turn(i);
+				break;
+					
+			}
+		}
+			
+	}
+	else // Korsning är inte vårt mål.
+	{
+		Do_turn(Get_dijkpointers_cardinal_direction(p_robot_node)); // Do_turn enligt Dijkstra
+	}
+}
 
+uint8_t Get_new_x_coordinate(uint8_t length)
+{
+	uint8_t x_coordinate = p_robot_node->x_coordinate;
+	uint8_t traveled_blocks = Number_of_traveled_blocks(length); // Antalet färdade rutor
+	
+	switch (robot_dir)
+	{
+		case EAST:
+		{
+			x_coordinate = x_coordinate + traveled_blocks;
+			break;
+		}
+		case WEST:
+		{
+			x_coordinate = x_coordinate - traveled_blocks;
+			break;
+		}
+		default:
+		break;
+	}
+	return x_coordinate;
+}
+
+uint8_t Get_new_y_coordinate(uint8_t length)
+{
+	uint8_t y_coordinate = p_robot_node->y_coordinate;
+	uint8_t traveled_blocks = Number_of_traveled_blocks(length); // Antalet färdade rutor
+	
+	switch (robot_dir)
+	{
+		case NORTH:
+		{
+			y_coordinate = y_coordinate + traveled_blocks;
+			break;
+		}
+		case SOUTH:
+		{
+			y_coordinate = y_coordinate - traveled_blocks;
+			break;
+		}
+		default:
+		break;
+	}
+	return y_coordinate;
+}
+
+uint8_t Number_of_traveled_blocks(uint8_t length)
+{
+	return (length + TRAVELED_BLOCKS_MARGIN) / SIZE_OF_SQUARE_IN_CM;
+}
+
+void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+{
+	uint8_t length;
+	if(following_path)
+	{
+		if(Crossing(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right)) // Korsning?
+		{
+			if (enable_node_editing)
+			{
+				p_robot_node = p_robot_node->p_pre_dijk;
+				enable_node_editing = FALSE;
+				length = Get_length();
+			}
+			Following_path_at_crossing();
+		}
+		else // Inte en korsing och following_path == TRUE
+		{
+			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		}
+	}
+	else // following path == FALSE
+	{
+		if (Crossing(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right))
+		{
+			if (enable_node_editing)
+			{
+				length = Get_length();
+				node* p_arrived_node = Exisiting_node_at(Get_new_x_coordinate(length), Get_new_y_coordinate(length));
+				if (p_arrived_node != NULL) // Noden finns redan
+				{
+					Update_node(p_arrived_node, Number_of_traveled_blocks(length));
+					
+					Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
+					following_path = TRUE;
+					Following_path_at_crossing();
+				}
+				else // Ej befintlig nod
+				{
+					Create_node(Get_new_x_coordinate(length), Get_new_y_coordinate(length), Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
+					if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
+					{
+						enable_node_editing = TRUE;
+						
+						Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
+						following_path = TRUE;
+						Following_path_at_crossing();
+					}
+					else // Ej återvändsgränd och ny nod
+					{
+						if (sensor_front > FRONT_SENSOR_LIMIT)
+						{
+							Do_turn(robot_dir);
+						}
+						else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
+						{
+							Do_turn((robot_dir + 1) % 4);
+						}
+						else if (sensor_front_left > SIDE_SENSOR_OPEN_LIMIT)
+						{
+							Do_turn((robot_dir + 3) % 4);
+						}
+						else // Borde ej inträffa!
+						{
+						}
+					}
+				}
+			}
+			else // Not enable node editing i korsning
+			{
+				//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+			}
+		}
+		else // Ej korsning
+		{
+			enable_node_editing = TRUE;
+			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		}
+	}
+}
 // ev. funktion deleta allt allokerat minne mha free()
 // (kanske inte behövs då vi inte ska deleta enskilda noder, och kan reseta minnet mellan körningar)
+
+void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+{
+	if (level == 0)
+	{
+		Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+	}
+}
