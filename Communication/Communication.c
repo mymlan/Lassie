@@ -10,14 +10,15 @@
 #include "Firefly.h"
 #include "Communication_init.h"
 int test_variable_e = 0;
-uint8_t testa = 0;
+
 int main(void)
 {
-	//_delay_ms(1000);
+	_delay_ms(1000);
 
 	SPI_Master_init();
 	USART_init();
-	testa = (PINA & (1<<PINA4));
+	Timer_init();
+	
 	if((PINA & (1<<PINA4)) == MANUAL_DECISIONS_ACTIVATED)
 	{
 		COMMON_SET_PIN(PORTA,PORTA7); //Just nu röd lampa lyser för manuellt läge

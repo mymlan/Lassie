@@ -4,4 +4,6 @@
 void Init_button_search ();
 void Init_button_deliver ();
 
+void Timer_init();
+
 #endif
