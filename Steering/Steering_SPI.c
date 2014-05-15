@@ -51,7 +51,7 @@ static uint8_t SPI_steering_recieve_byte(void)
 ISR(SPI_STC_vect)
 {
 	uint8_t byte_from_SPI = SPDR;
-	PORTA = byte_from_SPI;
+	//PORTA = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
@@ -111,9 +111,10 @@ ISR(SPI_STC_vect)
 			{
 				case COMMAND_STOP: Stop();
 					last_auto_decision = NO_NEED_TO_REGULATE;
-					//PORTA = 0x20; // Error
+					//PORTA = 0x80; // Error
 					break;
 				case COMMAND_FORWARD: Forward_regulated(90, 100);
+					//PORTA = 0x81;
 					last_auto_decision = REGULATED_FORWARD;
 					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 100);
@@ -144,7 +145,7 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_1: Stop();
-					//PORTA = 0x21; // Error
+					PORTA = 0x21; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_2: Stop();

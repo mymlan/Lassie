@@ -17,8 +17,6 @@ int main(void)
 
 	SPI_Master_init();
 	USART_init();
-	init_button_search();
-	init_button_deliver();
 	testa = (PINA & (1<<PINA4));
 	if((PINA & (1<<PINA4)) == MANUAL_DECISIONS_ACTIVATED)
 	{
@@ -28,11 +26,13 @@ int main(void)
 	}
 	else
 	{
+		Init_button_search();
+		Init_button_deliver();
 		Map_init();
 		COMMON_CLEAR_BIT(UCSR1B, RXCIE1); //stänger av avbrott från USART
 		sei();
 			
-		// Startar map-kod	
+		// Startar map-kod
 
 		SPI_map_send_id_byte_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
