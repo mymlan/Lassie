@@ -50,7 +50,7 @@ static uint8_t SPI_Master_recieve_data_byte_from_sensor(void)
 	SPDR = 0x0A; //Master måste lägga något i SPDR för att starta överföringen
 	while(!(SPSR & (1<<SPIF))){}
 	COMMON_SET_PIN(PORTB, PORTB4);
-	_delay_us(10);
+	_delay_us(400);
 	return SPDR;
 }
 
@@ -137,7 +137,7 @@ static void SPI_Master_transmit_data_byte(uint8_t data_byte)
 {
 	SPDR = data_byte;
 	while(!(SPSR & (1<<SPIF))){}
-	_delay_us(10);
+	_delay_us(400);
 }
 
 void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte)
