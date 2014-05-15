@@ -145,23 +145,23 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_2: Stop();
-					//PORTA = 0x22; // Error
+					PORTA = 0x22; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_3: Stop();
-					//PORTA = 0x23; // Error
+					PORTA = 0x23; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_4: Stop();
-					//PORTA = 0x24; // Error
+					PORTA = 0x24; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;								
 				case COMMAND_STOP_5: Stop();
-					//PORTA = 0x25; // Error
+					PORTA = 0x25; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_6: Stop();
-					//PORTA = 0x26; // Error
+					PORTA = 0x26; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				default: Stop();
