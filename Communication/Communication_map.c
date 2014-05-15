@@ -308,8 +308,8 @@ void Wait_for_90_degree_rotation()
 // Funktonen utför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
 void Do_turn(uint8_t cardinal_direction)
 {
-	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_1);
-	_delay_ms(2000);
+	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_1);
+	_delay_ms(1000);
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
@@ -355,8 +355,8 @@ void Do_turn(uint8_t cardinal_direction)
 		default:
 		break;
 	}
-	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_2);
-	_delay_ms(2000);
+	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_2);
+	_delay_ms(1000);
 	// Åk fram oreglerat order
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD); // Not regulated kanske
 	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
