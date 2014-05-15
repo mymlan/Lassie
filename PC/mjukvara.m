@@ -10,7 +10,7 @@ clc;
 %   %disp('Blåtansobjekt skapat.')
  % fopen(BT);
 %  disp('Kommunikationskanal öppnad.')
-%
+% fclose(BT);
 %%%%%%%%%%% DUMMYDATA %%%%%%%%%%%%%%%%%%%%%%%
 IR1 = 2.3; IR2 = 0.3; IR3 = 5.2; IR4 = 12.5; IR5 = 6.0;
 
