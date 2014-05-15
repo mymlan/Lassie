@@ -41,3 +41,20 @@ ISR(PCINT3_vect)
 	COMMON_TOGGLE_PIN(PORTA, PORTA1);
 	COMMON_TOGGLE_PIN(PORTA, PORTA3);
 }
+
+void Timer_init()
+{
+	//sätter timer
+	TCCR1A = 0x00;
+	TCCR1B = 0x0B;
+	TCCR1C = 0x00;
+
+	COMMON_SET_BIT(TIMSK1, OCIE1A); // Enable interrupt	
+	
+	OCR1A = TIMER_COMPARE_NUMBER;
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+	SPI_Master_send_id_byte_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
+}
