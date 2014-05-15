@@ -4,6 +4,7 @@
 #include "Communication_init.h"
 #include "../CommonLibrary/Common.h"
 #include "Communication_map.h"
+#include "Communication_SPI.h"
 
 void init_button_search()
 {
