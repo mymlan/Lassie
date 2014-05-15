@@ -16,6 +16,7 @@ uint8_t all_nodes_size;
 struct node_* p_robot_node;
 uint8_t robot_dir;
 struct node_* goal_node;
+struct node_* start_node;
 
 uint8_t following_path;
 uint8_t level;
@@ -76,4 +77,5 @@ uint8_t Get_new_y_coordinate(uint8_t length);
 uint8_t Number_of_traveled_blocks(uint8_t length);
 void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 #endif
