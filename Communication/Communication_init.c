@@ -4,8 +4,9 @@
 #include "Communication_init.h"
 #include "../CommonLibrary/Common.h"
 #include "Communication_map.h"
+#include "Communication_SPI.h"
 
-void init_button_search()
+void Init_button_search()
 {
 	COMMON_CLEAR_PIN(DDRC, DDC0);
 	COMMON_SET_PIN(PORTC, PORTC0);
@@ -16,13 +17,14 @@ void init_button_search()
 ISR(PCINT2_vect)
 {
 	level++;
+	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 	COMMON_CLEAR_BIT(PCICR, PCIE2); //Stänger av avbrottet
 	COMMON_CLEAR_BIT(PCMSK2, PCINT16); //Stänger av avbrottet
 	COMMON_TOGGLE_PIN(PORTA, PORTA1);
 }
 
 
-void init_button_deliver()
+void Init_button_deliver()
 {
 	COMMON_CLEAR_PIN(DDRD, DDD4);
 	COMMON_SET_PIN(PORTD, PORTD4);
