@@ -10,16 +10,15 @@
 #include "Firefly.h"
 #include "Communication_init.h"
 int test_variable_e = 0;
-uint8_t testa = 0;
+
 int main(void)
 {
 	_delay_ms(1000);
 
 	SPI_Master_init();
 	USART_init();
-	init_button_search();
-	init_button_deliver();
-	testa = (PINA & (1<<PINA4));
+	Timer_init();
+	
 	if((PINA & (1<<PINA4)) == MANUAL_DECISIONS_ACTIVATED)
 	{
 		COMMON_SET_PIN(PORTA,PORTA7); //Just nu röd lampa lyser för manuellt läge
@@ -28,11 +27,13 @@ int main(void)
 	}
 	else
 	{
+		Init_button_search();
+		Init_button_deliver();
 		Map_init();
 		COMMON_CLEAR_BIT(UCSR1B, RXCIE1); //stänger av avbrott från USART
 		sei();
 			
-		// Startar map-kod	
+		// Startar map-kod
 
 		SPI_map_send_id_byte_to_sensor(ID_BYTE_GIVE_IR_SENSOR_DATA);
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);

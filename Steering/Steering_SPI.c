@@ -10,16 +10,12 @@
 
 static volatile uint8_t last_auto_decision;
 
-static volatile uint8_t error;
-
 void SPI_steering_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	DDRB = 0x40; //Sätter MISO till utgång
 	
 	last_auto_decision = NO_NEED_TO_REGULATE;
-
-	error = 0;
 }
 
 static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
@@ -51,7 +47,7 @@ static uint8_t SPI_steering_recieve_byte(void)
 ISR(SPI_STC_vect)
 {
 	uint8_t byte_from_SPI = SPDR;
-	PORTA = byte_from_SPI;
+	//PORTA = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
@@ -69,7 +65,7 @@ ISR(SPI_STC_vect)
 					Backward_regulated(sensor_data[5], sensor_data[6]);
 					break;
 				default:
-					error = 1;
+					PORTA = 0xEC;
 					break;
 			}
 			
@@ -99,7 +95,7 @@ ISR(SPI_STC_vect)
 				case COMMAND_CLOSE_CLAW: Close_claw();
 					break;
 				default: Stop();
-					error = 1;
+					PORTA = 0xEF;
 					break;
 			}
 			break;
@@ -111,9 +107,10 @@ ISR(SPI_STC_vect)
 			{
 				case COMMAND_STOP: Stop();
 					last_auto_decision = NO_NEED_TO_REGULATE;
-					//PORTA = 0x20; // Error
+					//PORTA = 0x80; // Error
 					break;
 				case COMMAND_FORWARD: Forward_regulated(90, 100);
+					//PORTA = 0x81;
 					last_auto_decision = REGULATED_FORWARD;
 					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 100);
@@ -144,7 +141,7 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_1: Stop();
-					//PORTA = 0x21; // Error
+					PORTA = 0x21; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_2: Stop();
@@ -168,7 +165,7 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				default: Stop();
-					error = 1;
+					PORTA = 0xEA;
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 			}
@@ -176,7 +173,6 @@ ISR(SPI_STC_vect)
 		}
 		default:
 			PORTA = 0xEE;
-			error = 1;
 			break;
 	}
 }
