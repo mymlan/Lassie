@@ -4,18 +4,4 @@
 void Init_button_search ();
 void Init_button_deliver ();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif
