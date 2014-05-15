@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include "Communication_init.h"
 #include "../CommonLibrary/Common.h"
+#include "Communication_map.h"
 
 void init_button_search()
 {
@@ -14,7 +15,7 @@ void init_button_search()
 
 ISR(PCINT2_vect)
 {
-	//level++;
+	level++;
 	COMMON_CLEAR_BIT(PCICR, PCIE2); //Stänger av avbrottet
 	COMMON_CLEAR_BIT(PCMSK2, PCINT16); //Stänger av avbrottet
 	COMMON_TOGGLE_PIN(PORTA, PORTA1);
