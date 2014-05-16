@@ -148,7 +148,7 @@ ISR (ADC_vect)
 			ir_sensor_data[6] = diff_from_middle_corridor;//lägger in avvikelsen på plats 7 i ir_sensor_data;
 			break;
 		case(ANGULAR_RATE):
-			if ((-26.9 < angular_rate_total) & (angular_rate_total < 22)) //kollar om roboten roterat 90 grader i någon riktning
+			if ((-24 < angular_rate_total) && (angular_rate_total < 20)) //kollar om roboten roterat 90 grader i någon riktning, positiv i vänster riktning
 			{
 				angular_rate_value = ADCH; //läser av vinkelhastigheten
 				angular_rate_diff = (angular_rate_value - ANGULAR_RATE_OFFSET)*ANGULAR_RATE_SENSITIVITY; //beräknar förändringen av roterad vinkel sedan sedan förra avläsningen
@@ -161,9 +161,9 @@ ISR (ADC_vect)
 				ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 så att IR vänster fram börjar AD-omvandlas
 				angular_rate_total = 0; //sätter roterad vinkel till 0 när roboten roterat 90 grader i någon riktning
 				next_sensor_to_be_converted = IR_LEFT_FRONT; //sätter count till 0 för att återgå till AD-omvandling av IR-sensorerna
-				reflex_count = 0; //nollställer avläsningen av avståndet för att kunna påbörja ny avläsning
+				//reflex_count = 0; //nollställer avläsningen av avståndet för att kunna påbörja ny avläsning
 				SPI_sensor_send_rotation_finished(); //skickar meddelande till KOM att rotationen är klar
-				ACSR |= (1>>ACD); //Startar Analog Comparator (reflexsensorn)
+				//ACSR |= (1>>ACD); //Startar Analog Comparator (reflexsensorn) // BUGG !!!!!
 			}
 			break;
 		default:
