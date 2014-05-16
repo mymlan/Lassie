@@ -17,9 +17,9 @@ void Tight_turn_left();
 void Open_claw();
 void Close_claw();
 
-void Forward_regulated(uint8_t);
+void Forward_regulated(uint8_t, uint8_t);
 void Backward_regulated(uint8_t, uint8_t);
 
-void Lookup_table(uint8_t regulator_angle);
+void Lookup_table_K_D(uint8_t);
 
 #endif

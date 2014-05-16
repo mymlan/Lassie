@@ -1,5 +1,4 @@
 ﻿
-
 #define F_CPU 18432000UL
 
 #include <avr/io.h>
@@ -17,18 +16,21 @@ double K_P = 0.004; // Proportionella konstanten, 0.003 är bra
 double K_D = 1.5; // Deriveringskonstanten, 1.5 är bra
 double adjusted_speed;
 
-uint16_t pwm_right_wheel_fast_speed = 45000;
-uint16_t pwm_right_wheel_normal_speed = 30000;
-uint16_t pwm_right_wheel_slow_speed = 15000;
-uint16_t pwm_right_wheel_stop = 0;
+static uint16_t pwm_right_wheel_fast_speed = 45000;
+static uint16_t pwm_right_wheel_normal_speed = 30000;
+static uint16_t pwm_right_wheel_slow_speed = 15000;
+static uint16_t pwm_right_wheel_stop = 0;
 
-uint16_t pwm_left_wheel_fast_speed = 45000;
-uint16_t pwm_left_wheel_normal_speed = 30000;
-uint16_t pwm_left_wheel_slow_speed = 15000;
-uint16_t pwm_left_wheel_stop = 0;
+static uint16_t pwm_left_wheel_fast_speed = 45000;
+static uint16_t pwm_left_wheel_normal_speed = 30000;
+static uint16_t pwm_left_wheel_slow_speed = 15000;
+static uint16_t pwm_left_wheel_stop = 0;
 
-uint16_t pwm_claw_closed = 20;
-uint16_t pwm_claw_open = 25;
+static uint16_t pwm_claw_closed = 20;
+static uint16_t pwm_claw_open = 25;
+
+uint16_t adjusted_speed_right_wheel;
+uint16_t adjusted_speed_left_wheel;
 
 //-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
@@ -150,10 +152,10 @@ void Close_claw()
 //----------------AUTONOMA REGLERFUNKTIONER-----------//
 
 
-void Forward_regulated(uint8_t regulator_angle)
+void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 {
 	Set_wheels_both_goes_forward();
-	/*
+	
 	adjusted_speed = K_P * (regulator_error - 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
 	if (adjusted_speed >= 0.3)
 	{
@@ -165,8 +167,9 @@ void Forward_regulated(uint8_t regulator_angle)
 	}
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
-	*/
-	Lookup_table(regulator_angle);
+	
+	//Lookup_table_K_D(regulator_angle);
+	//nästa lookup
 }
 
 void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
@@ -177,7 +180,7 @@ void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns
 }
 
-void Lookup_table(uint8_t regulator_angle)
+void Lookup_table_K_D(uint8_t regulator_angle)
 {
 	if(regulator_angle >= 116)
 	{
