@@ -135,39 +135,39 @@ set(handles.styrform, 'String', 'Manuell')
 switch eventdata.Key
     case 'w'
         set(handles.kommando,'String','Fram') 
-        %Kommandot för forward är 0x01
+        %Kommandot för forward är 0x11
         fwrite(handles.BT, uint8(17));       
     case 's'
         set(handles.kommando,'String','Back')
-        %Kommandot för backward är 0x02
+        %Kommandot för backward är 0x12
         fwrite(handles.BT, uint8(18));  
     case 'a'
         set(handles.kommando,'String','Rotera vänster') 
-        %Kommandot för rotate_left är 0x06
+        %Kommandot för rotate_left är 0x16
         fwrite(handles.BT, uint8(22));       
     case 'd'
         set(handles.kommando,'String','Rotera höger')
-        %Kommandot för rotate_right är 0x05
+        %Kommandot för rotate_right är 0x15
         fwrite(handles.BT, uint8(21));
     case 'q'
         set(handles.kommando,'String','Sväng vänster')
-        %Kommandot för turn_left är 0x04
+        %Kommandot för turn_left är 0x14
         fwrite(handles.BT, uint8(20));
     case 'e'
         set(handles.kommando,'String','Sväng höger')
-        %Kommandot för turn_right är 0x03
+        %Kommandot för turn_right är 0x13
         fwrite(handles.BT, uint8(19)); 
     case 'space'
         set(handles.kommando,'String','Stanna')
-        %Kommandot för stop är 0x00
+        %Kommandot för stop är 0x10
         fwrite(handles.BT, uint8(16)); 
     case 'x'
         set(handles.kommando,'String','greppa med gripklo')
-        %Kommandot för open_claw är 0x08
+        %Kommandot för open_claw är 0x18
         fwrite(handles.BT, uint8(24)); 
     case 'z'
         set(handles.kommando,'String','öppna gripklo')
-        %Kommandot för close_claw är 0x07
+        %Kommandot för close_claw är 0x17
         fwrite(handles.BT, uint8(23)); 
         
 end
@@ -195,12 +195,6 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 %info.RemoteNames
 %Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
 %Device ID: 00066602D47F
-
-% IR_front_long2 = zeros(1,1000);
-% handles.IR_front_long2 = IR_front_long2;
-%  
-% number_of_sensor_data_collected = 1;
-% handles.number_of_sensor_data_collected = number_of_sensor_data_collected;
 
 sensor_data = zeros(7,1000);
 number_of_sensor_data_collected = 1;
