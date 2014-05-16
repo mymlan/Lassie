@@ -10,13 +10,25 @@
 
 //-------------VARIABLER/KONSTANTER---------------//
 
-double COUNTER_MAX = 65535;
-double BASE_SPEED = 30000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
-double left_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
-double right_speed_factor = 0; // Mellan 0 och 2, HÖGRE värde ger HÖGRE hastighet
+uint16_t COUNTER_MAX = 65535;
+uint16_t BASE_SPEED = 30000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
+
 double K_P = 0.004; // Proportionella konstanten, 0.003 är bra
 double K_D = 1.5; // Deriveringskonstanten, 1.5 är bra
 double adjusted_speed;
+
+uint16_t pwm_right_wheel_fast_speed = 45000;
+uint16_t pwm_right_wheel_normal_speed = 30000;
+uint16_t pwm_right_wheel_slow_speed = 15000;
+uint16_t pwm_right_wheel_stop = 0;
+
+uint16_t pwm_left_wheel_fast_speed = 45000;
+uint16_t pwm_left_wheel_normal_speed = 30000;
+uint16_t pwm_left_wheel_slow_speed = 15000;
+uint16_t pwm_left_wheel_stop = 0;
+
+uint16_t pwm_claw_closed = 20;
+uint16_t pwm_claw_open = 25;
 
 //-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
@@ -24,7 +36,27 @@ PORTD5: Höger styrka PWM
 PORTD4: Vänster styrka PWM
 PORTD3: Höger riktning
 PORTD2: Vänster riktning
+
+OCR1A = Höger PWM;
+OCR1B = Vänster PWM;
 */
+
+static void Set_wheels_both_goes_forward()
+{
+	PORTD = (1<< PORTD2) | (1<< PORTD3);
+}
+static void Set_wheels_both_goes_backward()
+{
+	PORTD = (0<< PORTD2) | (0<< PORTD3);
+}
+static void Set_wheels_left_forward_right_backward()
+{
+	PORTD = (1<<PORTD2) | (0<<PORTD3);
+}
+static void Set_wheels_left_backward_right_forward()
+{
+	PORTD = (0<<PORTD2) | (1<<PORTD3);
+}
 
 //-----------------INITIERINGSFUNKTION----------------//
 void Initialize_error_pins()
@@ -36,16 +68,16 @@ void Initialize_error_pins()
 void Initialize_pwm()
 {
 	// Motorer init
-	PORTD = (1<< PORTD2) | (1<< PORTD3);
+	Set_wheels_both_goes_forward();
 	ICR1 = COUNTER_MAX; // Räknarens tak
-	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
-	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
+	OCR1A = pwm_right_wheel_stop;
+	OCR1B = pwm_left_wheel_stop;
 	TCCR1A |= (1<< COM1A1) | (0<< COM1A0) | (1<< COM1B1) | (0<< COM1B0) | (1<< WGM11) | (0<< WGM10); // PWM-inställningar motor
 	TCCR1B |= (1<< WGM13) | (1<< WGM12) | (0<< CS12) | (0<< CS11) | (1<< CS10); // PWM-inställningar motor
 	
 	//Gripklo init, kommer starta öppen
 	OCR2A = 255; // Gripklo TOP
-	OCR2B = 25; // Gripklon startar öppen
+	OCR2B = pwm_claw_open; // Gripklon startar öppen
 	TCCR2A |= (0<< WGM21) | (1<< WGM20) | (1<< COM2B1) | (0<< COM2B0); // PWM-Inställningar gripklo
 	TCCR2B |= (1<< WGM22) | (1<< CS22) | (1<< CS21) | (0<< CS20); // PWM-inställningar gripklo
 	
@@ -53,108 +85,75 @@ void Initialize_pwm()
 }
 
 //----------------MANUELLA KOMMANDOFUNKTIONER-----------//
-// Stanna
 void Stop()
 {
-	OCR1A = 0;
-	OCR1B = 0;
+	OCR1A = pwm_right_wheel_stop;
+	OCR1B = pwm_left_wheel_stop;
 }
-
-// Åk Framåt
 void Forward()
 {
-	PORTD = (1<< PORTD2) | (1<< PORTD3);// Vänster - Höger
-	left_speed_factor = 1.5; // Mellan 0 och 2
-	right_speed_factor = 1.5; // Mellan 0 och 2
-	OCR1A = BASE_SPEED * right_speed_factor; // Höger motor gräns
-	OCR1B = BASE_SPEED * left_speed_factor; // Vänster motor gräns
+	Set_wheels_both_goes_forward();
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
-
-// Åk Bakåt
 void Backward()
 {
-	PORTD = (0<< PORTD2) | (0<< PORTD3);
-	OCR1A = BASE_SPEED * 1.5; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * 1.5;
+	Set_wheels_both_goes_backward();
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
-
-// Rotera Höger
 void Rotate_right()
 {
-	PORTD = (1<<PORTD2) | (0<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.5;
-	right_speed_factor = 1.5;
-	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * left_speed_factor;
+	Set_wheels_left_forward_right_backward();
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
-
-// Rotera Vänster
 void Rotate_left()
 {
-	PORTD = (0<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.5;
-	right_speed_factor = 1.5;
-	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * left_speed_factor;
+	Set_wheels_left_backward_right_forward();
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
-
-// Sväng Höger
 void Turn_right()
 {
-	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.5;
-	right_speed_factor = 0.5; // Ska prövas fram, 1.8 så länge
-	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * left_speed_factor;
+	Set_wheels_both_goes_forward();
+	OCR1A = pwm_right_wheel_slow_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
-
-// Sväng Vänster
 void Turn_left()
 {
-	PORTD = (1<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 0.5;
-	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
-	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * left_speed_factor;
+	Set_wheels_both_goes_forward();
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_slow_speed;
 }
-
-// Sväng Höger
 void Tight_turn_right()
 {
-	PORTD = (1<<PORTD2) | (0<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1.5;
-	right_speed_factor = 1; // Ska prövas fram, 1.8 så länge
-	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * left_speed_factor;
+	Set_wheels_left_forward_right_backward();
+	OCR1A = pwm_right_wheel_normal_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
-
-// Sväng Vänster
 void Tight_turn_left()
 {
-	PORTD = (0<<PORTD2) | (1<<PORTD3); // Vänster - Höger
-	left_speed_factor = 1;
-	right_speed_factor = 1.5; // Ska prövas fram, 1.8 så länge
-	OCR1A = BASE_SPEED * right_speed_factor; // Uppdatera hastigheten
-	OCR1B = BASE_SPEED * left_speed_factor;
+	Set_wheels_left_backward_right_forward();
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_normal_speed;
 }
-
-// Öppna Gripklo
 void Open_claw()
 {
-	OCR2B = 25;
+	OCR2B = pwm_claw_open;
 }
-
-// Stäng Gripklo
 void Close_claw()
 {
-	OCR2B = 20;
+	OCR2B = pwm_claw_closed;
 }
 
 //----------------AUTONOMA REGLERFUNKTIONER-----------//
-void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: uint8_t regulator_error, uint8_t regulator_angle
 
+
+void Forward_regulated(uint8_t regulator_angle)
 {
-	PORTD = (1<< PORTD2) | (1<< PORTD3); // Vänster - Höger riktning
+	Set_wheels_both_goes_forward();
+	/*
 	adjusted_speed = K_P * (regulator_error - 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
 	if (adjusted_speed >= 0.3)
 	{
@@ -166,15 +165,73 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)//arg: u
 	}
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
-	
-	
-	// Det kan bli fel om adjusted_speed blir för stor (beror av BASE_SPEED). När vi vet BASE_SPEED får vi lägga in ett tak på adjusted_speed.
+	*/
+	Lookup_table(regulator_angle);
 }
 
 void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 {
-	PORTD = (0<< PORTD2) | (0<< PORTD3); // Vänster - Höger riktning
-	double adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
+	Set_wheels_both_goes_backward();
+	adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 + adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns
+}
+
+void Lookup_table(uint8_t regulator_angle)
+{
+	if(regulator_angle >= 116)
+	{
+		OCR1A = 20435;
+		OCR1B = 39565;
+	}
+	else if(regulator_angle < 116 && regulator_angle >= 111)
+	{
+		OCR1A = 22066;
+		OCR1B = 37934;
+	}
+	else if(regulator_angle < 111 && regulator_angle >= 108)
+	{
+		OCR1A = 24076;
+		OCR1B = 35924;
+	}
+	else if(regulator_angle < 108 && regulator_angle >= 105)
+	{
+		OCR1A = 26063;
+		OCR1B = 33937;
+	}
+	else if(regulator_angle < 105 && regulator_angle >= 102)
+	{
+		OCR1A = 28035;
+		OCR1B = 31965;
+	}
+	else if(regulator_angle < 102 && regulator_angle > 98)
+	{
+		OCR1A = 30000;
+		OCR1B = 30000;
+	}
+	else if(regulator_angle <= 98 && regulator_angle > 95)
+	{
+		OCR1A = 31965;
+		OCR1B = 28035;
+	}
+	else if(regulator_angle <= 95 && regulator_angle > 92)
+	{
+		OCR1A = 33937;
+		OCR1B = 26063;
+	}
+	else if(regulator_angle <= 92 && regulator_angle > 89)
+	{
+		OCR1A = 35924;
+		OCR1B = 24076;
+	}
+	else if(regulator_angle <= 89 && regulator_angle > 84)
+	{
+		OCR1A = 37934;
+		OCR1B = 22066;
+	}
+	else if(regulator_angle <= 84)
+	{
+		OCR1A = 39565;
+		OCR1B = 20435;
+	}
 }
