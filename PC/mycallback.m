@@ -4,7 +4,7 @@ function mycallback(hObject, eventdata, BT, sensor_data, number_of_sensor_data_c
  %load('data_från_robot') %load och savwe fungerar, men känns som om det
  %blir trögt..
  id_byte = fread(BT,1);
- disp(id_byte)
+ %disp(id_byte)
  switch id_byte 
    case 1 %sensorvärden
          for j = 1:7
@@ -97,9 +97,10 @@ function mycallback(hObject, eventdata, BT, sensor_data, number_of_sensor_data_c
         end
     case 12 %Map coordinates
         disp('uppdate map')
-        %Hur vill vi representera kartan
-        %x_coordinate = fread(BT,1);
-        %y_coordinate = fread(BT,1);
+        x_coordinate = fread(BT, 1);
+        y_coordinate = fread(BT, 1);
+        coordinates = [x_coordinate, y_coordinate];
+        disp(coordinates)
     case 13 %Map parameters
         for k = 1:7
           byte = fread(BT,1);
