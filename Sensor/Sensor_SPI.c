@@ -29,10 +29,11 @@ ISR(SPI_STC_vect)
 		{
 			uint8_t distance = ((reflex_count*16) / 10);
 			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
+			reflex_count = 0;
 			break;
 		}
 		case ID_BYTE_START_ANGULAR_RATE_SENSOR:
-			ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor)
+			//ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor) // BUGG i påsättningen senare!
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
 			next_sensor_to_be_converted = ANGULAR_RATE;
 			break;

@@ -139,7 +139,7 @@ void Create_origin(uint8_t open_walls)
 	
 	p_node->start = TRUE; // Sätt nod till startnod
 	
-	for(uint8_t i = 0; i < NUMBER_OF_LINKS; i++) // Detta kanske ändras eller tas bort
+	for(int i = 0; i < NUMBER_OF_LINKS; i++) // Detta kanske ändras eller tas bort
 	{
 		p_node->links[i].open = ((open_walls >> (3 - i)) & 0x01); // Sätt rätt .open till TRUE
 	}
@@ -159,7 +159,7 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	p_robot_node->links[robot_dir].length = length; // 2a. Uppdatera längd
 	p_robot_node->links[robot_dir].p_node = p_node; // 2b. Koppla ny nod till gammal nod
 	// 3.Uppdatera ny nod
-	for(uint8_t i = 0; i < NUMBER_OF_LINKS; i++)
+	for(int i = 0; i < NUMBER_OF_LINKS; i++)
 	{
 		p_node->links[i].open = ((open_walls >> (3 - i)) & 0x01); // 3a. Sätt rätt .open till TRUE
 	}
@@ -218,7 +218,7 @@ void Update_node(node* p_node, uint8_t length)
 // Funktionen returnerar pekare till noden som finns på de givna koordinaterna om det finnsen nod där. Annars returneras NULL;
 node* Exisiting_node_at(uint8_t x_coordinate, uint8_t y_coordinate)
 {
-	for (uint8_t i = 0; i < all_nodes_size; i++)
+	for (int i = 0; i < all_nodes_size; i++)
 	{
 		if (all_nodes[i]->x_coordinate == x_coordinate && all_nodes[i]->y_coordinate == y_coordinate)
 		{
@@ -231,7 +231,7 @@ node* Exisiting_node_at(uint8_t x_coordinate, uint8_t y_coordinate)
 // Hittar placeringen som noden ligger på i all_nodes // Kan tas bort senare om den inte används
 uint8_t Find_index_of_node(node* p_node)
 {
-	for (uint8_t i = 0; i < all_nodes_size ; i++)
+	for (int i = 0; i < all_nodes_size ; i++)
 	{
 		if(all_nodes[i] == p_node)
 		{
@@ -246,7 +246,7 @@ uint8_t Find_low_cost_index()
 {
 	uint8_t temp_cost = DIJKSTRA_INFINITY;
 	uint8_t temp_index = DIJKSTRA_INFINITY;
-	for(uint8_t i = 0; i < all_nodes_size; i++)
+	for(int i = 0; i < all_nodes_size; i++)
 	{
 		if(all_nodes[i]->searched == FALSE && all_nodes[i]->cost < temp_cost)
 		{
@@ -265,7 +265,7 @@ uint8_t Find_shortest_path(node* p_node1, node* p_node2)
 	
 	//1. Markerar alla noder ej avsökta och sätter kostnaden till oändlighten samt sätter föregångaren som odefinerad
 	//Sätter även startnodens kostnad till 0.
-	for(uint8_t i = 0; i < all_nodes_size; i++)
+	for(int i = 0; i < all_nodes_size; i++)
 	{
 		all_nodes[i]->searched = FALSE;
 		all_nodes[i]->cost = DIJKSTRA_INFINITY;// =102 m =~ DIJKSTRA_INFINITY
@@ -287,7 +287,7 @@ uint8_t Find_shortest_path(node* p_node1, node* p_node2)
 		//2. Hitta den nod som har lägst nodpris, första gången startnoden.
 		node* p_chosen_node = all_nodes[Find_low_cost_index()];
 		//3. Ge angränsande noder uppdaterade värden om deras kostnad och föregångare.
-		for(uint8_t n = 0; n < NUMBER_OF_LINKS; n++)
+		for(int n = 0; n < NUMBER_OF_LINKS; n++)
 		{
 			if(p_chosen_node->links[n].p_node != NULL && p_chosen_node->links[n].p_node->cost > p_chosen_node->cost + p_chosen_node->links[n].length)
 			{
@@ -387,7 +387,7 @@ void Do_turn(uint8_t cardinal_direction)
 // Funktionen tar in en nodpekare och returnerar dess dijkstraspekares vädersträck
 uint8_t Get_dijkpointers_cardinal_direction(node* p_node)
 {
-	for (uint8_t i = 0; i < NUMBER_OF_LINKS; i++)
+	for (int i = 0; i < NUMBER_OF_LINKS; i++)
 	{
 		if (p_node->links[i].p_node->x_coordinate == p_node->p_pre_dijk->x_coordinate && p_node->links[i].p_node->y_coordinate == p_node->p_pre_dijk->y_coordinate)
 		{
@@ -407,7 +407,7 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 	if (p_robot_node->p_pre_dijk == NULL)
 	{
 		following_path = FALSE;
-		for (uint8_t i = 0; i < NUMBER_OF_LINKS; i++)
+		for (int i = 0; i < NUMBER_OF_LINKS; i++)
 		{
 			if (p_robot_node->links[i].length == 0 && p_robot_node->links[i].open)
 			{
@@ -425,9 +425,9 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 // Hittar en nod som har en outforskad öppning
 node* Easy_find_unexplored_node()
 {
-	for(int16_t i = all_nodes_size - 1; i > 0; i--)
+	for(int i = all_nodes_size - 1; i > 0; i--)
 	{
-		for (uint8_t n = 0; n < NUMBER_OF_LINKS; n++)
+		for (int n = 0; n < NUMBER_OF_LINKS; n++)
 		{
 			if (all_nodes[i]->links[n].open && all_nodes[i]->links[n].length == 0) // Om öppen med längd 0, alltså outforskad.
 			{
@@ -446,14 +446,14 @@ node* Easy_find_unexplored_node()
 //Hittar istället den nod som är minst antal steg från given nod(oftast robotpekaren som anropas)
 node* Smarter_find_unexplored_node(node* p_node)
 {
-	for(uint8_t i = 0; i < NUMBER_OF_LINKS; i++) //kolar om någon link är outforskad
+	for(int i = 0; i < NUMBER_OF_LINKS; i++) //kolar om någon link är outforskad
 	{
 		if(p_node->links[i].open && p_node->links[i].length == 0) // öppen och längd 0 -> outforskad väg
 		{
 			return p_node;
 		}
 	}
-	for(uint8_t n = 0; n < NUMBER_OF_LINKS; n++) //Om inte hittad outforskad, gör samma sak på grannarna
+	for(int n = 0; n < NUMBER_OF_LINKS; n++) //Om inte hittad outforskad, gör samma sak på grannarna
 	{
 		if(p_node->links[n].p_node != NULL && !p_node->links[n].p_node->start) //Om nästa nod inte är NULL och inte startnod
 		{
@@ -1010,8 +1010,6 @@ uint8_t Get_new_x_coordinate(uint8_t length)
 			break;
 		}
 		default:
-		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_1);
-		_delay_ms(1000);
 		break;
 	}
 	return x_coordinate;
@@ -1035,8 +1033,6 @@ uint8_t Get_new_y_coordinate(uint8_t length)
 			break;
 		}
 		default:
-		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_2);
-		_delay_ms(1000);
 		break;
 	}
 	return y_coordinate;
@@ -1044,7 +1040,7 @@ uint8_t Get_new_y_coordinate(uint8_t length)
 
 uint8_t Number_of_traveled_blocks(uint8_t length)
 {
-	return (length + TRAVELED_BLOCKS_MARGIN) / SIZE_OF_SQUARE_IN_CM;
+	return floor((length + 20) / SIZE_OF_SQUARE_IN_CM); // Ev. plussa något till length som marginal vid behov
 }
 
 void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
@@ -1075,7 +1071,10 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			if (enable_node_editing)
 			{
 				length = Get_length();
-				node* p_arrived_node = Exisiting_node_at(Get_new_x_coordinate(length), Get_new_y_coordinate(length));
+				uint8_t	new_x_coordinate = Get_new_x_coordinate(length);
+				uint8_t new_y_coordinate = Get_new_y_coordinate(length);
+				
+				node* p_arrived_node = Exisiting_node_at(new_x_coordinate, new_y_coordinate);
 				if (p_arrived_node != NULL) // Noden finns redan
 				{
 					Update_node(p_arrived_node, Number_of_traveled_blocks(length));
@@ -1086,7 +1085,8 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 				}
 				else // Ej befintlig nod
 				{
-					Create_node(Get_new_x_coordinate(length), Get_new_y_coordinate(length), Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
+					Create_node(new_x_coordinate, new_y_coordinate, Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
+					//if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
 					if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
 					{
 						enable_node_editing = TRUE;
@@ -1225,6 +1225,15 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		case 1:
 		{
 			Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			break;
+		}
+		case 2:
+		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_2);
+			break;
+		}
+		case 3:
+		{
 			break;
 		}
 		default:

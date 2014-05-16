@@ -60,7 +60,7 @@
 #define HALF_ROBOT_LENGTH (100)
 #define ANGULAR_RATE (0x05)
 #define ANGULAR_RATE_SENSITIVITY (1.28)
-#define ANGULAR_RATE_OFFSET (133.4)
+#define ANGULAR_RATE_OFFSET (136.3)
 
 #define RFID_1 (1)
 #define RFID_2 (2)
@@ -90,7 +90,7 @@
 #define TRAVELED_BLOCKS_MARGIN (20)
 #define SIDE_SENSOR_OPEN_LIMIT (240)
 #define SIZE_OF_SQUARE_IN_CM (40)
-#define FRONT_SENSOR_LIMIT (26)
+#define FRONT_SENSOR_LIMIT (20)
 
 //test
 #define COMMAND_STOP_1 (0x21)
