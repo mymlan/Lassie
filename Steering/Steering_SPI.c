@@ -59,7 +59,7 @@ ISR(SPI_STC_vect)
 				case NO_NEED_TO_REGULATE:
 					break;
 				case REGULATED_FORWARD:
-					Forward_regulated(sensor_data[5], sensor_data[6]);
+					Forward_regulated(sensor_data[5]);
 					break;
 				case REGULATED_BACKWARD:
 					Backward_regulated(sensor_data[5], sensor_data[6]);
@@ -68,7 +68,6 @@ ISR(SPI_STC_vect)
 					PORTA = 0xEC;
 					break;
 			}
-			
 			break;
 		}
 		case ID_BYTE_MANUAL_DECISIONS:
@@ -109,14 +108,14 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					//PORTA = 0x80; // Error
 					break;
-				case COMMAND_FORWARD: Forward_regulated(90, 100);
+				case COMMAND_FORWARD: Forward_regulated(90);
 					//PORTA = 0x81;
 					last_auto_decision = REGULATED_FORWARD;
 					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 100);
 					last_auto_decision = REGULATED_BACKWARD;
 					break;
-				case COMMAND_FORWARD_NOT_REGULATED: Forward_regulated(90, 100);
+				case COMMAND_FORWARD_NOT_REGULATED: Forward_regulated(90);
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_BACKWARD_NOT_REGULATED: Backward_regulated(90, 100);
