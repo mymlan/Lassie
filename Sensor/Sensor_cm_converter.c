@@ -431,6 +431,7 @@ uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t 
 	}
 }
 /*
+
 uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	int8_t angle_in_corridor_right;
@@ -459,31 +460,6 @@ uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t 
 
 //Funktion som beräknar avvikelse från mitten i korridoren
 
-/*
-uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	uint16_t diff_from_right_wall = (right_back + right_front) / 2;
-	uint16_t diff_from_left_wall = (left_back + left_front) / 2;
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 130;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return diff_from_right_wall - 130;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 330 - diff_from_left_wall;
-	}
-	else
-	{
-		return (diff_from_right_wall - diff_from_left_wall) / 2 + 130;
-	}
-}*/
-
-
 uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
@@ -507,5 +483,30 @@ uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_
 	else
 	{
 		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
-	}	
+	}
 }
+/*
+uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
+{
+	uint16_t diff_from_right_wall = (right_back + right_front) / 2;
+	uint16_t diff_from_left_wall = (left_back + left_front) / 2;
+	
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 100;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return diff_from_right_wall;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 200 - diff_from_left_wall;
+	}
+	else
+	{
+		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
+	}
+}
+*/
+
