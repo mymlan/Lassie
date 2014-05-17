@@ -22,6 +22,8 @@ uint8_t following_path;
 uint8_t level;
 uint8_t enable_node_editing;
 uint8_t traveled_blocks;
+uint8_t enable_safety;
+uint8_t length;
 
 int test_variable_a;
 int test_variable_b;
@@ -75,7 +77,10 @@ void Following_path_at_crossing();
 uint8_t Get_new_x_coordinate(uint8_t length);
 uint8_t Get_new_y_coordinate(uint8_t length);
 uint8_t Number_of_traveled_blocks(uint8_t length);
+void Follow(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
-void level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
+void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_front);
+void Set_enable();
 #endif
