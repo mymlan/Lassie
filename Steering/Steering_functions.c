@@ -180,9 +180,13 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 {
 	Set_wheels_both_goes_backward();
-	adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
+	/*adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 + adjusted_speed); // Höger motor gräns
-	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns
+	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns*/
+	Lookup_table_K_D(regulator_angle);
+	Lookup_table_K_P(regulator_error);
+	OCR1A = adjusted_speed_KD_right_wheel + adjusted_speed_KP_right_wheel - BASE_SPEED;
+	OCR1B = adjusted_speed_KD_left_wheel + adjusted_speed_KP_left_wheel - BASE_SPEED;
 }
 
 void Lookup_table_K_P(uint8_t regulator_error)
