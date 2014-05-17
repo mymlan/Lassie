@@ -1,4 +1,3 @@
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "../CommonLibrary/Common.h"
@@ -15,7 +14,17 @@ int main(void)
 	
     while(1)
 	{
-		;
+		/*if(MANUAL_DECISIONS_ACTIVATED)
+		{
+			init_button_calibrate_angular_sensor();
+			while(1)
+			{
+				
+			}
+		}else 
+		{
+			;
+		}*/
 	}
 	
 }

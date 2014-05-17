@@ -1,11 +1,13 @@
-﻿#include <stdint.h>
+﻿#define F_CPU (18432000L)
+#include <util/delay.h>
+#include <stdint.h>
 #include <avr/interrupt.h>
 #include <math.h>
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 #include "../CommonLibrary/Common.h"
 #define Baudrate 2400  //Bits per second hos RFID
-#define F_CPU 18432000UL  //Clock freq. hos MC
+//#define F_CPU 18432000UL  //Clock freq. hos MC
 #define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)  //Baud rate generator (prescaler) för USART
 volatile uint8_t RFID_tag_read[10];  //Array med 10 bytes där RFID ID lagras
 volatile uint8_t RFID_tag_correct[10];  //Avläst ID på RFID läggs in här om korrekt avläsning skett
@@ -15,7 +17,7 @@ volatile uint8_t RFID_start_read = 0;  //Kontrollerar startbit innan bytes lägg
 static volatile int diff_from_middle_corridor; 
 static volatile uint8_t angle_corridor;
 
-static volatile uint8_t angular_read[8];
+static float angular_read[50];
 static volatile double angular_rate_offset = 136.7;
 static volatile uint8_t angular_rate_value;
 static volatile float angular_rate_total = 0;
@@ -42,6 +44,16 @@ void USART_init(){
 	UBRR0L = (unsigned char)Baud_Prescale; //set rest of bits of baudrate
 }
 
+float sum_array(float a[], int num_elements)
+{
+   int i, sum=0;
+   for (i=0; i<num_elements; i++)
+   {
+	 sum = sum + a[i];
+   }
+   return(sum);
+}
+
 void init_variable()
 {
 	reflex_count = 0;
@@ -59,17 +71,19 @@ void init_button_calibrate_angular_sensor()
 ISR(PCINT2_vect)
 {
 	ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
+	_delay_ms(20);
 	ADCSRA |= (1<<ADSC);
-	for (int i = 0; i < 8; i++)
+	
+	for (int i = 0; i < 100; i++)
 	{
+		_delay_ms(5);
 		angular_read[i] = ADCH;
 		ADCSRA |= (1<<ADSC);
 	}
-	angular_rate_offset = (angular_read[0] + angular_read[1] + angular_read[2] + angular_read[3] + angular_read[4] + angular_read[5] + angular_read[6] + angular_read[7]) / 8;
-	
-	COMMON_CLEAR_BIT(PCICR, PCIE2); //Stänger av avbrottet
-	COMMON_CLEAR_BIT(PCMSK2, PCINT16); //Stänger av avbrottet
-	COMMON_TOGGLE_PIN(PORTA, PORTA1);
+	angular_rate_offset = sum_array(angular_read,100) / 100.0f;
+	//COMMON_CLEAR_BIT(PCICR, PCIE2); //Stänger av avbrottet
+	//COMMON_CLEAR_BIT(PCMSK2, PCINT16); //Stänger av avbrottet
+	//COMMON_TOGGLE_PIN(PORTA, PORTA1);
 }
 
 ISR(USART0_RX_vect)
@@ -505,7 +519,7 @@ uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_bac
 	}
 	else
 	{
-		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
+		return ((diff_from_right_wall - diff_from_left_wall) / 2) + 100;
 	}
 }
 */
