@@ -22,6 +22,7 @@ static volatile double angular_rate_offset = 136.7;
 static volatile uint8_t angular_rate_value;
 static volatile float angular_rate_total = 0;
 static volatile float angular_rate_diff;
+uint8_t manual_mode = 0;
 
 void init_interrupts()
 {
@@ -153,7 +154,8 @@ ISR (ADC_vect)
 			next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
 			angle_corridor = calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
-			diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor - 90, ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
+			diff_from_middle_corridor = calculate_diff_from_middle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
+			//diff_from_middle_corridor = calculate_diff_from_middle_corridor(angle_corridor, ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
 			if (diff_from_middle_corridor > 255)
 			{
 				diff_from_middle_corridor = 255;
@@ -418,7 +420,7 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 
 //Funktion som beräknar vinkeln roboten har i en korridor
 
-
+/*
 uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	int8_t angle_in_corridor_right;
@@ -443,8 +445,8 @@ uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t 
 	{
 		return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
 	}
-}
-/*
+}*/
+
 
 uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
@@ -470,10 +472,10 @@ uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t 
 	{
 		return 100 + ((angle_in_corridor_right + angle_in_corridor_left) / 2);
 	}
-}*/
+}
 
 //Funktion som beräknar avvikelse från mitten i korridoren
-
+/*
 uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
@@ -498,8 +500,8 @@ uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_
 	{
 		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
 	}
-}
-/*
+}*/
+
 uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	uint16_t diff_from_right_wall = (right_back + right_front) / 2;
@@ -522,5 +524,5 @@ uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_bac
 		return ((diff_from_right_wall - diff_from_left_wall) / 2) + 100;
 	}
 }
-*/
+
 

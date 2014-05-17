@@ -10,21 +10,12 @@ int main(void)
 	USART_init();
   	init_interrupts();
 	SPI_sensor_init();
+	init_button_calibrate_angular_sensor();
 	sei();
 	
     while(1)
 	{
-		/*if(MANUAL_DECISIONS_ACTIVATED)
-		{
-			init_button_calibrate_angular_sensor();
-			while(1)
-			{
-				
-			}
-		}else 
-		{
-			;
-		}*/
+		
 	}
 	
 }

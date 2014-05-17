@@ -163,6 +163,7 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 	}
 	else if (adjusted_speed <= -0.3)
 	{
+		
 		adjusted_speed = -0.3;
 	}
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
@@ -178,6 +179,75 @@ void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 	adjusted_speed = K_P * (regulator_error) + K_D * tan(regulator_angle - 90);
 	OCR1A = BASE_SPEED * (1 + adjusted_speed); // Höger motor gräns
 	OCR1B = BASE_SPEED * (1 - adjusted_speed); // Vänster motor gräns
+}
+
+void Lookup_table_K_P(uint8_t regulator_error)
+{
+	if(regulator_error >= 142)
+	{
+		OCR1A = 23400;
+		OCR1B = 36600;
+	}
+	else if(regulator_error < 142 && regulator_error >= 132)
+	{
+		OCR1A = 25560;
+		OCR1B = 34440;
+	}
+	else if(regulator_error < 132 && regulator_error >= 123)
+	{
+		OCR1A = 26700;
+		OCR1B = 33300;
+	}
+	else if(regulator_error < 123 && regulator_error >= 115)
+	{
+		OCR1A = 27720;
+		OCR1B = 32280;
+	}
+	else if(regulator_error < 115 && regulator_error >= 108)
+	{
+		OCR1A = 28740;
+		OCR1B = 31260;
+	}
+	else if(regulator_error < 108 && regulator_error >= 102)
+	{
+		OCR1A = 29520;
+		OCR1B = 30480;
+	}
+	else if(regulator_error < 102 && regulator_error > 98)
+	{
+		OCR1A = 30000;
+		OCR1B = 30000;
+	}
+	else if(regulator_error <= 98 && regulator_error > 92)
+	{
+		OCR1A = 30480;
+		OCR1B = 29520;
+	}
+	else if(regulator_error <= 92 && regulator_error > 85)
+	{
+		OCR1A = 31260;
+		OCR1B = 28740;
+	}
+	else if(regulator_error <= 85 && regulator_error > 77)
+	{
+		OCR1A = 32280;
+		OCR1B = 27720;
+	}
+	else if(regulator_error <= 77 && regulator_error > 68)
+	{
+		OCR1A = 33330;
+		OCR1B = 26700;
+	}
+	else if(regulator_error <= 68 && regulator_error > 58)
+	{
+		OCR1A = 34440;
+		OCR1B = 25560;
+	}
+	else if(regulator_error <= 58)
+	{
+		OCR1A = 36600;
+		OCR1B = 22400;
+	}
 }
 
 void Lookup_table_K_D(uint8_t regulator_angle)

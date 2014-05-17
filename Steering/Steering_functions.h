@@ -21,5 +21,6 @@ void Forward_regulated(uint8_t, uint8_t);
 void Backward_regulated(uint8_t, uint8_t);
 
 void Lookup_table_K_D(uint8_t);
+void Lookup_table_K_P(uint8_t);
 
 #endif
