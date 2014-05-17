@@ -175,7 +175,7 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	_delay_ms(1000);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 	
-	//USART_send_nodes_to_PC(1, x_coordinate, y_coordinate) // 1 betyder noden skapades
+	Map_send_map_coordinates_to_PC(ID_BYTE_MAP_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Create_goal
@@ -211,7 +211,7 @@ void Update_node(node* p_node, uint8_t length)
 	_delay_ms(1000);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 	
-	//USART_send_nodes_to_PC(0, x_coordinate, y_coordinate) // 0 betyder noden uppdaterades
+	Map_send_map_coordinates_to_PC(ID_BYTE_MAP_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Existing_node_at
@@ -723,6 +723,7 @@ void Map_init()
 	level = 0;
 	enable_node_editing = 1;
 	robot_dir = NORTH;
+	enable_safety = 0;
 }
 
 // Map_main
@@ -1040,7 +1041,7 @@ uint8_t Get_new_y_coordinate(uint8_t length)
 
 uint8_t Number_of_traveled_blocks(uint8_t length)
 {
-	return floor((length + 20) / SIZE_OF_SQUARE_IN_CM); // Ev. plussa något till length som marginal vid behov
+	return (length + 20) / SIZE_OF_SQUARE_IN_CM; // Ev. plussa något till length som marginal vid behov
 }
 
 void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
@@ -1060,6 +1061,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		else // Inte en korsing och following_path == TRUE
 		{
+			//set_enable();
 			enable_node_editing = TRUE;
 			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 		}
@@ -1089,8 +1091,8 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 					//if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
 					if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
 					{
+						//set_enable();
 						enable_node_editing = TRUE;
-						
 						Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
 						following_path = TRUE;
 						Following_path_at_crossing();
@@ -1124,6 +1126,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		else // Ej korsning, ej following path
 		{
+			//set_enable();
 			enable_node_editing = TRUE;
 			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 		}
@@ -1131,89 +1134,13 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 }
 // ev. funktion deleta allt allokerat minne mha free()
 // (kanske inte behövs då vi inte ska deleta enskilda noder, och kan reseta minnet mellan körningar)
-void Do_level_2(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
-{
-	uint8_t length;
-	if(following_path)
-	{
-		if(Crossing(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right)) // Korsning?
-		{
-			if (enable_node_editing)
-			{
-				p_robot_node = p_robot_node->p_pre_dijk;
-				enable_node_editing = FALSE;
-				length = Get_length();
-			}
-			Following_path_at_crossing();
-		}
-		else // Inte en korsing och following_path == TRUE
-		{
-			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-		}
-	}
-	else // following path == FALSE
-	{
-		if (Crossing(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right))
-		{
-			if (enable_node_editing)
-			{
-				length = Get_length();
-				node* p_arrived_node = Exisiting_node_at(Get_new_x_coordinate(length), Get_new_y_coordinate(length));
-				if (p_arrived_node != NULL) // Noden finns redan
-				{
-					Update_node(p_arrived_node, Number_of_traveled_blocks(length));
-					
-					Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
-					following_path = TRUE;
-					Following_path_at_crossing();
-				}
-				else // Ej befintlig nod
-				{
-					Create_node(Get_new_x_coordinate(length), Get_new_y_coordinate(length), Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
-					if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
-					{
-						enable_node_editing = TRUE;
-						
-						Find_shortest_path(Easy_find_unexplored_node(), p_robot_node);
-						following_path = TRUE;
-						Following_path_at_crossing();
-					}
-					else // Ej återvändsgränd och ny nod
-					{
-						if (sensor_front > SIZE_OF_SQUARE_IN_CM)
-						{
-							Do_turn(robot_dir);
-						}
-						else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
-						{
-							Do_turn((robot_dir + 1) % 4);
-						}
-						else if (sensor_front_left > SIDE_SENSOR_OPEN_LIMIT)
-						{
-							Do_turn((robot_dir + 3) % 4);
-						}
-						else // Borde ej inträffa!
-						{
-							SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_3);
-						}
-					}
-				}
-			}
-			else // Not enable node editing i korsning
-			{
-				//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-			}
-		}
-		else // Ej korsning
-		{
-			enable_node_editing = TRUE;
-			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-		}
-	}
-}
 
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
+	if (SPI_map_should_handle_rfid())
+	{
+		Do_this_when_rfid_found(sensor_front_left, sensor_front_right, sensor_front);
+	}
 	//level = 1;
 	switch(level)
 	{
@@ -1234,6 +1161,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		case 3:
 		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_3);
 			break;
 		}
 		default:
@@ -1279,5 +1207,18 @@ void level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t senso
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 		_delay_ms(500);
 		Do_turn((robot_dir + 2) % 4);
+	}
+}
+
+void set_enable()
+{
+	if(enable_safety > 0)
+	{
+		enable_node_editing = 1;
+		enable_safety = 0;
+	}
+	else
+	{
+		enable_safety++;
 	}
 }
