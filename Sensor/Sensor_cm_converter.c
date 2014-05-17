@@ -26,8 +26,14 @@ uint8_t manual_mode = 0;
 
 void init_interrupts()
 {
-	ACSR = (1>>ACD)|(1>>ACBG)|(1<<ACIE)|(1>>ACIC)|(0>>ACIS0)|(0>>ACIS1);  //ACD=0 AC på, ACBG=0 external comparator pin AIN0, ACIE=1 interrupt enable, ACIC=0 Timer/Counter disabled, ACIS0..1=1 interrupt on rising/falling output edge
-	PORTD |= 1<<PORTD6;  //Sätter PORTD6 (pinne 20) till HIGH som används till spänningsdelaren hos reflexsensorn
+	COMMON_CLEAR_BIT(ACSR, ACD); //ACD=0 AC på
+	COMMON_CLEAR_BIT(ACSR, ACBG); //ACBG=0 external comparator pin AIN0
+	COMMON_CLEAR_BIT(ACSR, ACIC); //ACIC=0 Timer/Counter disabled
+	COMMON_CLEAR_BIT(ACSR, ACIS0); //ACIS0..1=0 interrupt on rising/falling output edge 
+	COMMON_CLEAR_BIT(ACSR, ACIS1);
+	COMMON_SET_BIT(ACSR, ACIE); //ACIE=1 interrupt enable
+	COMMON_SET_BIT(DDRD, DDD6);  //PORTD6 som output
+	COMMON_SET_BIT(PORTD, PORTD6);  //Sätter PORTD6 (pinne 20) till HIGH som används till spänningsdelaren hos reflexsensorn
 	ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); // Set the ADMUX
 	ADCSRA = (1<<ADIE)|(1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); //Set Prescaler to 128, Set ADCSRA to enable interrupts
 	ADCSRA |= (1<<ADSC); //Start ADC
@@ -89,7 +95,7 @@ ISR(PCINT2_vect)
 
 ISR(USART0_RX_vect)
 {	
-	if (RFID_count==10)  //kollar om korrekt startbit
+	/*if (RFID_count==10)  //kollar om korrekt startbit
 	{
 		if (UDR0 == 13)  //kollar om korrekt stopbit
 		{
@@ -98,15 +104,16 @@ ISR(USART0_RX_vect)
 				RFID_tag_correct[i] = RFID_tag_read[i];  //Laddar över korrekt avläst RFID ID
 			}
 			//Ifall vi vill kunna identifiera en specifik RFID så ska vi kolla igenom den avlästa RFIDn med ett antal kända RFID-nummer
-			/*if (RFID_tag_correct[9] == 68) 
+			if (RFID_tag_correct[9] == 68) 
 			{
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
 			}
 			*/
+			/*
 			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
 			RFID_count = 0; 
-			RFID_start_read = 0;
-		}
+			RFID_start_read = 0;*/
+		/*}
 		else
 		{
 			RFID_count = 0;
@@ -117,11 +124,14 @@ ISR(USART0_RX_vect)
 	{
 		RFID_tag_read[RFID_count] = UDR0;
 		RFID_count++;
-	}
+	}*/
 	//Meddelar resten av ISR att en korrekt startbit hittats
 	if (UDR0 == 10)
 	{
-		RFID_start_read = 1;
+		SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
+		RFID_count = 0;
+		RFID_start_read = 0;
+		//RFID_start_read = 1;
 	}
 }
 
@@ -193,14 +203,16 @@ ISR (ADC_vect)
 
 ISR(ANALOG_COMP_vect){
 	//Tröskelvärdet höjs resp. sänks om interruptet startas på låg resp. hög 
-	if (PORTD && (1<<PORTD6)){ 
-		PORTD |= (1>>PORTD6);  
+	if ((PORTD & (1<<PORTD6)) == 64)
+	{ 
+		COMMON_CLEAR_PIN(PORTD,PORTD6);
 	}
-	else{
-		PORTD |= (1<<PORTD6);  
+	else
+	{
+		COMMON_SET_PIN(PORTD, PORTD6);  
 	}
-	reflex_count = reflex_count+1;  //Räknar upp 
-	ACSR |= (1<<ACI);  //Tar bort eventuella interrupts på kö (endast ett ska räknas varje gång)
+	reflex_count++;  //Räknar upp 
+	COMMON_SET_BIT(ACSR, ACI);  //Tar bort eventuella interrupts på kö (endast ett ska räknas varje gång)
 }
 
 //Funktioner som omvandlar sensor utdata till avstånd i mm
