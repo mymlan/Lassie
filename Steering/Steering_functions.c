@@ -29,8 +29,10 @@ static uint16_t pwm_left_wheel_stop = 0;
 static uint16_t pwm_claw_closed = 20;
 static uint16_t pwm_claw_open = 25;
 
-uint16_t adjusted_speed_right_wheel;
-uint16_t adjusted_speed_left_wheel;
+uint16_t adjusted_speed_KP_right_wheel;
+uint16_t adjusted_speed_KP_left_wheel;
+uint16_t adjusted_speed_KD_right_wheel;
+uint16_t adjusted_speed_KD_left_wheel;
 
 //-----------------PORTDEFINITIONER----------------//
 /* Portdefinitioner Motor
@@ -156,7 +158,7 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 {
 	Set_wheels_both_goes_forward();
 	
-	adjusted_speed = K_P * (regulator_error - 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
+	/*adjusted_speed = K_P * (regulator_error - 100) + K_D * tan(( - regulator_angle + 90) * 3.1415 / 180.0f);
 	if (adjusted_speed >= 0.3)
 	{
 		adjusted_speed = 0.3;
@@ -167,10 +169,12 @@ void Forward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
 		adjusted_speed = -0.3;
 	}
 	OCR1A = BASE_SPEED * (1 - adjusted_speed); // Höger motor gräns
-	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns
+	OCR1B = BASE_SPEED * (1 + adjusted_speed); // Vänster motor gräns*/
 	
-	//Lookup_table_K_D(regulator_angle);
-	//nästa lookup
+	Lookup_table_K_D(regulator_angle);
+	Lookup_table_K_P(regulator_error);
+	OCR1A = adjusted_speed_KD_right_wheel + adjusted_speed_KP_right_wheel - BASE_SPEED;
+	OCR1B = adjusted_speed_KD_left_wheel + adjusted_speed_KP_left_wheel - BASE_SPEED;
 }
 
 void Backward_regulated(uint8_t regulator_angle, uint8_t regulator_error)
@@ -185,68 +189,68 @@ void Lookup_table_K_P(uint8_t regulator_error)
 {
 	if(regulator_error >= 142)
 	{
-		OCR1A = 23400;
-		OCR1B = 36600;
+		adjusted_speed_KP_right_wheel = 23400;
+		adjusted_speed_KP_left_wheel = 36600;
 	}
 	else if(regulator_error < 142 && regulator_error >= 132)
 	{
-		OCR1A = 25560;
-		OCR1B = 34440;
+		adjusted_speed_KP_right_wheel = 25560;
+		adjusted_speed_KP_left_wheel = 34440;
 	}
 	else if(regulator_error < 132 && regulator_error >= 123)
 	{
-		OCR1A = 26700;
-		OCR1B = 33300;
+		adjusted_speed_KP_right_wheel = 26700;
+		adjusted_speed_KP_left_wheel = 33300;
 	}
 	else if(regulator_error < 123 && regulator_error >= 115)
 	{
-		OCR1A = 27720;
-		OCR1B = 32280;
+		adjusted_speed_KP_right_wheel = 27720;
+		adjusted_speed_KP_left_wheel = 32280;
 	}
 	else if(regulator_error < 115 && regulator_error >= 108)
 	{
-		OCR1A = 28740;
-		OCR1B = 31260;
+		adjusted_speed_KP_right_wheel = 28740;
+		adjusted_speed_KP_left_wheel = 31260;
 	}
 	else if(regulator_error < 108 && regulator_error >= 102)
 	{
-		OCR1A = 29520;
-		OCR1B = 30480;
+		adjusted_speed_KP_right_wheel = 29520;
+		adjusted_speed_KP_left_wheel = 30480;
 	}
 	else if(regulator_error < 102 && regulator_error > 98)
 	{
-		OCR1A = 30000;
-		OCR1B = 30000;
+		adjusted_speed_KP_right_wheel = 30000;
+		adjusted_speed_KP_left_wheel = 30000;
 	}
 	else if(regulator_error <= 98 && regulator_error > 92)
 	{
-		OCR1A = 30480;
-		OCR1B = 29520;
+		adjusted_speed_KP_right_wheel = 30480;
+		adjusted_speed_KP_left_wheel = 29520;
 	}
 	else if(regulator_error <= 92 && regulator_error > 85)
 	{
-		OCR1A = 31260;
-		OCR1B = 28740;
+		adjusted_speed_KP_right_wheel = 31260;
+		adjusted_speed_KP_left_wheel = 28740;
 	}
 	else if(regulator_error <= 85 && regulator_error > 77)
 	{
-		OCR1A = 32280;
-		OCR1B = 27720;
+		adjusted_speed_KP_right_wheel = 32280;
+		adjusted_speed_KP_left_wheel = 27720;
 	}
 	else if(regulator_error <= 77 && regulator_error > 68)
 	{
-		OCR1A = 33330;
-		OCR1B = 26700;
+		adjusted_speed_KP_right_wheel = 33330;
+		adjusted_speed_KP_left_wheel = 26700;
 	}
 	else if(regulator_error <= 68 && regulator_error > 58)
 	{
-		OCR1A = 34440;
-		OCR1B = 25560;
+		adjusted_speed_KP_right_wheel = 34440;
+		adjusted_speed_KP_left_wheel = 25560;
 	}
 	else if(regulator_error <= 58)
 	{
-		OCR1A = 36600;
-		OCR1B = 22400;
+		adjusted_speed_KP_right_wheel = 36600;
+		adjusted_speed_KP_left_wheel = 22400;
 	}
 }
 
@@ -254,57 +258,57 @@ void Lookup_table_K_D(uint8_t regulator_angle)
 {
 	if(regulator_angle >= 116)
 	{
-		OCR1A = 20435;
-		OCR1B = 39565;
+		adjusted_speed_KD_right_wheel = 20435;
+		adjusted_speed_KD_left_wheel = 39565;
 	}
 	else if(regulator_angle < 116 && regulator_angle >= 111)
 	{
-		OCR1A = 22066;
-		OCR1B = 37934;
+		adjusted_speed_KD_right_wheel = 22066;
+		adjusted_speed_KD_left_wheel = 37934;
 	}
 	else if(regulator_angle < 111 && regulator_angle >= 108)
 	{
-		OCR1A = 24076;
-		OCR1B = 35924;
+		adjusted_speed_KD_right_wheel = 24076;
+		adjusted_speed_KD_left_wheel = 35924;
 	}
 	else if(regulator_angle < 108 && regulator_angle >= 105)
 	{
-		OCR1A = 26063;
-		OCR1B = 33937;
+		adjusted_speed_KD_right_wheel = 26063;
+		adjusted_speed_KD_left_wheel = 33937;
 	}
 	else if(regulator_angle < 105 && regulator_angle >= 102)
 	{
-		OCR1A = 28035;
-		OCR1B = 31965;
+		adjusted_speed_KD_right_wheel = 28035;
+		adjusted_speed_KD_left_wheel = 31965;
 	}
 	else if(regulator_angle < 102 && regulator_angle > 98)
 	{
-		OCR1A = 30000;
-		OCR1B = 30000;
+		adjusted_speed_KD_right_wheel = 30000;
+		adjusted_speed_KD_left_wheel = 30000;
 	}
 	else if(regulator_angle <= 98 && regulator_angle > 95)
 	{
-		OCR1A = 31965;
-		OCR1B = 28035;
+		adjusted_speed_KD_right_wheel = 31965;
+		adjusted_speed_KD_left_wheel = 28035;
 	}
 	else if(regulator_angle <= 95 && regulator_angle > 92)
 	{
-		OCR1A = 33937;
-		OCR1B = 26063;
+		adjusted_speed_KD_right_wheel = 33937;
+		adjusted_speed_KD_left_wheel = 26063;
 	}
 	else if(regulator_angle <= 92 && regulator_angle > 89)
 	{
-		OCR1A = 35924;
-		OCR1B = 24076;
+		adjusted_speed_KD_right_wheel = 35924;
+		adjusted_speed_KD_left_wheel = 24076;
 	}
 	else if(regulator_angle <= 89 && regulator_angle > 84)
 	{
-		OCR1A = 37934;
-		OCR1B = 22066;
+		adjusted_speed_KD_right_wheel = 37934;
+		adjusted_speed_KD_left_wheel = 22066;
 	}
 	else if(regulator_angle <= 84)
 	{
-		OCR1A = 39565;
-		OCR1B = 20435;
+		adjusted_speed_KD_right_wheel = 39565;
+		adjusted_speed_KD_left_wheel = 20435;
 	}
 }
