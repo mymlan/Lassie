@@ -56,7 +56,12 @@ function mjukvaru_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for mjukvaru_gui
 handles.output = hObject;
-
+%sensor_data = zeros(5,300);
+%handles.sensor_data = sensor_data;
+handles.sensor_plot = figure();
+map_links = [];
+handles.map_links = map_links;
+handles.map_plot = figure();
 % Update handles structure
 guidata(hObject, handles);
 
@@ -195,16 +200,15 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 %info.RemoteNames
 %Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
 %Device ID: 00066602D47F
-
-sensor_data = zeros(7,1000);
-number_of_sensor_data_collected = 1;
-
+global sensor_data;
+sensor_data = zeros(5,300);
 set(handles.bt_info, 'String', 'Wait...');
 BT = Bluetooth('FireFly-D47F', 1); % Channel är möjligtvis inte alltid 1
 disp('Blåtansobjekt skapat.')
+
 BT.BytesAvailableFcnCount = 1;
 BT.BytesAvailableFcnMode = 'byte';
-BT.BytesAvailableFcn = {'mycallback', BT, sensor_data, number_of_sensor_data_collected ,handles};
+BT.BytesAvailableFcn = {'mycallback', BT, handles};
 
 fopen(BT);
 disp('Kommunikationskanal öppnad.')
@@ -229,180 +233,5 @@ set(handles.pushbutton2,'Enable','on')
 set(handles.bt_info, 'String', 'Disonnected');
 
 
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-IR_front_long = zeros(1,1000);
-IR_right_front = zeros(1,1000);
-IR_right_back = zeros(1,1000);
-IR_left_front = zeros(1,1000);
-IR_left_back = zeros(1,1000);
-regulator_error = zeros(1,1000);
-regulator_angle = zeros(1,1000);
 
-disp('bytes available')
-disp(handles.BT.BytesAvailable)
-
-for i = 1:240
-while handles.BT.BytesAvailable == 0
-    %disp('no bytes available')
-end
-id_byte = fread(handles.BT,1);
-disp(id_byte)
-switch id_byte 
-  case 1 %sensorvärden
-        for j = 1:7
-            %Ev lägga in en while här, men känns onödigt om felmeddelandet
-            %aldrig uppstår
-           byte = fread(handles.BT,1);
-            switch j
-                case 1
-                    regulator_error(i) = byte;
-                    set(handles.error,'String',byte)
-                    drawnow()
-                case 2
-                    regulator_angle(i) = byte;
-                    set(handles.angle,'String',byte)
-                    drawnow()
-                case 3
-                    IR_front_long(i) = byte;
-                    set(handles.ir_f,'String',byte)
-                    drawnow()
-                case 4
-                    IR_right_back(i) = byte;
-                    set(handles.ir_h_f,'String',byte)
-                    drawnow()
-                case 5
-                    IR_right_front(i) = byte;
-                    set(handles.ir_h_b,'String',byte)
-                    drawnow()
-                case 6
-                    IR_left_back(i) = byte;
-                    set(handles.ir_v_b,'String',byte)
-                    drawnow()
-                case 7
-                    IR_left_front(i) = byte;
-                    set(handles.ir_v_f,'String',byte)
-                    drawnow()
-                otherwise 
-                    disp('error i switch för sensordata')
-            end
-        end
-    case 3 %distance
-        byte = fread(handles.BT,1);
-        set(handles.distance,'String',byte)
-    case 8 %auto_decisions
-        set(handles.styrform, 'String', 'Autonom')
-        byte = fread(handles.BT,1);
-        %disp(byte)
-        switch byte
-            case 16 %Stop
-                set(handles.kommando, 'String', 'Stanna')
-                drawnow() %Tvingar GUI att uppdatera sig
-            case 17 %Forward
-                set(handles.kommando, 'String', 'Fram')
-                drawnow()
-            case 18 %Backward
-                set(handles.kommando, 'String', 'Back')
-                drawnow()
-            case 19 %Turn Right
-                set(handles.kommando, 'String', 'Sväng höger')
-                drawnow()
-            case 20 %Turn left
-                set(handles.kommando, 'String', 'Sväng vänster')
-                drawnow()
-            case 21 %Rotate Right
-                set(handles.kommando, 'String', 'Rotera höger')
-                drawnow()
-            case 22 %Rotera vänster
-                set(handles.kommando, 'String', 'Rotera vänster')
-                drawnow()
-            case 23 %Close claw
-                set(handles.kommando, 'String', 'Greppa med gripklo')
-                drawnow()
-            case 24 %Open claw
-                set(handles.kommando, 'String', 'öppna gripklo')
-                drawnow()
-            case 25 %Forward not regulated
-                set(handles.kommando, 'String', 'Fram, ej reglerad')
-                drawnow()
-            case 26 %Backward not regulated
-                set(handles.kommando, 'String', 'Back, ej reglerad')
-                drawnow()
-            case 27 %Tight turn right
-                set(handles.kommando, 'String', 'Snäv högersväng')
-                drawnow()   
-            case 28 %Tight turn left
-                set(handles.kommando, 'String', 'Snäv vänstersväng')
-                drawnow() 
-            otherwise
-                disp('error i auto_decisions')
-        end
-    case 12 %Map coordinates
-        disp('uppdate map')
-        %Hur vill vi representera kartan
-        %x_coordinate = fread(handles.BT,1);
-        %y_coordinate = fread(handles.BT,1);
-    case 13 %Map parameters
-        for k = 1:7
-          byte = fread(handles.BT,1);
-          switch k
-                case 1
-                    set(handles.robot_direction,'String',byte)
-                    drawnow()
-                case 2
-                    set(handles.size_all_nodes,'String',byte)
-                    drawnow()
-                case 3
-                    set(handles.following_path,'String',byte)
-                    drawnow()
-                case 4
-                    set(handles.enable_node_edit,'String',byte)
-                    drawnow()
-                case 5
-                    set(handles.level,'String',byte)
-                    drawnow()
-                case 6
-                    set(handles.x_coordinate,'String',byte)
-                    drawnow()
-                case 7
-                    set(handles.y_coordinate,'String',byte)
-                    drawnow()
-                otherwise 
-                    disp('error i switch för kartparametrar')
-          end
-        end
-    otherwise
-        disp('error i switch för id-byte')
-end
-
-start_value_to_plot_array = 1;
-if(size(IR_front_long)> 100)
-    start_value_to_plot_array = size(IR_front_long) - 100;
-end
-axes(handles.ir_front_long)
-plot(IR_front_long(start_value_to_plot_array:size(IR_front_long)))
-axes(handles.ir_right_back)
-plot(IR_right_back(start_value_to_plot_array:size(IR_right_back)))
-axes(handles.ir_right_front)
-plot(IR_right_front(start_value_to_plot_array:size(IR_right_front)))
-axes(handles.ir_left_back)
-plot(IR_left_back(start_value_to_plot_array:size(IR_right_front)))
-axes(handles.ir_left_front)
-plot(IR_left_front(start_value_to_plot_array:size(IR_left_front)))
-drawnow()
-end
-
-save('Data_från_robot');
-
-% disp(IR_left_front)
-% disp(IR_left_back)
-% disp(IR_right_front)
-% disp(IR_right_back)
-% disp(IR_front_long)
-% disp(regulator_angle)
-% disp(regulator_error)
-disp('all data du ville hämta är hämtad')
 
