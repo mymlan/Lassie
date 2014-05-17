@@ -7,10 +7,12 @@
 
 int main(void)
 {
+	init_button_calibrate_angular_sensor();
 	USART_init();
   	init_interrupts();
 	SPI_sensor_init();
-	init_button_calibrate_angular_sensor();
+	calibrate_angular_rate_sensor();
+	
 	sei();
 	
     while(1)

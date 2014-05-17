@@ -22,7 +22,6 @@ static volatile double angular_rate_offset = 136.3;
 static volatile uint8_t angular_rate_value;
 static volatile float angular_rate_total = 0;
 static volatile float angular_rate_diff;
-uint8_t manual_mode = 0;
 
 void init_interrupts()
 {
@@ -77,20 +76,7 @@ void init_button_calibrate_angular_sensor()
 
 ISR(PCINT2_vect)
 {
-	ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
-	_delay_ms(20);
-	ADCSRA |= (1<<ADSC);
-	
-	for (int i = 0; i < 100; i++)
-	{
-		_delay_ms(5);
-		angular_read[i] = ADCH;
-		ADCSRA |= (1<<ADSC);
-	}
-	angular_rate_offset = sum_array(angular_read,100) / 100.0f;
-	//COMMON_CLEAR_BIT(PCICR, PCIE2); //Stänger av avbrottet
-	//COMMON_CLEAR_BIT(PCMSK2, PCINT16); //Stänger av avbrottet
-	//COMMON_TOGGLE_PIN(PORTA, PORTA1);
+	calibrate_angular_rate_sensor();
 }
 
 ISR(USART0_RX_vect)
@@ -537,6 +523,21 @@ uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_bac
 	{
 		return ((diff_from_right_wall - diff_from_left_wall) / 2) + 100;
 	}
+}
+
+void calibrate_angular_rate_sensor()
+{
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
+		_delay_ms(20);
+		ADCSRA |= (1<<ADSC);
+		
+		for (int i = 0; i < 100; i++)
+		{
+			_delay_ms(5);
+			angular_read[i] = ADCH;
+			ADCSRA |= (1<<ADSC);
+		}
+		angular_rate_offset = sum_array(angular_read,100) / 100.0f;
 }
 
 
