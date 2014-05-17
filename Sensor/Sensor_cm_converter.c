@@ -109,8 +109,10 @@ ISR(USART0_RX_vect)
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
 			}
 			*/
+
 			/*
 			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
+
 			RFID_count = 0; 
 			RFID_start_read = 0;*/
 		/*}
