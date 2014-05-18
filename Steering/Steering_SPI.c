@@ -106,7 +106,7 @@ ISR(SPI_STC_vect)
 			{
 				case COMMAND_STOP: Stop();
 					last_auto_decision = NO_NEED_TO_REGULATE;
-					//PORTA = 0x80; // Error
+					PORTA = 0x20; // Error
 					break;
 				case COMMAND_FORWARD: Forward_regulated(90,100);
 					//PORTA = 0x81;
