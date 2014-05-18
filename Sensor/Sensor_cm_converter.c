@@ -17,7 +17,7 @@ volatile uint8_t RFID_start_read = 0;  //Kontrollerar startbit innan bytes lägg
 static volatile int diff_from_middle_corridor; 
 static volatile uint8_t angle_corridor;
 
-static float angular_read[50];
+static float angular_read[100];
 static volatile double angular_rate_offset = 136.3;
 static volatile uint8_t angular_rate_value;
 static volatile float angular_rate_total = 0;
@@ -80,8 +80,8 @@ ISR(PCINT2_vect)
 }
 
 ISR(USART0_RX_vect)
-{	
-	/*if (RFID_count==10)  //kollar om korrekt startbit
+{	/*
+	if (RFID_count==10)  //kollar om korrekt startbit
 	{
 		if (UDR0 == 13)  //kollar om korrekt stopbit
 		{
@@ -94,14 +94,14 @@ ISR(USART0_RX_vect)
 			{
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
 			}
-			*/
+			
 
-			/*
+			
 			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
 
 			RFID_count = 0; 
-			RFID_start_read = 0;*/
-		/*}
+			RFID_start_read = 0;
+		}
 		else
 		{
 			RFID_count = 0;
@@ -204,57 +204,11 @@ ISR(ANALOG_COMP_vect){
 }
 
 //Funktioner som omvandlar sensor utdata till avstånd i mm
+
 uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
-	
-	if (digital_distance >= 144) //Ger ut avståndet 20mm för alla digit_distance över 144
-	{
-		mm_value =20;
-	}
-	if (digital_distance <= 144 && digital_distance >= 104) //För digital_distance mellan 104-144 ges avstånd 40-60mm
-	{
-		mm_value = ((digital_distance - 224) / -2);
-	}
-	else if (digital_distance <=104 && digital_distance >= 80) //För digital_distance mellan 80-104 ges avstånd 60-80mm
-	{
-		mm_value = (((digital_distance - 176)*10) / -12);
-	}
-	else if (digital_distance <= 80 && digital_distance >= 66) //För digital_distance mellan 80-66 ges avstånd 80-100mm
-	{
-		mm_value = ((digital_distance - 136)*10/ -7);
-	}
-	else if (digital_distance <= 66 && digital_distance >= 55) //För digital_distance mellan 55-66 ges avstånd 100-120mm
-	{
-		mm_value = (((digital_distance - 121)*100) / -55);
-	}
-	else if (digital_distance <= 55 && digital_distance >= 47) //För digital_distance mellan 47-55 ges avstånd 120-140mm
-	{
-		mm_value = (((digital_distance - 103)*10) / -4);
-	}
-	else if (digital_distance <= 47 && digital_distance >= 43) //För digital_distance mellan 43-47 ges avstånd 140-160mm
-	{
-		mm_value = (((digital_distance - 75)*10) / -2);
-	}
-	else if (digital_distance <= 43 && digital_distance >= 37) //För digital_distance mellan 37-42 ges avstånd 160-180mm
-	{
-		mm_value = (((digital_distance - 91)*10) / -3);
-	}
-	else if (digital_distance <= 37 && digital_distance >= 30) //För digital_distance mellan 30-37 ges avstånd 180-220mm
-	{
-		mm_value = (((digital_distance - 68)*100) / -17);
-	}
-	else //Ger ut avståndet 255mm för alla digit_distance under 30
-	{
-		mm_value = 255;
-	}
-	return mm_value;
-}
-
-uint8_t S2_convert_sensor_value_left_back(uint8_t digital_distance)
-{
-	uint8_t mm_value;
-	if (digital_distance >= 142) //Ger ut avståndet 20mm för alla digit_distance över 142
+	if (digital_distance >= 142) //Ger ut avståndet 20mm för alla digital_distance över 142
 	{
 		mm_value =20;
 	}
@@ -297,11 +251,58 @@ uint8_t S2_convert_sensor_value_left_back(uint8_t digital_distance)
 	return mm_value;
 }
 
+uint8_t S2_convert_sensor_value_left_back(uint8_t digital_distance)
+{
+	uint8_t mm_value;
+	
+	if (digital_distance >= 144) //Ger ut avståndet 20mm för alla digital_distance över 144
+	{
+		mm_value =20;
+	}
+	if (digital_distance <= 144 && digital_distance >= 104) //För digital_distance mellan 104-144 ges avstånd 40-60mm
+	{
+		mm_value = ((digital_distance - 224) / -2);
+	}
+	else if (digital_distance <=104 && digital_distance >= 80) //För digital_distance mellan 80-104 ges avstånd 60-80mm
+	{
+		mm_value = (((digital_distance - 176)*10) / -12);
+	}
+	else if (digital_distance <= 80 && digital_distance >= 66) //För digital_distance mellan 80-66 ges avstånd 80-100mm
+	{
+		mm_value = ((digital_distance - 136)*10/ -7);
+	}
+	else if (digital_distance <= 66 && digital_distance >= 55) //För digital_distance mellan 55-66 ges avstånd 100-120mm
+	{
+		mm_value = (((digital_distance - 121)*100) / -55);
+	}
+	else if (digital_distance <= 55 && digital_distance >= 47) //För digital_distance mellan 47-55 ges avstånd 120-140mm
+	{
+		mm_value = (((digital_distance - 103)*10) / -4);
+	}
+	else if (digital_distance <= 47 && digital_distance >= 43) //För digital_distance mellan 43-47 ges avstånd 140-160mm
+	{
+		mm_value = (((digital_distance - 75)*10) / -2);
+	}
+	else if (digital_distance <= 43 && digital_distance >= 37) //För digital_distance mellan 37-42 ges avstånd 160-180mm
+	{
+		mm_value = (((digital_distance - 91)*10) / -3);
+	}
+	else if (digital_distance <= 37 && digital_distance >= 30) //För digital_distance mellan 30-37 ges avstånd 180-220mm
+	{
+		mm_value = (((digital_distance - 68)*100) / -17);
+	}
+	else //Ger ut avståndet 255mm för alla digit_distance under 30
+	{
+		mm_value = 255;
+	}
+	return mm_value;
+}
+
 uint8_t S3_convert_sensor_value_right_front(uint8_t digital_distance)
 {
 	uint8_t mm_value;
 	
-	if (digital_distance >= 150) //Ger ut avståndet 20mm för alla digit_distance över 150
+	if (digital_distance >= 150) //Ger ut avståndet 20mm för alla digital_distance över 150
 	{
 		mm_value =20;
 	}
@@ -383,7 +384,7 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 {
 	int cm_value;
 	
-	if (digital_distance >= 130) //Ger ut avståndet 5cm för alla digit_distance över 130
+	if (digital_distance >= 130) //Ger ut avståndet 5cm för alla digital_distance över 130
 	{
 		cm_value = 5;
 	}	
