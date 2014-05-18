@@ -42,6 +42,11 @@ node* Newnode(uint8_t x_coordinate_in, uint8_t y_coordinate_in)
 	p_node->links[2].length = 0;
 	p_node->links[3].length = 0;
 	
+	p_node->links[0].p_node = NULL;
+	p_node->links[1].p_node = NULL;
+	p_node->links[2].p_node = NULL;
+	p_node->links[3].p_node = NULL;
+	
 	all_nodes[all_nodes_size] = p_node;
 	all_nodes_size++;
 	
@@ -282,10 +287,12 @@ uint8_t Find_shortest_path(node* p_node1, node* p_node2)
 		return 0;
 	}
 	
+	node* p_chosen_node;
+	
 	while(p_node2->searched == FALSE)
 	{
 		//2. Hitta den nod som har lägst nodpris, första gången startnoden.
-		node* p_chosen_node = all_nodes[Find_low_cost_index()];
+		p_chosen_node = all_nodes[Find_low_cost_index()];
 		//3. Ge angränsande noder uppdaterade värden om deras kostnad och föregångare.
 		for(int n = 0; n < NUMBER_OF_LINKS; n++)
 		{
@@ -329,8 +336,8 @@ void Wait_for_90_degree_rotation()
 // Funktonen utför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
 void Do_turn(uint8_t cardinal_direction)
 {
-	//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_2);
-	//_delay_ms(1000);
+	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_3);
+	_delay_ms(400);
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
@@ -445,6 +452,8 @@ node* Easy_find_unexplored_node()
 	}
 	if(level == 1)
 	{
+		Find_shortest_path(start_node, p_robot_node);
+		following_path = TRUE;
 		level = 42; // Om Lassie inte hittat RFID
 	}
 	return all_nodes[0]; // åker till start om upptäckt hela, levlar innan åker hem
@@ -992,8 +1001,7 @@ void Following_path_at_crossing()
 				break;
 					
 			}
-		}
-			
+		}	
 	}
 	else // Korsning är inte vårt mål.
 	{
@@ -1151,7 +1159,6 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 
 void Do_level_3(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
-	Find_shortest_path(start_node, p_robot_node);
 	Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 }
 

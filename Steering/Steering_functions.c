@@ -17,7 +17,7 @@ float K_D = 1.5; // Deriveringskonstanten, 1.5 är bra
 float adjusted_speed;
 
 static uint16_t pwm_right_wheel_fast_speed = 45000;
-static uint16_t pwm_right_wheel_normal_speed = 30000;
+//static uint16_t pwm_right_wheel_normal_speed = 30000;
 static uint16_t pwm_right_wheel_slow_speed = 15000;
 static uint16_t pwm_right_wheel_stop = 0;
 
@@ -133,7 +133,7 @@ void Turn_left()
 void Tight_turn_right()
 {
 	Set_wheels_left_forward_right_backward();
-	OCR1A = pwm_right_wheel_normal_speed;
+	OCR1A = pwm_right_wheel_slow_speed; // OBS slow här för höger sensorer detekterar korsning tidigare
 	OCR1B = pwm_left_wheel_fast_speed;
 }
 void Tight_turn_left()
