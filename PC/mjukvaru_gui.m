@@ -85,16 +85,7 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-load('mjukvaruvariabler') % Laddar variabler
-handles.IR1_tid = IR1_tid; % Lägger till variabel i handles
-handles.IR2_tid = IR2_tid;
-handles.IR3_tid = IR3_tid;
-handles.IR4_tid = IR4_tid;
-handles.IR5_tid = IR5_tid;
-handles.coord1 = coord1;
-handles.coord2 = coord2;
 
-% Övriga variabler från mjukvara.m skrivs här
 guidata(hObject, handles); % Typ uppdaterar hObject med handles
 
 
