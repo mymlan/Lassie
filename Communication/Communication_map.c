@@ -337,7 +337,7 @@ void Wait_for_90_degree_rotation()
 void Do_turn(uint8_t cardinal_direction)
 {
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_3);
-	_delay_ms(400);
+	_delay_ms(500);
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
@@ -377,6 +377,12 @@ void Do_turn(uint8_t cardinal_direction)
 			
 			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
 			length = 20;
+			/*
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+			_delay_ms(400);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			_delay_ms(1);
+			*/
 			break;
 		}
 		case 0:
@@ -436,7 +442,7 @@ void Follow_path() //uint8_t sensor_back_left, uint8_t sensor_back_right§
 // Hittar en nod som har en outforskad öppning
 node* Easy_find_unexplored_node()
 {
-	for(int i = all_nodes_size - 1; i > 0; i--)
+	for (int i = all_nodes_size - 1; i > 0; i--)
 	{
 		for (int n = 0; n < NUMBER_OF_LINKS; n++)
 		{
@@ -990,18 +996,32 @@ uint8_t Crossing(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor
 // Funktion som körs om following path och korsning gäller
 void Following_path_at_crossing()
 {	
+	uint8_t turn_done = FALSE;
 	if(p_robot_node->p_pre_dijk == NULL) // Är korsningen vårt mål?
 	{
-		following_path = FALSE;
-		for(int i = 0; i < 4; i++)
+		if (level == 42)
 		{
-			if(p_robot_node->links[i].open == TRUE && p_robot_node->links[i].length == 0)
+			level = 43;
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		}
+		else
+		{
+			following_path = FALSE;
+			for(int i = 0; i < 4; i++)
 			{
-				Do_turn(i);
-				break;
+				if(p_robot_node->links[i].open == TRUE && p_robot_node->links[i].length == 0 && !turn_done)
+				{
+					Do_turn(i);
+					turn_done = TRUE;
+					//break;
 					
-			}
-		}	
+				}
+			}	
+		}
 	}
 	else // Korsning är inte vårt mål.
 	{
@@ -1057,7 +1077,7 @@ uint8_t Get_new_y_coordinate(uint8_t length)
 
 uint8_t Number_of_traveled_blocks(uint8_t length)
 {
-	return (length + 20) / SIZE_OF_SQUARE_IN_CM; // Ev. plussa något till length som marginal vid behov
+	return (length + HALF_SIZE_OF_SQUARE_IN_CM) / SIZE_OF_SQUARE_IN_CM; // Ev. plussa något till length som marginal vid behov
 }
 
 //Följer pekarna
@@ -1070,8 +1090,8 @@ void Follow(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 			p_robot_node = p_robot_node->p_pre_dijk;
 			enable_node_editing = FALSE;
 			length = Get_length();
+			Following_path_at_crossing();
 		}
-		Following_path_at_crossing();
 		enable_safety = 0;
 	}
 	else // Inte en korsing och following_path == TRUE
@@ -1123,6 +1143,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 						if (sensor_front > SIZE_OF_SQUARE_IN_CM)
 						{
 							//Do_turn(robot_dir);
+							length = 10;
 						}
 						else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
 						{
@@ -1195,6 +1216,10 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		{
 			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
 			Do_level_3(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+		}
+		case 43:
+		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 		}
 		default:
 		break;	
