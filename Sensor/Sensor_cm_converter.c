@@ -40,7 +40,8 @@ void init_interrupts()
 }
 
 void USART_init(){
-	COMMON_SET_BIT(DDRD, DDD6);  //Enable RFID
+	COMMON_CLEAR_PIN(PORTD, PORTD2);
+	COMMON_SET_BIT(DDRD, DDD2);  //Enable RFID
 	//DDRD |= (1<<DDD2);  
 	COMMON_SET_BIT(UCSR0B, RXEN0);  //Enable USART0 receiver
 	COMMON_SET_BIT(UCSR0B, RXCIE0);  //enable receive complete interrupt
@@ -86,9 +87,9 @@ ISR(PCINT2_vect)
 
 ISR(USART0_RX_vect)
 {	
-	SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
-	/*
-	if (RFID_count==10)  //kollar om korrekt startbit
+	//SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
+
+	if (RFID_count==10)  //kollar om korrekt antal bitar
 	{
 		if (UDR0 == 13)  //kollar om korrekt stopbit
 		{
@@ -97,10 +98,10 @@ ISR(USART0_RX_vect)
 				RFID_tag_correct[i] = RFID_tag_read[i];  //Laddar över korrekt avläst RFID ID
 			}
 			//Ifall vi vill kunna identifiera en specifik RFID så ska vi kolla igenom den avlästa RFIDn med ett antal kända RFID-nummer
-			if (RFID_tag_correct[9] == 68) 
+			/*if (RFID_tag_correct[9] == 68) 
 			{
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
-			}
+			}*/
 			
 
 			
@@ -119,14 +120,14 @@ ISR(USART0_RX_vect)
 	{
 		RFID_tag_read[RFID_count] = UDR0;
 		RFID_count++;
-	}*/
+	}
 	//Meddelar resten av ISR att en korrekt startbit hittats
 	if (UDR0 == 10)
 	{
-		SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
-		RFID_count = 0;
-		RFID_start_read = 0;
-		//RFID_start_read = 1;
+		//SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
+		//RFID_count = 0;
+		//RFID_start_read = 0;
+		RFID_start_read = 1;
 	}
 }
 
