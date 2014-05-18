@@ -12,9 +12,9 @@
 uint16_t COUNTER_MAX = 65535;
 uint16_t BASE_SPEED = 30000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
 
-double K_P = 0.004; // Proportionella konstanten, 0.003 är bra
-double K_D = 1.5; // Deriveringskonstanten, 1.5 är bra
-double adjusted_speed;
+float K_P = 0.004; // Proportionella konstanten, 0.003 är bra
+float K_D = 1.5; // Deriveringskonstanten, 1.5 är bra
+float adjusted_speed;
 
 static uint16_t pwm_right_wheel_fast_speed = 45000;
 static uint16_t pwm_right_wheel_normal_speed = 30000;
