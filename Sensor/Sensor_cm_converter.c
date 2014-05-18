@@ -80,7 +80,9 @@ ISR(PCINT2_vect)
 }
 
 ISR(USART0_RX_vect)
-{	/*
+{	
+	SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
+	/*
 	if (RFID_count==10)  //kollar om korrekt startbit
 	{
 		if (UDR0 == 13)  //kollar om korrekt stopbit
