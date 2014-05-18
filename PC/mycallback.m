@@ -111,31 +111,19 @@ switch byte
 end
 
 function collect_and_display_map_parameters(BT, handles)
-for k = 1:7
-    byte = fread(BT,1);
-    switch k
-        case 1
-            set(handles.robot_direction,'String',byte)
-            drawnow()
-        case 2
-            set(handles.size_all_nodes,'String',byte)
-            drawnow()
-        case 3
-            set(handles.following_path,'String',byte)
-            drawnow()
-        case 4
-            set(handles.enable_node_edit,'String',byte)
-            drawnow()
-        case 5
-            set(handles.level,'String',byte)
-            drawnow()
-        case 6
-            set(handles.x_coordinate,'String',byte)
-            drawnow()
-        case 7
-            set(handles.y_coordinate,'String',byte)
-            drawnow()
-        otherwise
-            disp('error i switch för kartparametrar')
-    end
-end
+    map_parameters = fread(BT,7);
+    set(handles.robot_direction,'String',map_parameters(1));
+    drawnow() %Testa om det behöver vara drawnow() mellan varje rad.
+    set(handles.size_all_nodes,'String',map_parameters(2));
+    drawnow()
+    set(handles.following_path,'String',map_parameters(3));
+    drawnow()
+    set(handles.enable_node_edit,'String',map_parameters(4));
+    drawnow()
+    set(handles.level,'String',map_parameters(5));
+    drawnow()
+    set(handles.x_coordinate,'String',map_parameters(6));
+    drawnow()
+    set(handles.y_coordinate,'String',map_parameters(7));
+    drawnow()
+    
