@@ -27,7 +27,7 @@ ISR(SPI_STC_vect)
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 		{
-			uint8_t distance = ((reflex_count*16) / 10);
+			uint8_t distance = ((reflex_count*49) / 10);
 			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 			reflex_count = 0;
 			break;
