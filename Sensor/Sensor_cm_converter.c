@@ -40,12 +40,17 @@ void init_interrupts()
 }
 
 void USART_init(){
-	DDRD |= (1<<DDD2);  //Enable RFID
-	UCSR0B |= (1<<RXEN0);  //Enable USART0 receiver
-	UCSR0B |= (1<<RXCIE0);  //enable receive complete interrupt
-	UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01) | (1<<UCSZ02);  //8 bits per frame
-	UCSR0C |= (0<<USBS0);  //Declares one stop bit
-	//eventuellt prescale räkning på buad?!?!?!
+	COMMON_SET_BIT(DDRD, DDD6);  //Enable RFID
+	//DDRD |= (1<<DDD2);  
+	COMMON_SET_BIT(UCSR0B, RXEN0);  //Enable USART0 receiver
+	COMMON_SET_BIT(UCSR0B, RXCIE0);  //enable receive complete interrupt
+	//8 bits frame format---
+	COMMON_CLEAR_BIT(UCSR0B, UCSZ02);
+	COMMON_SET_BIT(UCSR0C, UCSZ00);
+	COMMON_SET_BIT(UCSR0C, UCSZ01);
+	//-----------------------  
+	//UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01) | (1<<UCSZ02);  //8 bits per frame
+	COMMON_SET_BIT(UCSR0C, USBS0);  //Declares one stop bit
 	UBRR0H = (unsigned char)(Baud_Prescale>>8);//set upper 8 bit of baudrate
 	UBRR0L = (unsigned char)Baud_Prescale; //set rest of bits of baudrate
 }
@@ -80,7 +85,9 @@ ISR(PCINT2_vect)
 }
 
 ISR(USART0_RX_vect)
-{	/*
+{	
+	SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
+	/*
 	if (RFID_count==10)  //kollar om korrekt startbit
 	{
 		if (UDR0 == 13)  //kollar om korrekt stopbit
