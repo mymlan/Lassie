@@ -17,7 +17,7 @@ int main(void)
 
 	SPI_Master_init();
 	USART_init();
-	Timer_init();
+	
 	
 	if((PINA & (1<<PINA4)) == MANUAL_DECISIONS_ACTIVATED)
 	{
@@ -27,6 +27,7 @@ int main(void)
 	}
 	else
 	{
+		Timer_init();
 		Init_button_search();
 		Init_button_deliver();
 		Map_init();
