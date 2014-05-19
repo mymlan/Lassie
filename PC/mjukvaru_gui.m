@@ -24,7 +24,7 @@ function varargout = mjukvaru_gui(varargin)
 
 % Edit the above text to modify the response to help mjukvaru_gui
 
-% Last Modified by GUIDE v2.5 09-May-2014 14:03:39
+% Last Modified by GUIDE v2.5 19-May-2014 19:59:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,13 +56,9 @@ function mjukvaru_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for mjukvaru_gui
 handles.output = hObject;
-%sensor_data = zeros(5,300);
-%handles.sensor_data = sensor_data;
-handles.sensor_plot = figure();
-map_links = [];
-handles.map_links = map_links;
-handles.map_plot = figure();
-% Update handles structure
+
+handles.sensor_and_map_plot = figure();
+%Update handles structure
 guidata(hObject, handles);
 
 % UIWAIT makes mjukvaru_gui wait for user response (see UIRESUME)
@@ -87,36 +83,6 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 guidata(hObject, handles); % Typ uppdaterar hObject med handles
-
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-axes(handles.ir_front_long)
-title('IR-värden över tid')
-hold on
-set(handles.ir_f,'String',20.7)
-set(handles.ir_v_f,'String',3.1)
-set(handles.ir_h_f,'String',5.2)
-set(handles.ir_v_b,'String',8.0)
-set(handles.ir_h_b,'String',4.4)
-
-axes(handles.axes2)
-title('Representation av labyrint')
-hold on
-
-min_c1 = min(handles.coord1);
-min_c2 = min(handles.coord2);
-max_c1 = max(handles.coord1);
-max_c2 = max(handles.coord2);
-axis([min_c1(1,1)-1 max_c1(1,1)+1 min_c2(1,1)-1 max_c2(1,1)+1]);
-
-line(handles.coord1, handles.coord2)
-robot_coord = [handles.coord1(end) handles.coord2(end)];
-plot(robot_coord, 'o')
-
 
 % --- Executes on key press with focus on figure1 and none of its controls.
 function figure1_KeyPressFcn(hObject, eventdata, handles)
@@ -192,7 +158,9 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 %Lassie_info = instrhwinfo('Bluetooth', '00066602D47F')
 %Device ID: 00066602D47F
 global sensor_data;
-sensor_data = zeros(5,300);
+sensor_data = zeros(5,70);
+global map_links;
+map_links = [];
 set(handles.bt_info, 'String', 'Wait...');
 BT = Bluetooth('FireFly-D47F', 1); % Channel är möjligtvis inte alltid 1
 disp('Blåtansobjekt skapat.')
@@ -222,7 +190,3 @@ disp('Koppel frånkopplad')
 set(handles.pushbutton3,'Enable','off')
 set(handles.pushbutton2,'Enable','on')
 set(handles.bt_info, 'String', 'Disonnected');
-
-
-
-
