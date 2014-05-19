@@ -2,8 +2,8 @@
 #ifndef _STEERING_FUNCTIONS_H
 #define _STEERING_FUNCTIONS_H
 
-void Initialize_error_pins();
-void Initialize_pwm();
+void Steering_initialize_7_segment_display_error_pins();
+void Steering_initialize_pwm();
 
 void Stop();
 void Forward();
@@ -19,8 +19,5 @@ void Close_claw();
 
 void Forward_regulated(uint8_t, uint8_t);
 void Backward_regulated(uint8_t, uint8_t);
-
-void Lookup_table_K_D(uint8_t);
-void Lookup_table_K_P(uint8_t);
 
 #endif
