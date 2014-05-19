@@ -13,7 +13,7 @@
 
 #define COMMON_TOGGLE_PIN(PORT, PIN) (PORT ^= (1 << PIN))
 
-//ID-bytes:
+//ID-bytes (Switch-case)
 #define ID_BYTE_IR_SENSOR_DATA (0x01)
 #define ID_BYTE_DISTANCE (0x03)
 #define ID_BYTE_ROTATION_FINISHED (0x06)
@@ -29,8 +29,7 @@
 #define ID_BYTE_LINK_COORDINATES (0x0C)
 #define ID_BYTE_MAP_PARAMETERS (0x0D)
 
-//Kommando till styrmodulen
-
+//Kommando till styrmodulen (Switch-case)
 #define COMMAND_STOP (0x10)
 #define COMMAND_FORWARD (0x11)
 #define COMMAND_BACKWARD (0x12)
@@ -50,18 +49,15 @@
 #define MANUAL_DECISIONS_ACTIVATED (16)
 #define TIMER_COMPARE_NUMBER (14400)
 
-//Sensor
+//Sensorer att omvandla i AD-omvandlaren (Swich-case)
 #define IR_LEFT_FRONT (0x00)
 #define IR_LEFT_BACK (0x01)
 #define IR_RIGHT_FRONT (0x02)
 #define IR_RIGHT_BACK (0x03)
 #define IR_FRONT_LONG (0x04)
-#define SIDE_IR_DISTANCE (78)
-#define HALF_ROBOT_LENGTH (100)
 #define ANGULAR_RATE (0x05)
-#define ANGULAR_RATE_SENSITIVITY (1.28)
-#define ANGULAR_RATE_OFFSET (136.3)
 
+// RFID-taggar
 #define RFID_1 (1)
 #define RFID_2 (2)
 #define RFID_3 (3)
