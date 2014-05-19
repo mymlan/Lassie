@@ -40,8 +40,8 @@ typedef struct link_
 } link;
 typedef struct node_
 {
-	int8_t x_coordinate;
-	int8_t y_coordinate;
+	uint8_t x_coordinate;
+	uint8_t y_coordinate;
 	uint8_t cost;
 	uint8_t searched;
 	struct node_ *p_pre_dijk; // föregångare

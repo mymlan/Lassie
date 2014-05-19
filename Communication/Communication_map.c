@@ -170,6 +170,9 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	}
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].p_node = p_robot_node; // 3b. Koppla gammal nod till ny nod
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].length = length; // 3c. Längd för vägen bakåt satt
+	
+	Map_send_link_coordinates_to_PC(ID_BYTE_LINK_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate, x_coordinate, y_coordinate);
+	
 	p_robot_node = p_node;// 4.
 	// 5. Nollställ avstånd (kanske sker utanför funktionen)
 	// 6. Ta styrbslut och return (sker utanför funktionen)
@@ -179,8 +182,6 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_4);
 	_delay_ms(1000);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-	
-	Map_send_map_coordinates_to_PC(ID_BYTE_MAP_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Create_goal
@@ -206,6 +207,8 @@ void Update_node(node* p_node, uint8_t length)
 	p_robot_node->links[robot_dir].p_node = p_node; // Ge förra noden pekar-info om noden
 	p_robot_node->links[robot_dir].length = length; // Ge förra noden längd-info om noden
 	
+	Map_send_link_coordinates_to_PC(ID_BYTE_LINK_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate, p_node->x_coordinate, p_node->y_coordinate);
+	
 	p_robot_node = p_node;
 	
 	enable_node_editing = FALSE;
@@ -215,8 +218,6 @@ void Update_node(node* p_node, uint8_t length)
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_5);
 	_delay_ms(1000);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-	
-	Map_send_map_coordinates_to_PC(ID_BYTE_MAP_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Existing_node_at
