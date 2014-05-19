@@ -7,42 +7,17 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 
-static volatile uint8_t error;
+//----------------VARIABLER/KONSTANTER---------------//
+volatile uint8_t REFLEX_COUNT_DISTANCE_PER_COLOUR_FIELD = 49;
 
+//----------------INITIERINGSFUNKTION----------------//
 void SPI_sensor_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
 	DDRB = 0x41; //sätter MISO till  utgång och även PB0 till utgång, flagga SPI
-		
-	error = 0;
 }
-//Avbrottsrutin SPI transmission complete
-ISR(SPI_STC_vect)
-{
-	uint8_t byte_from_SPI = SPDR;
-	switch (byte_from_SPI)
-	{
-		case ID_BYTE_GIVE_IR_SENSOR_DATA:
-			SPI_sensor_send_sensor_data(ir_sensor_data);
-			break;
-		case ID_BYTE_GIVE_DISTANCE:
-		{
-			uint8_t distance = ((reflex_count*49
-			) / 10);
-			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
-			reflex_count = 0;
-			break;
-		}
-		case ID_BYTE_START_ANGULAR_RATE_SENSOR:
-			//ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor) // BUGG i påsättningen senare!
-			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
-			next_sensor_to_be_converted = ANGULAR_RATE;
-			break;
-		default:
-			error = 1;
-			break;
-	}
-}
+
+//-----------------STATIC FUNKTIONER----------------//
 
 /* void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 *  Skickar id_byte till Master som framtvingar övriga bytes
@@ -54,14 +29,39 @@ static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 	while(!(SPSR & (1<<SPIF))){}
 }
 
+//----------------AVBROTTSVEKTORER----------------//
+//Avbrottsrutin SPI transmission complete
+ISR(SPI_STC_vect)
+{
+	uint8_t byte_from_SPI = SPDR;
+	switch (byte_from_SPI)
+	{
+		case ID_BYTE_GIVE_IR_SENSOR_DATA:
+			SPI_sensor_send_sensor_data(ir_sensor_data);
+			break;
+		case ID_BYTE_GIVE_DISTANCE:
+		{
+			uint8_t distance = ((reflex_count*REFLEX_COUNT_DISTANCE_PER_COLOUR_FIELD) / 10);
+			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
+			reflex_count = 0;
+			break;
+		}
+		case ID_BYTE_START_ANGULAR_RATE_SENSOR:
+			//ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor) // BUGG i påsättningen senare!
+			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
+			next_sensor_to_be_converted = ANGULAR_RATE;
+			break;
+		default:
+			break;
+	}
+}
+
+//-------------SPI FUNKTIONER SENSOR----------------//
 void SPI_sensor_send_rotation_finished(void)
 {
 	SPI_sensor_slave_send_id_byte(ID_BYTE_ROTATION_FINISHED);
 }
 
-/* void SPI_sensor_send(uint8_t id_byte, volatile uint8_t *data)
-*  Skickar hela meddelanden från sensor till Master
-*/
 void SPI_sensor_send_sensor_data(uint8_t *data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;	

@@ -7,9 +7,10 @@
 int main(void)
 {
 	// Initiering
-	Initialize_error_pins();
+	Steering_initialize_7_segment_display_error_pins();
+	Steering_initialize_pwm();
 	SPI_steering_init();
-	Initialize_pwm();
+	
 	sei();
 	
 	while(1)
