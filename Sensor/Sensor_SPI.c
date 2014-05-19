@@ -9,6 +9,8 @@
 
 static volatile uint8_t error;
 
+volatile uint8_t REFLEX_COUNT_DISTANCE_PER_COLOUR_FIELD = 49;
+
 void SPI_sensor_init(void)
 {
 	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
@@ -27,8 +29,7 @@ ISR(SPI_STC_vect)
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 		{
-			uint8_t distance = ((reflex_count*49
-			) / 10);
+			uint8_t distance = ((reflex_count*REFLEX_COUNT_DISTANCE_PER_COLOUR_FIELD) / 10);
 			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
 			reflex_count = 0;
 			break;
