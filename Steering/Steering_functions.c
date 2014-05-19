@@ -40,7 +40,7 @@ static uint16_t adjusted_speed_KD_left_wheel;
 *  OCR1B: Gräns för vänster motor PWM;
 */
 
-//-------------FUNKTIONER FÖR HJULRIKTNING-----------//
+//-----------------STATIC FUNKTIONER----------------//
 static void Set_wheels_both_goes_forward()
 {
 	PORTD = (1<< PORTD2) | (1<< PORTD3);
