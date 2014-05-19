@@ -3,7 +3,7 @@ function mycallback(hObject, eventdata, BT, handles)
 global sensor_data;
 global map_links;
 id_byte = fread(BT,1);
-%disp(id_byte)
+disp(id_byte)
 switch id_byte
     case 1 %sensorvärden
         collect_and_plot_sensor_data(BT, handles);
