@@ -24,7 +24,7 @@ function varargout = mjukvaru_gui(varargin)
 
 % Edit the above text to modify the response to help mjukvaru_gui
 
-% Last Modified by GUIDE v2.5 19-May-2014 19:59:17
+% Last Modified by GUIDE v2.5 19-May-2014 20:39:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -190,3 +190,4 @@ disp('Koppel frånkopplad')
 set(handles.pushbutton3,'Enable','off')
 set(handles.pushbutton2,'Enable','on')
 set(handles.bt_info, 'String', 'Disonnected');
+
