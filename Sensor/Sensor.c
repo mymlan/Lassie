@@ -7,18 +7,19 @@
 
 int main(void)
 {
-	init_variable();
-	init_button_calibrate_angular_sensor();
-	USART_init();
-  	init_interrupts();
-	SPI_sensor_init();
-	calibrate_angular_rate_sensor();
+	Sensor_init_AD_converter();
+	Sensor_init_analog_comparator();
+	Sensor_init_USART_for_RFID();	
+	Sensor_init_button_for_calibrating_angular_rate_sensor();
+
+  	SPI_sensor_init();
+	Calibrate_angular_rate_sensor();
 		
 	sei();
 	
     while(1)
 	{
-		
+		;
 	}
 	
 }
