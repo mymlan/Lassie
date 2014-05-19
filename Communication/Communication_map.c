@@ -170,6 +170,9 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	}
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].p_node = p_robot_node; // 3b. Koppla gammal nod till ny nod
 	p_node->links[(robot_dir + 2) % NUMBER_OF_LINKS].length = length; // 3c. Längd för vägen bakåt satt
+	
+	Map_send_link_coordinates_to_PC(ID_BYTE_LINK_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate, x_coordinate, y_coordinate);
+	
 	p_robot_node = p_node;// 4.
 	// 5. Nollställ avstånd (kanske sker utanför funktionen)
 	// 6. Ta styrbslut och return (sker utanför funktionen)
@@ -179,8 +182,6 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_4);
 	_delay_ms(1000);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-	
-	Map_send_map_coordinates_to_PC(ID_BYTE_MAP_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Create_goal
@@ -206,6 +207,8 @@ void Update_node(node* p_node, uint8_t length)
 	p_robot_node->links[robot_dir].p_node = p_node; // Ge förra noden pekar-info om noden
 	p_robot_node->links[robot_dir].length = length; // Ge förra noden längd-info om noden
 	
+	Map_send_link_coordinates_to_PC(ID_BYTE_LINK_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate, p_node->x_coordinate, p_node->y_coordinate);
+	
 	p_robot_node = p_node;
 	
 	enable_node_editing = FALSE;
@@ -215,8 +218,6 @@ void Update_node(node* p_node, uint8_t length)
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_5);
 	_delay_ms(1000);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
-	
-	Map_send_map_coordinates_to_PC(ID_BYTE_MAP_COORDINATES, p_robot_node->x_coordinate, p_robot_node->y_coordinate);
 }
 
 // Existing_node_at
@@ -452,11 +453,13 @@ node* Easy_find_unexplored_node()
 			}
 		}
 	}
-	if(level == 2)
+	if(level == KEEP_SEARCHING)
 	{
-		level = 3; // Level up 2->3	
+		Find_shortest_path(start_node, p_robot_node);
+		following_path = TRUE;	
+		level = RETURN_AFTER_FOUND; // Level up 2->3	
 	}
-	if(level == 1)
+	if(level == SEARCH_FOR_GOAL)
 	{
 		Find_shortest_path(start_node, p_robot_node);
 		following_path = TRUE;
@@ -483,7 +486,6 @@ node* Smarter_find_unexplored_node(node* p_node)
 			return Smarter_find_unexplored_node(p_node->links[n].p_node); //Så ska genomsökning på den noden ske.
 		}
 	}
-	level++; // Level up 1->2
 	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
@@ -1001,12 +1003,20 @@ void Following_path_at_crossing()
 	{
 		if (level == 42)
 		{
-			level = 43;
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			level = 43;
+		}
+		else if (level == RETURN_AFTER_FOUND)
+		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			level = WAIT_FOR_ITEM;
 		}
 		else
 		{
@@ -1156,7 +1166,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 						else // Borde ej inträffa!
 						{
 							SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
-							level = 0;
+							level = FIRST_WAIT;
 						}
 					}
 				}
@@ -1178,11 +1188,6 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 // ev. funktion deleta allt allokerat minne mha free()
 // (kanske inte behövs då vi inte ska deleta enskilda noder, och kan reseta minnet mellan körningar)
 
-void Do_level_3(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
-{
-	Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
-}
-
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
 	if (SPI_map_should_handle_rfid())
@@ -1192,30 +1197,35 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 	//level = 1;
 	switch(level)
 	{
-		case 0:
+		case FIRST_WAIT:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			break;
 		}
-		case 1:
+		case SEARCH_FOR_GOAL:
 		{
 			Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;
 		}
-		case 2:
+		case KEEP_SEARCHING:
 		{
 			Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;
 		}
-		case 3:
+		case RETURN_AFTER_FOUND:
 		{
-			Do_level_3(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;
 		}
+		case WAIT_FOR_ITEM:
+		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		}
+		// Test så länge RFID inte klar
 		case 42:
 		{
 			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
-			Do_level_3(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 		}
 		case 43:
 		{
@@ -1242,7 +1252,7 @@ void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_rig
 		uint8_t length = Get_length();
 		Create_goal(Get_new_x_coordinate(length), Get_new_y_coordinate(length), Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 	}
-	level = 2;
+	level = KEEP_SEARCHING;
 }
 
 void Level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)

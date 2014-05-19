@@ -61,25 +61,27 @@ void Map_send_byte_to_PC(uint8_t id_byte, uint8_t value)
 	sei();
 }
 
-void Map_send_map_coordinates_to_PC(uint8_t id_byte, int8_t x_coordinate, int8_t y_coordinate)
+void Map_send_map_parameters_to_PC(uint8_t robot_direction, uint8_t size_of_all_nodes, uint8_t following_path, uint8_t enable_node_editing, uint8_t level, uint8_t x_coordinate, uint8_t y_coordinates)
+{
+	 cli();
+	 USART_transmit_byte_to_PC(ID_BYTE_MAP_PARAMETERS);
+	 USART_transmit_byte_to_PC(robot_direction);
+	 USART_transmit_byte_to_PC(size_of_all_nodes);
+	 USART_transmit_byte_to_PC(following_path);
+	 USART_transmit_byte_to_PC(enable_node_editing);
+	 USART_transmit_byte_to_PC(level);
+	 USART_transmit_byte_to_PC(x_coordinate);
+	 USART_transmit_byte_to_PC(y_coordinates);
+	 sei();
+}
+
+void Map_send_link_coordinates_to_PC(uint8_t id_byte, uint8_t old_node_xcoord, uint8_t old_node_ycoord, uint8_t new_node_xcoord, uint8_t new_node_ycoord)
 {
 	cli();
 	USART_transmit_byte_to_PC(id_byte);
-	USART_transmit_byte_to_PC(x_coordinate);
-	USART_transmit_byte_to_PC(y_coordinate);
+	USART_transmit_byte_to_PC(old_node_xcoord);
+	USART_transmit_byte_to_PC(old_node_ycoord);
+	USART_transmit_byte_to_PC(new_node_xcoord);
+	USART_transmit_byte_to_PC(new_node_ycoord);
 	sei();
-}
-
-void Map_send_map_parameters_to_PC(uint8_t robot_direction, uint8_t size_of_all_nodes, uint8_t following_path, uint8_t enable_node_editing, uint8_t level, uint8_t x_coordinate, uint8_t y_coordinates)
-{
- cli();
- USART_transmit_byte_to_PC(ID_BYTE_MAP_PARAMETERS);
- USART_transmit_byte_to_PC(robot_direction);
- USART_transmit_byte_to_PC(size_of_all_nodes);
- USART_transmit_byte_to_PC(following_path);
- USART_transmit_byte_to_PC(enable_node_editing);
- USART_transmit_byte_to_PC(level);
- USART_transmit_byte_to_PC(x_coordinate);
- USART_transmit_byte_to_PC(y_coordinates); 
- sei();
 }

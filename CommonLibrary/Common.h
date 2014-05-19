@@ -26,7 +26,7 @@
 #define ID_BYTE_START_ANGULAR_RATE_SENSOR (0x04)
 #define ID_BYTE_GIVE_IR_SENSOR_DATA (0x09)
 
-#define ID_BYTE_MAP_COORDINATES (0x0C)
+#define ID_BYTE_LINK_COORDINATES (0x0C)
 #define ID_BYTE_MAP_PARAMETERS (0x0D)
 
 //Kommando till styrmodulen
@@ -100,3 +100,14 @@
 #define COMMAND_STOP_4 (0x24)
 #define COMMAND_STOP_5 (0x25)
 #define COMMAND_STOP_6 (0x26)
+
+//levels
+#define FIRST_WAIT (0)
+#define SEARCH_FOR_GOAL (1)
+#define KEEP_SEARCHING (2)
+#define RETURN_AFTER_FOUND (3)
+#define WAIT_FOR_ITEM (4)
+#define GO_TO_GOAL (5)
+#define DROP_ITEM (6)
+#define RETURN_AFTER_DELIVERED (7)
+#define FINISHED (8)
