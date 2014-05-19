@@ -18,7 +18,7 @@ static volatile int diff_from_middle_corridor;
 static volatile uint8_t angle_corridor;
 
 static float angular_read[100];
-static volatile double angular_rate_offset = 136.3;
+static volatile double angular_rate_offset;
 static volatile uint8_t angular_rate_value;
 static volatile float angular_rate_total = 0;
 static volatile float angular_rate_diff;
@@ -70,6 +70,7 @@ void init_variable()
 {
 	reflex_count = 0;
 	next_sensor_to_be_converted = IR_LEFT_FRONT;
+	angular_rate_offset = 133;
 }
 
 void init_button_calibrate_angular_sensor()
