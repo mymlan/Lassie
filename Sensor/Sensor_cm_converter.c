@@ -1,4 +1,8 @@
-﻿#define F_CPU (18432000L)
+﻿
+#define F_CPU (18432000L)
+#define Baudrate 2400  //Bits per second hos RFID
+#define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)  //Baud rate generator (prescaler) för USART
+
 #include <util/delay.h>
 #include <stdint.h>
 #include <avr/interrupt.h>
@@ -6,9 +10,7 @@
 #include "Sensor_SPI.h"
 #include "Sensor_cm_converter.h"
 #include "../CommonLibrary/Common.h"
-#define Baudrate 2400  //Bits per second hos RFID
-//#define F_CPU 18432000UL  //Clock freq. hos MC
-#define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)  //Baud rate generator (prescaler) för USART
+
 volatile uint8_t RFID_tag_read[10];  //Array med 10 bytes där RFID ID lagras
 volatile uint8_t RFID_tag_correct[10];  //Avläst ID på RFID läggs in här om korrekt avläsning skett
 volatile uint8_t RFID_count = 0;  //Räknare för att kontrollera att rätt antal bytes lästs in från RFID
@@ -39,7 +41,8 @@ void init_interrupts()
 	
 }
 
-void USART_init(){
+void USART_init()
+{
 	COMMON_CLEAR_PIN(PORTD, PORTD2);
 	COMMON_SET_BIT(DDRD, DDD2);  //Enable RFID
 	//DDRD |= (1<<DDD2);  
@@ -158,7 +161,7 @@ ISR (ADC_vect)
 			break;
 		case(IR_FRONT_LONG):
 			ir_sensor_data[4] = S5_convert_sensor_value_front_long(ADCH); //S5_convert_sensor_value_front_long(ADCH);
-			next_sensor_to_be_converted = 0; //nollställer sensor_which_AD_converted
+			next_sensor_to_be_converted = IR_LEFT_FRONT; //nollställer sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA3 för att börja om och AD-omvandla left_front IR-sensor
 			angle_corridor = calculate_angle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar vinkeln roboten har i en korridor utifrån centrumlinjen
 			diff_from_middle_corridor = calculate_diff_from_middle_corridor(ir_sensor_data[0], ir_sensor_data[1], ir_sensor_data[2], ir_sensor_data[3]); //Beräknar avvikelsen från mitten av från 20cm vilket är mitten av korridoren
@@ -198,7 +201,8 @@ ISR (ADC_vect)
 	
 }
 
-ISR(ANALOG_COMP_vect){
+ISR(ANALOG_COMP_vect)
+{
 	//Tröskelvärdet höjs resp. sänks om interruptet startas på låg resp. hög 
 	if ((PORTD & (1<<PORTD6)) == 64)
 	{ 
@@ -210,6 +214,129 @@ ISR(ANALOG_COMP_vect){
 	}
 	reflex_count++;  //Räknar upp 
 	COMMON_SET_BIT(ACSR, ACI);  //Tar bort eventuella interrupts på kö (endast ett ska räknas varje gång)
+}
+
+
+//Funktion som beräknar vinkeln roboten har i en korridor
+
+/*
+uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
+{
+	int8_t angle_in_corridor_right;
+	int8_t angle_in_corridor_left;
+	
+	angle_in_corridor_right = atan2(right_back - right_front, SIDE_IR_DISTANCE) * 180 / 3.14;
+	angle_in_corridor_left = atan2(left_front - left_back, SIDE_IR_DISTANCE) * 180 / 3.14;
+	
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 90;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 90 + angle_in_corridor_right;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 90 + angle_in_corridor_left;
+	}
+	else
+	{
+		return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
+	}
+}*/
+
+
+uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
+{
+	int8_t angle_in_corridor_right;
+	int8_t angle_in_corridor_left;
+	
+	angle_in_corridor_right = right_front - right_back;
+	angle_in_corridor_left = left_back - left_front;
+	
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 100;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 100 + angle_in_corridor_right;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 100 + angle_in_corridor_left;
+	}
+	else
+	{
+		return 100 + ((angle_in_corridor_right + angle_in_corridor_left) / 2);
+	}
+}
+
+//Funktion som beräknar avvikelse från mitten i korridoren
+/*
+uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
+{
+	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
+	int8_t little_add_on_left = HALF_ROBOT_LENGTH + tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
+	
+	uint16_t diff_from_right_wall = (little_add_on_right + right_back) * cos(angle_corridor * 3.14 / 180.0f);
+	uint16_t diff_from_left_wall = (little_add_on_left + left_back) * cos(angle_corridor * 3.14 / 180.0f);
+	
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 100;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return diff_from_right_wall - 100;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 300 - diff_from_left_wall;
+	}
+	else
+	{
+		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
+	}
+}*/
+
+uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
+{
+	uint8_t diff_from_right_wall = (right_back + right_front) / 2;
+	uint8_t diff_from_left_wall = (left_back + left_front) / 2;
+	
+	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
+	{
+		return 100;
+	}
+	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return diff_from_right_wall;
+	}
+	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
+	{
+		return 200 - diff_from_left_wall;
+	}
+	else
+	{
+		return ((diff_from_right_wall - diff_from_left_wall) / 2) + 100;
+	}
+}
+
+void calibrate_angular_rate_sensor()
+{
+		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
+		_delay_ms(20);
+		ADCSRA |= (1<<ADSC);
+		
+		for (int i = 0; i < 100; i++)
+		{
+			_delay_ms(5);
+			angular_read[i] = ADCH;
+			ADCSRA |= (1<<ADSC);
+		}
+		angular_rate_offset = sum_array(angular_read,100) / 100.0f;
 }
 
 //Funktioner som omvandlar sensor utdata till avstånd i mm
@@ -396,7 +523,7 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 	if (digital_distance >= 130) //Ger ut avståndet 5cm för alla digital_distance över 130
 	{
 		cm_value = 5;
-	}	
+	}
 	if (digital_distance <= 130 && digital_distance >= 92) //För digital_distance mellan 92-130 ges avstånd 10-15cm
 	{
 		cm_value = (((digital_distance-206)*10) / -76);
@@ -427,127 +554,3 @@ uint8_t S5_convert_sensor_value_front_long(uint8_t digital_distance)
 	}
 	return cm_value;
 }
-
-//Funktion som beräknar vinkeln roboten har i en korridor
-
-/*
-uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	int8_t angle_in_corridor_right;
-	int8_t angle_in_corridor_left;
-	
-	angle_in_corridor_right = atan2(right_back - right_front, SIDE_IR_DISTANCE) * 180 / 3.14;
-	angle_in_corridor_left = atan2(left_front - left_back, SIDE_IR_DISTANCE) * 180 / 3.14;
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 90;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 90 + angle_in_corridor_right;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 90 + angle_in_corridor_left;
-	}
-	else
-	{
-		return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
-	}
-}*/
-
-
-uint8_t calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	int8_t angle_in_corridor_right;
-	int8_t angle_in_corridor_left;
-	
-	angle_in_corridor_right = right_front - right_back;
-	angle_in_corridor_left = left_back - left_front;
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 100;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 100 + angle_in_corridor_right;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 100 + angle_in_corridor_left;
-	}
-	else
-	{
-		return 100 + ((angle_in_corridor_right + angle_in_corridor_left) / 2);
-	}
-}
-
-//Funktion som beräknar avvikelse från mitten i korridoren
-/*
-uint8_t calculate_diff_from_middle_corridor(int8_t angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
-	int8_t little_add_on_left = HALF_ROBOT_LENGTH + tan(angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
-	
-	uint16_t diff_from_right_wall = (little_add_on_right + right_back) * cos(angle_corridor * 3.14 / 180.0f);
-	uint16_t diff_from_left_wall = (little_add_on_left + left_back) * cos(angle_corridor * 3.14 / 180.0f);
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 100;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return diff_from_right_wall - 100;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 300 - diff_from_left_wall;
-	}
-	else
-	{
-		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
-	}
-}*/
-
-uint8_t calculate_diff_from_middle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	uint16_t diff_from_right_wall = (right_back + right_front) / 2;
-	uint16_t diff_from_left_wall = (left_back + left_front) / 2;
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 100;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return diff_from_right_wall;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 200 - diff_from_left_wall;
-	}
-	else
-	{
-		return ((diff_from_right_wall - diff_from_left_wall) / 2) + 100;
-	}
-}
-
-void calibrate_angular_rate_sensor()
-{
-		ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
-		_delay_ms(20);
-		ADCSRA |= (1<<ADSC);
-		
-		for (int i = 0; i < 100; i++)
-		{
-			_delay_ms(5);
-			angular_read[i] = ADCH;
-			ADCSRA |= (1<<ADSC);
-		}
-		angular_rate_offset = sum_array(angular_read,100) / 100.0f;
-}
-
-
