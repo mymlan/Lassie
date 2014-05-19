@@ -137,22 +137,22 @@ ISR (ADC_vect)
 	switch (next_sensor_to_be_converted)
 	{
 		case(IR_LEFT_FRONT):
-			ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH);
+			ir_sensor_data[0] = S1_convert_sensor_value_left_front(ADCH) - 25;
 			next_sensor_to_be_converted = IR_LEFT_BACK; //adderar 1 till sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2); //sätter ADMUX till PA4 för att AD-omvandla left_back IR-sensor
 			break;
 		case(IR_LEFT_BACK):
-			ir_sensor_data[1] = S2_convert_sensor_value_left_back(ADCH);
+			ir_sensor_data[1] = S2_convert_sensor_value_left_back(ADCH) - 25;
 			next_sensor_to_be_converted = IR_RIGHT_FRONT; //adderar 1 till sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX0); //Sätter ADMUX till PA5 för att AD-omvandla right_front IR-sensor
 			break;
 		case(IR_RIGHT_FRONT):
-			ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH);
+			ir_sensor_data[2] = S3_convert_sensor_value_right_front(ADCH) - 25;
 			next_sensor_to_be_converted = IR_RIGHT_BACK; //adderar 1 till sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1); //Sätter ADMUX till PA6 för att AD-omvandla right_back IR-sensor
 			break;
 		case(IR_RIGHT_BACK):
-			ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH);
+			ir_sensor_data[3] = S4_convert_sensor_value_right_back(ADCH) - 25;
 			next_sensor_to_be_converted = IR_FRONT_LONG; //adderar 1 till sensor_which_AD_converted
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0); //Sätter ADMUX till PA7 för att AD-omvandla front_long IR-sensor
 			break;
