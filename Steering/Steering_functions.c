@@ -14,7 +14,7 @@ uint8_t counter_maximum_8_bit = 255;
 uint16_t BASE_SPEED = 30000; // Halvfart, HÖGRE värde ger HÖGRE hastighet, 40000 halva
 
 static uint16_t pwm_right_wheel_fast_speed = 45000;
-//static uint16_t pwm_right_wheel_normal_speed = 30000;
+static uint16_t pwm_right_wheel_normal_speed = 30000;
 static uint16_t pwm_right_wheel_slow_speed = 15000;
 static uint16_t pwm_right_wheel_stop = 0;
 
@@ -276,7 +276,7 @@ void Turn_left()
 void Tight_turn_right()
 {
 	Set_wheels_left_forward_right_backward();
-	OCR1A = pwm_right_wheel_slow_speed; // OBS slow här för höger sensorer detekterar korsning tidigare
+	OCR1A = pwm_right_wheel_normal_speed; // OBS slow här för höger sensorer detekterar korsning tidigare
 	OCR1B = pwm_left_wheel_fast_speed;
 }
 void Tight_turn_left()
