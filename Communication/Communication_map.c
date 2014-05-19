@@ -452,11 +452,13 @@ node* Easy_find_unexplored_node()
 			}
 		}
 	}
-	if(level == 2)
+	if(level == KEEP_SEARCHING)
 	{
-		level = 3; // Level up 2->3	
+		Find_shortest_path(start_node, p_robot_node);
+		following_path = TRUE;	
+		level = RETURN_AFTER_FOUND; // Level up 2->3	
 	}
-	if(level == 1)
+	if(level == SEARCH_FOR_GOAL)
 	{
 		Find_shortest_path(start_node, p_robot_node);
 		following_path = TRUE;
@@ -483,7 +485,6 @@ node* Smarter_find_unexplored_node(node* p_node)
 			return Smarter_find_unexplored_node(p_node->links[n].p_node); //Så ska genomsökning på den noden ske.
 		}
 	}
-	level++; // Level up 1->2
 	return all_nodes[0]; // åker till start om upptäckt hela
 }
 
@@ -1001,12 +1002,20 @@ void Following_path_at_crossing()
 	{
 		if (level == 42)
 		{
-			level = 43;
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			level = 43;
+		}
+		else if (level == RETURN_AFTER_FOUND)
+		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			level = WAIT_FOR_ITEM;
 		}
 		else
 		{
@@ -1156,7 +1165,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 						else // Borde ej inträffa!
 						{
 							SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
-							level = 0;
+							level = FIRST_WAIT;
 						}
 					}
 				}
@@ -1178,11 +1187,6 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 // ev. funktion deleta allt allokerat minne mha free()
 // (kanske inte behövs då vi inte ska deleta enskilda noder, och kan reseta minnet mellan körningar)
 
-void Do_level_3(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
-{
-	Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
-}
-
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
 	if (SPI_map_should_handle_rfid())
@@ -1192,30 +1196,35 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 	//level = 1;
 	switch(level)
 	{
-		case 0:
+		case FIRST_WAIT:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			break;
 		}
-		case 1:
+		case SEARCH_FOR_GOAL:
 		{
 			Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;
 		}
-		case 2:
+		case KEEP_SEARCHING:
 		{
 			Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;
 		}
-		case 3:
+		case RETURN_AFTER_FOUND:
 		{
-			Do_level_3(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;
 		}
+		case WAIT_FOR_ITEM:
+		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+		}
+		// Test så länge RFID inte klar
 		case 42:
 		{
 			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
-			Do_level_3(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 		}
 		case 43:
 		{
@@ -1242,7 +1251,7 @@ void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_rig
 		uint8_t length = Get_length();
 		Create_goal(Get_new_x_coordinate(length), Get_new_y_coordinate(length), Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 	}
-	level = 2;
+	level = KEEP_SEARCHING;
 }
 
 void Level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
