@@ -19,11 +19,7 @@ int main(void)
 	
     while(1)
 	{
-		if(SPI_sensor_should_handle_number_of_reflex_counts_to_RFID())
-		{
-			count_down_number_of_reflex_counts_to_RFID_requested = 1;
-			reflex_count = 0;
-		}
+		;
 	}
 	
 }
