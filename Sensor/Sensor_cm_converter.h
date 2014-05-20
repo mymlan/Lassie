@@ -3,6 +3,8 @@
 
 uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
 volatile uint16_t reflex_count;
+volatile uint8_t number_of_reflex_counts_to_RFID;
+volatile uint8_t number_of_reflex_counts_to_RFID_requested;
 
 volatile uint8_t next_sensor_to_be_converted;
 
