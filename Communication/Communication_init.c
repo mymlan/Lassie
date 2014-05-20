@@ -34,14 +34,12 @@ void Init_button_deliver()
 
 ISR(PCINT3_vect)
 {
-	//if(level == 4)
-	//{
-	//level++;
+	if(level == 4)
+	{
+	level++;
 	COMMON_CLEAR_BIT(PCICR, PCIE3); //Stänger av avbrottet
 	COMMON_CLEAR_BIT(PCMSK3, PCINT28); //Stänger av avbrottet
-	//}
-	COMMON_TOGGLE_PIN(PORTA, PORTA1);
-	COMMON_TOGGLE_PIN(PORTA, PORTA3);
+	}
 }
 
 void Timer_init()
