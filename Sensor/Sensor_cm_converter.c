@@ -250,6 +250,7 @@ ISR(ANALOG_COMP_vect)
 	if((count_down_number_of_reflex_counts_to_RFID_requested == 1) && (reflex_count == number_of_reflex_counts_to_RFID))
 	{	
 		//skicka tillbaka att sökt avstånd är uppnådd.
+		SPI_sensor_send_reached_RFID();
 		count_down_number_of_reflex_counts_to_RFID_requested = 0; 
 		reflex_count = 0;
 	}

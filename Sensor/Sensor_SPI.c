@@ -90,6 +90,11 @@ void SPI_sensor_send_rotation_finished(void)
 	SPI_sensor_slave_send_id_byte(ID_BYTE_ROTATION_FINISHED);
 }
 
+void SPI_sensor_send_reached_RFID(void)
+{
+	SPI_sensor_slave_send_id_byte(ID_BYTE_REACHED_RFID);
+}
+
 void SPI_sensor_send_sensor_data(uint8_t *data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;	
