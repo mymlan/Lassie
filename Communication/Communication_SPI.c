@@ -8,7 +8,7 @@
 #include "Communication_SPI.h"
 #include "Firefly.h"
 
-//-------------VARIABLER/KONSTANTER---------------//
+//---------STATIC VARIABLER/KONSTANTER-------------//
 static volatile uint8_t communication_has_recieved_sensor_data;
 static volatile uint8_t communication_has_recieved_distance;
 static volatile uint8_t communication_has_recieved_rotation_finished;
