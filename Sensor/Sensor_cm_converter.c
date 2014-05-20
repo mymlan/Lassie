@@ -69,6 +69,8 @@ void Sensor_init_analog_comparator()
 	COMMON_SET_BIT(PORTD, PORTD6);  //Sätter PORTD6 (pinne 20) till HIGH som används till spänningsdelaren hos reflexsensorn
 	
 	reflex_count = 0;
+	number_of_reflex_counts_to_RFID = 0;
+	number_of_reflex_counts_to_RFID_requested = 0;
 }
 
 void Sensor_init_USART_for_RFID()
@@ -248,6 +250,13 @@ ISR(ANALOG_COMP_vect)
 	}
 	reflex_count++;  //Räknar upp 
 	COMMON_SET_BIT(ACSR, ACI);  //Tar bort eventuella interrupts på kö (endast ett ska räknas varje gång)
+	
+	if((number_of_reflex_counts_to_RFID_requested == 1) && (reflex_count == number_of_reflex_counts_to_RFID))
+	{
+		//skicka tillbaka att sökt avstånd är uppnådd.
+		number_of_reflex_counts_to_RFID_requested = 0; 
+		reflex_count = 0;
+	}
 }
 
 //------------------FUNKTIONER--------------------//
