@@ -85,4 +85,6 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 void Level_stupid(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right);
 void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_front);
 void Set_enable();
+uint8_t Is_node_crossing(node* p_node);
+
 #endif

@@ -888,6 +888,10 @@ void Follow(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 		if (enable_node_editing)
 		{
 			p_robot_node = p_robot_node->p_pre_dijk;
+			if (p_robot_node == p_goal_node && !Is_node_crossing(p_robot_node))
+			{
+				p_robot_node = p_robot_node->p_pre_dijk; // Om vi kör över målet i en korridor, skippa även denna nod.
+			}
 			enable_node_editing = FALSE;
 			length = Get_length();
 			Following_path_at_crossing();
@@ -1032,21 +1036,62 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		case GO_TO_GOAL: // i funktionen Follow_path_at_crossing
 		{
-			Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			if(Is_node_crossing(p_goal_node))
+			{
+				Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			}
+			else
+			{
+				if(p_robot_node->p_pre_dijk->p_pre_dijk != NULL)
+				{
+					Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+				}
+				else
+				{
+					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
+					while (SPI_map_should_handle_reached_RFID() == FALSE)
+					{}
+					SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+					level = DROP_ITEM;
+				}
+			}
+			
 			break;
 		}
 		case DROP_ITEM: // i case:en
 		{
+			
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
-			_delay_ms(500);
+			_delay_ms(100);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_OPEN_CLAW);
+			_delay_ms(100);
+			
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_BACKWARD);
+			_delay_ms(150);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
+			_delay_ms(100);
+			
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Wait_for_90_degree_rotation(); // 90 grader
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
+			Wait_for_90_degree_rotation(); // ytterligare 90 grader
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
+			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
+			
+			//Find_shortest_path(p_robot_node, p_robot_node);
+			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_FORWARD);
+			
+			
 			Find_shortest_path(p_start_node, p_goal_node);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_FORWARD);
 			level = RETURN_AFTER_DELIVERED;
 			break;
 		}
 		case RETURN_AFTER_DELIVERED:
 		{
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 			Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			break;		
 		}
@@ -1132,5 +1177,26 @@ void Set_enable()
 	else
 	{
 		enable_safety++;
+	}
+}
+
+//Returnerar sant om noden befinner sig i en korsning, falskt om inte.
+uint8_t Is_node_crossing(node* p_node)
+{
+	if ((p_node->links[0].open + p_node->links[1].open + p_node->links[2].open + p_node->links[3].open) == 2 )
+	{
+		uint8_t buffer = 0;
+		for(int i = 0 ; i < 4; i++)
+		{
+			if(p_node->links[i].open == TRUE)
+			{
+				buffer = buffer + i;
+			}
+		}
+		return buffer % 2;
+	}
+	else
+	{
+		return TRUE;
 	}
 }
