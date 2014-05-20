@@ -12,7 +12,8 @@
 static volatile uint8_t communication_has_recieved_sensor_data;
 static volatile uint8_t communication_has_recieved_distance;
 static volatile uint8_t communication_has_recieved_rotation_finished;
-static volatile uint8_t communication_has_recieved_rfid;
+static volatile uint8_t communication_has_recieved_RFID;
+static volatile uint8_t communication_has_reached_RFID;
 static volatile int8_t times_until_send_sensor_data_to_PC;
 
 //-----------------STATIC FUNKTIONER----------------//
@@ -79,7 +80,8 @@ void SPI_Master_init(void)
 	communication_has_recieved_sensor_data = 0;
 	communication_has_recieved_distance = 0;
 	communication_has_recieved_rotation_finished = 0;
-	communication_has_recieved_rfid = 0;
+	communication_has_recieved_RFID = 0;
+	communication_has_reached_RFID = 0;
 	times_until_send_sensor_data_to_PC = NUMBER_OF_SENSOR_DATA_TO_SKIP_TO_SEND_TO_PC;
 }
 
@@ -116,7 +118,10 @@ ISR(PCINT0_vect)
 		case ID_BYTE_FOUND_RFID:
 			rfid_id = SPI_Master_recieve_data_byte_from_sensor();
 			USART_send_byte_to_PC(ID_BYTE_FOUND_RFID, rfid_id);
-			communication_has_recieved_rfid = 1;
+			communication_has_recieved_RFID = 1;
+		case ID_BYTE_REACHED_RFID:
+			communication_has_reached_RFID = 1;
+			break;
 		default:
 			break;
 	}
@@ -144,10 +149,17 @@ uint8_t SPI_map_should_handle_rotation_finished(void)
 	return result;
 }
 
-uint8_t SPI_map_should_handle_rfid(void)
+uint8_t SPI_map_should_handle_RFID(void)
 {
-	uint8_t result = communication_has_recieved_rfid;
-	communication_has_recieved_rfid = 0;
+	uint8_t result = communication_has_recieved_RFID;
+	communication_has_recieved_RFID = 0;
+	return result;
+}
+
+uint8_t SPI_map_should_handle_reached_RFID(void)
+{
+	uint8_t result = communication_has_reached_RFID;
+	communication_has_reached_RFID = 0;
 	return result;
 }
 

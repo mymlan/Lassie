@@ -11,7 +11,8 @@ void SPI_Master_init(void);
 uint8_t SPI_map_should_handle_new_sensor_data(void);
 uint8_t SPI_map_should_handle_new_distance(void);
 uint8_t SPI_map_should_handle_rotation_finished(void);
-uint8_t SPI_map_should_handle_rfid(void);
+uint8_t SPI_map_should_handle_RFID(void);
+uint8_t SPI_map_should_handle_reached_RFID(void);
 
 void SPI_Master_send_id_byte_to_sensor(uint8_t id_byte);
 void SPI_map_send_id_byte_to_sensor(uint8_t id_byte);
