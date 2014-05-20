@@ -32,7 +32,6 @@ static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 	while(!(SPSR & (1<<SPIF))){}
 }
 
-/*
 static uint8_t SPI_sensor_recieve_byte(void)
 {
 	uint8_t number_of_bytes_in_data = 1;
@@ -45,7 +44,7 @@ static uint8_t SPI_sensor_recieve_byte(void)
 	}
 	return SPDR;
 }
-*/
+
 //----------------AVBROTTSVEKTORER----------------//
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
@@ -69,7 +68,7 @@ ISR(SPI_STC_vect)
 			next_sensor_to_be_converted = ANGULAR_RATE;
 			break;
 		case ID_BYTE_COUNT_DOWN_REFLEX_SENSOR:
-			//number_of_reflex_counts_to_RFID = SPI_sensor_recieve_byte();
+			number_of_reflex_counts_to_RFID = SPI_sensor_recieve_byte();
 			sensor_has_recieved_number_of_reflex_counts_to_RFID = 1;
 			break;
 		default:
