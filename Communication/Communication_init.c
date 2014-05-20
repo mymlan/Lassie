@@ -34,11 +34,11 @@ void Init_button_deliver()
 
 ISR(PCINT3_vect)
 {
-	if(level == 4)
+	if(level == WAIT_FOR_ITEM)
 	{
-	level++;
-	COMMON_CLEAR_BIT(PCICR, PCIE3); //Stänger av avbrottet
-	COMMON_CLEAR_BIT(PCMSK3, PCINT28); //Stänger av avbrottet
+		level = GRAB_ITEM_AND_CALC_DIJK;
+		COMMON_CLEAR_BIT(PCICR, PCIE3); //Stänger av avbrottet
+		COMMON_CLEAR_BIT(PCMSK3, PCINT28); //Stänger av avbrottet
 	}
 }
 
