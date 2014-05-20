@@ -32,10 +32,6 @@ static float angular_read[100];
 static volatile uint8_t sensor_data_distance_from_right_wall;
 static volatile uint8_t sensor_data_angle_corridor;
 
-// tillhör tidigare reglering, bortkommenterad.
-// static uint8_t SIDE_IR_DISTANCE = 78;
-// static uint8_t HALF_ROBOT_LENGTH = 100;
-
 //-----------------STATIC FUNKTIONER----------------//
 static float Sum_array(float a[], int num_elements)
 {
@@ -69,6 +65,8 @@ void Sensor_init_analog_comparator()
 	COMMON_SET_BIT(PORTD, PORTD6);  //Sätter PORTD6 (pinne 20) till HIGH som används till spänningsdelaren hos reflexsensorn
 	
 	reflex_count = 0;
+	number_of_reflex_counts_to_RFID = 0;
+	count_down_number_of_reflex_counts_to_RFID_requested = 0;
 }
 
 void Sensor_init_USART_for_RFID()
@@ -248,38 +246,17 @@ ISR(ANALOG_COMP_vect)
 	}
 	reflex_count++;  //Räknar upp 
 	COMMON_SET_BIT(ACSR, ACI);  //Tar bort eventuella interrupts på kö (endast ett ska räknas varje gång)
+	
+	if((count_down_number_of_reflex_counts_to_RFID_requested == 1) && (reflex_count == number_of_reflex_counts_to_RFID))
+	{	
+		//skicka tillbaka att sökt avstånd är uppnådd.
+		SPI_sensor_send_reached_RFID();
+		count_down_number_of_reflex_counts_to_RFID_requested = 0; 
+		reflex_count = 0;
+	}
 }
 
 //------------------FUNKTIONER--------------------//
-
-//Funktion som beräknar vinkeln roboten har i en korridor
-/*
-uint8_t Calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	int8_t angle_in_corridor_right;
-	int8_t angle_in_corridor_left;
-	
-	angle_in_corridor_right = atan2(right_back - right_front, SIDE_IR_DISTANCE) * 180 / 3.14;
-	angle_in_corridor_left = atan2(left_front - left_back, SIDE_IR_DISTANCE) * 180 / 3.14;
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 90;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 90 + angle_in_corridor_right;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 90 + angle_in_corridor_left;
-	}
-	else
-	{
-		return 90 + (angle_in_corridor_right + angle_in_corridor_left) / 2;
-	}
-}*/
-
 uint8_t Calculate_approx_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	int8_t angle_in_corridor_right;
@@ -306,34 +283,6 @@ uint8_t Calculate_approx_angle_corridor(uint8_t left_front, uint8_t left_back, u
 	}
 }
 
-//Funktion som beräknar avvikelse från mitten i korridoren
-/*
-uint8_t Calculate_diff_from_middle_corridor(int8_t sensor_data_angle_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
-{
-	int8_t little_add_on_right = HALF_ROBOT_LENGTH - tan(sensor_data_angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
-	int8_t little_add_on_left = HALF_ROBOT_LENGTH + tan(sensor_data_angle_corridor * 3.14 / 180.0f) * (SIDE_IR_DISTANCE / 2);
-	
-	uint16_t diff_from_right_wall = (little_add_on_right + right_back) * cos(sensor_data_angle_corridor * 3.14 / 180.0f);
-	uint16_t diff_from_left_wall = (little_add_on_left + left_back) * cos(sensor_data_angle_corridor * 3.14 / 180.0f);
-	
-	if((left_back > SIDE_SENSOR_OPEN_LIMIT || left_front > SIDE_SENSOR_OPEN_LIMIT) && (right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT))
-	{
-		return 100;
-	}
-	else if(left_front > SIDE_SENSOR_OPEN_LIMIT || left_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return diff_from_right_wall - 100;
-	}
-	else if(right_front > SIDE_SENSOR_OPEN_LIMIT || right_back > SIDE_SENSOR_OPEN_LIMIT)
-	{
-		return 300 - diff_from_left_wall;
-	}
-	else
-	{
-		return (diff_from_right_wall - diff_from_left_wall) / 2 + 100;
-	}
-}*/
-
 uint8_t Calculate_distance_from_right_wall(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back)
 {
 	uint8_t diff_from_right_wall = (right_back + right_front) / 2;
@@ -356,8 +305,6 @@ uint8_t Calculate_distance_from_right_wall(uint8_t left_front, uint8_t left_back
 		return ((diff_from_right_wall - diff_from_left_wall) / 2) + 100;
 	}
 }
-
-
 
 //Funktioner som omvandlar sensor utdata till avstånd i mm alt cm
 uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance)

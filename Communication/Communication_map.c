@@ -1224,7 +1224,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
-	if (SPI_map_should_handle_rfid())
+	if (SPI_map_should_handle_RFID())
 	{
 		Do_this_when_rfid_found(sensor_front_left, sensor_front_right, sensor_front);
 	}
