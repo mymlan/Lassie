@@ -4,7 +4,7 @@
 uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
 volatile uint16_t reflex_count;
 volatile uint8_t number_of_reflex_counts_to_RFID;
-volatile uint8_t number_of_reflex_counts_to_RFID_requested;
+volatile uint8_t count_down_number_of_reflex_counts_to_RFID_requested;
 
 volatile uint8_t next_sensor_to_be_converted;
 
@@ -17,8 +17,6 @@ void Calibrate_angular_rate_sensor();
 
 uint8_t Calculate_approx_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t  right_back);
 uint8_t Calculate_distance_from_right_wall(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back);
-//uint8_t Calculate_angle_corridor(uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t  right_back);
-//uint8_t Calculate_diff_from_middle_corridor(int8_t angle_in_corridor, uint8_t left_front, uint8_t left_back, uint8_t right_front, uint8_t right_back);
 
 uint8_t S1_convert_sensor_value_left_front(uint8_t digital_distance);
 uint8_t S2_convert_sensor_value_left_back(uint8_t digital_distance);
