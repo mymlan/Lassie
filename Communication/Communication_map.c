@@ -373,7 +373,7 @@ void Do_turn(uint8_t cardinal_direction)
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
-			
+			_delay_ms(200);
 			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
 			length = 2;
 			break;
@@ -784,7 +784,9 @@ void Following_path_at_crossing()
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
+			_delay_ms(50);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+
 			robot_dir = (robot_dir + 2) % 4;
 			level = 43;
 		}
@@ -798,6 +800,7 @@ void Following_path_at_crossing()
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
 			Wait_for_90_degree_rotation();
+			_delay_ms(50);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			robot_dir = (robot_dir + 2) % 4;
 			level = WAIT_FOR_ITEM;
@@ -810,7 +813,22 @@ void Following_path_at_crossing()
 		}
 		else if(level == RETURN_AFTER_DELIVERED)
 		{
-			level = FINISHED;
+			//level = FINISHED;
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			_delay_ms(150);
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
+			Wait_for_90_degree_rotation();
+			_delay_ms(50);
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			robot_dir = (robot_dir + 2) % 4;
+			level = WAIT_FOR_ITEM;
+			COMMON_TOGGLE_PIN(PORTA, PORTA3);
+			COMMON_TOGGLE_PIN(PORTA, PORTA1);
+			level = WAIT_FOR_ITEM;
 		}
 		else
 		{
@@ -1025,7 +1043,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		case KEEP_SEARCHING: // i funktionen Easy_find_unexplored
 		{
-			if(Find_unexplored_node() == p_start_node)
+			if(Easy_find_unexplored_node() == p_start_node)
 			{
 				level = RETURN_AFTER_FOUND;
 			}
@@ -1105,6 +1123,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
+			_delay_ms(50);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
 			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
 			
@@ -1238,7 +1257,7 @@ node* Find_unexplored_node()
 			if (all_nodes[i]->links[n].open && all_nodes[i]->links[n].length == 0) // Om öppen med längd 0, alltså outforskad.
 			{
 				uint8_t so_far_best_way = Find_shortest_path(p_goal_node, p_start_node);
-				uint8_t potential_better_way = Find_shortest_path(p_goal_node, all_nodes[i]) + all_nodes[i]->x_coordinate + all_nodes[i]->y_coordinate - 60;
+				uint8_t potential_better_way = Find_shortest_path(p_goal_node, all_nodes[i]) + abs(all_nodes[i]->x_coordinate - 30) + abs(all_nodes[i]->y_coordinate - 30);
 				if(potential_better_way < so_far_best_way)
 				{
 				return all_nodes[i];
