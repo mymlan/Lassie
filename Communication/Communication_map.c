@@ -185,11 +185,12 @@ void Create_node(uint8_t x_coordinate, uint8_t y_coordinate, uint8_t length, uin
 	// 5. Nollställ avstånd (kanske sker utanför funktionen)
 	// 6. Ta styrbslut och return (sker utanför funktionen)
 	enable_node_editing = FALSE;
-	
+	/*
 	// TESTKOD
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 	_delay_ms(250);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	*/
 }
 
 // Create_goal
@@ -221,11 +222,12 @@ void Update_node(node* p_node, uint8_t length)
 	
 	enable_node_editing = FALSE;
 	
-	
+	/*
 	// TESTKOD
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 	_delay_ms(250);
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	*/
 }
 
 // Existing_node_at
@@ -346,7 +348,7 @@ void Wait_for_90_degree_rotation()
 void Do_turn(uint8_t cardinal_direction)
 {
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-	_delay_ms(100);
+	_delay_ms(35);
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
@@ -405,7 +407,7 @@ void Do_turn(uint8_t cardinal_direction)
 		break;
 	}
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-	_delay_ms(100);
+	_delay_ms(30);
 	// Åk fram oreglerat order
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD); // Not regulated kanske
 	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
@@ -988,8 +990,7 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		Search(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 	}
 }
-// ev. funktion deleta allt allokerat minne mha free()
-// (kanske inte behövs då vi inte ska deleta enskilda noder, och kan reseta minnet mellan körningar)
+
 
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
@@ -1214,4 +1215,37 @@ uint8_t Is_node_crossing(node* p_node)
 	{
 		return TRUE;
 	}
+}
+
+node* Find_unexplored_node()
+{
+	for (int i = all_nodes_size - 1; i > 0; i--)
+	{
+		for (int n = 0; n < NUMBER_OF_LINKS; n++)
+		{
+			if (all_nodes[i]->links[n].open && all_nodes[i]->links[n].length == 0) // Om öppen med längd 0, alltså outforskad.
+			{
+				uint8_t so_far_best_way = Find_shortest_path(p_goal_node, p_start_node);
+				uint8_t potential_better_way = Find_shortest_path(p_goal_node, all_nodes[i]) + all_nodes[i]->x_coordinate + all_nodes[i]->y_coordinate - 60;
+				if(potential_better_way < so_far_best_way)
+				{
+				return all_nodes[i];
+				}
+			}
+		}
+	}
+	if(level == KEEP_SEARCHING)
+	{
+		Find_shortest_path(p_start_node, p_robot_node);
+		following_path = TRUE;
+		level = RETURN_AFTER_FOUND; // Level up 2->3
+	}
+	if(level == SEARCH_FOR_GOAL)
+	{
+		Find_shortest_path(p_start_node, p_robot_node);
+		following_path = TRUE;
+		level = 42; // Om Lassie inte hittat RFID
+		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	}
+	return all_nodes[0]; // åker till start om upptäckt hela, levlar innan åker hem
 }
