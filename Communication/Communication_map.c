@@ -9,6 +9,8 @@
 #include "Firefly.h"
 #include <util/delay.h>
 
+uint8_t REFLEXES_PER_SQUARE = 8;
+
 //uint8_t start_regulating = TRUE;
 
 // Newnode
@@ -1010,7 +1012,14 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		case KEEP_SEARCHING: // i funktionen Easy_find_unexplored
 		{
-			Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			if(Easy_find_unexplored_node() == p_start_node)
+			{
+				level = RETURN_AFTER_FOUND;
+			}
+			else
+			{
+				Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+			}
 			break;
 		}
 		case RETURN_AFTER_FOUND: // i funktionen Follow_path_at_crossing
@@ -1048,9 +1057,14 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 				}
 				else
 				{
-					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
+					
+					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * REFLEXES_PER_SQUARE);//abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
+					SPI_map_should_handle_reached_RFID();
 					while (SPI_map_should_handle_reached_RFID() == FALSE)
-					{}
+					{
+						//_delay_ms(5);
+					}
+					p_robot_node = p_goal_node;
 					SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 					level = DROP_ITEM;
 				}
@@ -1123,7 +1137,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 // Koden anropas då rfid hittas och antingen uppdaterar redan befintlig nod eller skapar en ny nod som goal.
 void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_front)
 {
-	if (level == SEARCH_FOR_GOAL)
+	if (level == SEARCH_FOR_GOAL || level == 42)
 	{
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_1);
 		_delay_ms(1000);
