@@ -989,6 +989,18 @@ void Do_level_1(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 	}
 }
 
+void Do_level_2(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+{
+	if(following_path)
+	{
+		Follow(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+	}
+	else // following path == FALSE
+	{
+		Search_on_level_2(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+	}
+}
+
 
 void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
 {
@@ -1017,7 +1029,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			}
 			else
 			{
-				Do_level_1(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
+				Do_level_2(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right);
 			}
 			break;
 		}
@@ -1245,4 +1257,73 @@ node* Find_unexplored_node()
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 	}
 	return all_nodes[0]; // åker till start om upptäckt hela, levlar innan åker hem
+}
+
+void Search_on_level_2(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_front_right, uint8_t sensor_back_left, uint8_t sensor_back_right)
+{
+	if (Crossing(sensor_front, sensor_front_left, sensor_front_right, sensor_back_left, sensor_back_right))
+	{
+		if (enable_node_editing)
+		{
+			length += Get_length();
+			uint8_t	new_x_coordinate = Get_new_x_coordinate(length);
+			uint8_t new_y_coordinate = Get_new_y_coordinate(length);
+			
+			node* p_arrived_node = Exisiting_node_at(new_x_coordinate, new_y_coordinate);
+			if (p_arrived_node != NULL) // Noden finns redan
+			{
+				if (p_robot_node->x_coordinate != p_arrived_node->x_coordinate || p_robot_node->y_coordinate != p_arrived_node->y_coordinate)
+				{
+					Update_node(p_arrived_node, Number_of_traveled_blocks(length));
+				}
+				Find_shortest_path(Find_unexplored_node(), p_robot_node);
+				following_path = TRUE;
+				Following_path_at_crossing();
+			}
+			else // Ej befintlig nod
+			{
+				Create_node(new_x_coordinate, new_y_coordinate, Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
+				//if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
+				if (sensor_front < FRONT_SENSOR_LIMIT && sensor_front_left < SIDE_SENSOR_OPEN_LIMIT && sensor_front_right < SIDE_SENSOR_OPEN_LIMIT && sensor_back_left < SIDE_SENSOR_OPEN_LIMIT && sensor_back_right < SIDE_SENSOR_OPEN_LIMIT) // Återvändsgränd
+				{
+					enable_node_editing = TRUE;
+					Find_shortest_path(Find_unexplored_node(), p_robot_node);
+					following_path = TRUE;
+					Following_path_at_crossing();
+				}
+				else // Ej återvändsgränd och ny nod
+				{
+					if (sensor_front > SIZE_OF_SQUARE_IN_CM)
+					{
+						//Do_turn(robot_dir);
+						length = 4;
+					}
+					else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
+					{
+						Do_turn((robot_dir + 1) % 4);
+					}
+					else if (sensor_front_left > SIDE_SENSOR_OPEN_LIMIT)
+					{
+						Do_turn((robot_dir + 3) % 4);
+					}
+					else // Borde ej inträffa!
+					{
+						SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP_6);
+						level = FIRST_WAIT;
+					}
+				}
+			}
+		}
+		else // Not enable node editing i korsning
+		{
+			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+		}
+		enable_safety = 0;
+	}
+	else // Ej korsning, ej following path
+	{
+		Set_enable();
+		//enable_node_editing = TRUE;
+		//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
+	}
 }
