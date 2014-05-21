@@ -801,6 +801,8 @@ void Following_path_at_crossing()
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 			robot_dir = (robot_dir + 2) % 4;
 			level = WAIT_FOR_ITEM;
+			COMMON_TOGGLE_PIN(PORTA, PORTA3);
+			COMMON_TOGGLE_PIN(PORTA, PORTA1);
 		}
 		else if (level == GO_TO_GOAL)
 		{
@@ -1181,6 +1183,7 @@ void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_rig
 			Create_goal(Get_new_x_coordinate(length), Get_new_y_coordinate(length), Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 		}
 		*/
+		COMMON_TOGGLE_PIN(PORTA, PORTA3);
 		length = 0;
 		level = KEEP_SEARCHING;
 		SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);

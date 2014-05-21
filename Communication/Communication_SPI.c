@@ -159,6 +159,7 @@ uint8_t SPI_map_should_handle_RFID(void)
 uint8_t SPI_map_should_handle_reached_RFID(void)
 {
 	uint8_t result = communication_has_reached_RFID;
+	
 	communication_has_reached_RFID = 0;
 	return result;
 }
