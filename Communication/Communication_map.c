@@ -1023,7 +1023,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 		}
 		case KEEP_SEARCHING: // i funktionen Easy_find_unexplored
 		{
-			if(Easy_find_unexplored_node() == p_start_node)
+			if(Find_unexplored_node() == p_start_node)
 			{
 				level = RETURN_AFTER_FOUND;
 			}
