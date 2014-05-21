@@ -9,8 +9,6 @@
 #include "Firefly.h"
 #include <util/delay.h>
 
-uint8_t REFLEXES_PER_SQUARE = 8;
-
 //uint8_t start_regulating = TRUE;
 
 // Newnode
@@ -348,7 +346,7 @@ void Wait_for_90_degree_rotation()
 void Do_turn(uint8_t cardinal_direction)
 {
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-	_delay_ms(250);
+	_delay_ms(100);
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
@@ -360,7 +358,7 @@ void Do_turn(uint8_t cardinal_direction)
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
-			length = 5;
+			length = 2;
 			break;
 		}
 		case 2:
@@ -375,7 +373,7 @@ void Do_turn(uint8_t cardinal_direction)
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
 			
 			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
-			length = 5;
+			length = 2;
 			break;
 		}
 		case 1:
@@ -387,7 +385,7 @@ void Do_turn(uint8_t cardinal_direction)
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
-			length = 5;
+			length = 2;
 			/*
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 			_delay_ms(400);
@@ -407,7 +405,7 @@ void Do_turn(uint8_t cardinal_direction)
 		break;
 	}
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-	_delay_ms(250);
+	_delay_ms(100);
 	// Åk fram oreglerat order
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD); // Not regulated kanske
 	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
@@ -879,7 +877,7 @@ uint8_t Get_new_y_coordinate(uint8_t length)
 
 uint8_t Number_of_traveled_blocks(uint8_t length)
 {
-	return (length + HALF_SIZE_OF_SQUARE_IN_CM) / SIZE_OF_SQUARE_IN_CM; // Ev. plussa något till length som marginal vid behov
+	return (length + HALF_SIZE_OF_SQUARE_IN_TICS) / SIZE_OF_SQUARE_IN_TICS; // Ev. plussa något till length som marginal vid behov
 }
 
 //Följer pekarna
@@ -945,7 +943,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 					if (sensor_front > SIZE_OF_SQUARE_IN_CM)
 					{
 						//Do_turn(robot_dir);
-						length = 10;
+						length = 4;
 					}
 					else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
 					{
@@ -1058,7 +1056,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 				else
 				{
 					
-					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * REFLEXES_PER_SQUARE);//abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
+					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_TICS);//abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
 					SPI_map_should_handle_reached_RFID();
 					while (SPI_map_should_handle_reached_RFID() == FALSE)
 					{

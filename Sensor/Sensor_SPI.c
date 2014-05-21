@@ -54,8 +54,7 @@ ISR(SPI_STC_vect)
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 		{
-			uint8_t distance = ((reflex_count*REFLEX_COUNT_DISTANCE_PER_COLOUR_FIELD) / 10);
-			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
+			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, reflex_count);
 			reflex_count = 0;
 			break;
 		}
