@@ -39,6 +39,7 @@ ISR(PCINT3_vect)
 		level = GRAB_ITEM_AND_CALC_DIJK;
 		COMMON_CLEAR_BIT(PCICR, PCIE3); //Stänger av avbrottet
 		COMMON_CLEAR_BIT(PCMSK3, PCINT28); //Stänger av avbrottet
+		COMMON_TOGGLE_PIN(PORTA, PORTA3);
 	}
 }
 
