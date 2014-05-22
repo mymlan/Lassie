@@ -253,14 +253,14 @@ void Backward()
 void Rotate_right()
 {
 	Set_wheels_left_forward_right_backward();
-	OCR1A = pwm_right_wheel_ultra_speed;
-	OCR1B = pwm_left_wheel_ultra_speed;
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
 void Rotate_left()
 {
 	Set_wheels_left_backward_right_forward();
-	OCR1A = pwm_right_wheel_ultra_speed;
-	OCR1B = pwm_left_wheel_ultra_speed;
+	OCR1A = pwm_right_wheel_fast_speed;
+	OCR1B = pwm_left_wheel_fast_speed;
 }
 void Turn_right()
 {
