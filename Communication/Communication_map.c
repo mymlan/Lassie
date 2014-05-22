@@ -353,7 +353,7 @@ void Do_turn(uint8_t cardinal_direction)
 		case 3:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(150);
+			_delay_ms(100);
 			
 			// Turn right order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
@@ -368,7 +368,7 @@ void Do_turn(uint8_t cardinal_direction)
 		case 2:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(200);
+			_delay_ms(150);
 			
 			// Rotation 180 degrees order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
@@ -390,7 +390,7 @@ void Do_turn(uint8_t cardinal_direction)
 		case 1:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(150);
+			_delay_ms(100);
 			// Turn left order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_TIGHT_TURN_LEFT);
