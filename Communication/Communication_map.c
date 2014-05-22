@@ -7,6 +7,7 @@
 #include "Communication_map.h"
 #include "Communication_SPI.h"
 #include "Firefly.h"
+#include "Communication_init.h"
 #include <util/delay.h>
 
 //uint8_t start_regulating = TRUE;
@@ -347,12 +348,13 @@ void Wait_for_90_degree_rotation()
 // Funktonen utför en sväng eller liknande för att rotera roboten i given riktning genom anrop till styr och sensormodulerna
 void Do_turn(uint8_t cardinal_direction)
 {
-	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-	_delay_ms(35);
 	switch ((robot_dir - cardinal_direction + NUMBER_OF_LINKS) % NUMBER_OF_LINKS)
 	{
 		case 3:
 		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			_delay_ms(150);
+			
 			// Turn right order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_TIGHT_TURN_RIGHT);
@@ -360,11 +362,14 @@ void Do_turn(uint8_t cardinal_direction)
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 1) % NUMBER_OF_LINKS;
-			length = 2;
+			length = 0;
 			break;
 		}
 		case 2:
 		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			_delay_ms(200);
+			
 			// Rotation 180 degrees order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
@@ -373,13 +378,19 @@ void Do_turn(uint8_t cardinal_direction)
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
 			Wait_for_90_degree_rotation(); // ytterligare 90 grader
-			_delay_ms(200);
+			_delay_ms(75);
+			
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			_delay_ms(70);
+			
 			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
-			length = 2;
+			length = 0;
 			break;
 		}
 		case 1:
 		{
+			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
+			_delay_ms(150);
 			// Turn left order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_TIGHT_TURN_LEFT);
@@ -387,7 +398,7 @@ void Do_turn(uint8_t cardinal_direction)
 			Wait_for_90_degree_rotation();
 			
 			robot_dir = (robot_dir + 3) % NUMBER_OF_LINKS;
-			length = 2;
+			length = 0;
 			/*
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 			_delay_ms(400);
@@ -406,8 +417,6 @@ void Do_turn(uint8_t cardinal_direction)
 		_delay_ms(2000);
 		break;
 	}
-	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-	_delay_ms(30);
 	// Åk fram oreglerat order
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD); // Not regulated kanske
 	Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
@@ -777,32 +786,14 @@ void Following_path_at_crossing()
 		if (level == 42)
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(150);
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-			Wait_for_90_degree_rotation();
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-			Wait_for_90_degree_rotation();
-			_delay_ms(50);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
 
-			robot_dir = (robot_dir + 2) % 4;
 			level = 43;
 		}
 		else if (level == RETURN_AFTER_FOUND)
 		{
+
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(150);
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-			Wait_for_90_degree_rotation();
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-			Wait_for_90_degree_rotation();
-			_delay_ms(50);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			robot_dir = (robot_dir + 2) % 4;
+			
 			level = WAIT_FOR_ITEM;
 			COMMON_TOGGLE_PIN(PORTA, PORTA3);
 			COMMON_TOGGLE_PIN(PORTA, PORTA1);
@@ -814,18 +805,8 @@ void Following_path_at_crossing()
 		else if(level == RETURN_AFTER_DELIVERED)
 		{
 			//level = FINISHED;
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(150);
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-			Wait_for_90_degree_rotation();
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_LEFT);
-			Wait_for_90_degree_rotation();
-			_delay_ms(50);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			robot_dir = (robot_dir + 2) % 4;
-			level = WAIT_FOR_ITEM;
+			
+			Init_button_deliver();
 			COMMON_TOGGLE_PIN(PORTA, PORTA3);
 			COMMON_TOGGLE_PIN(PORTA, PORTA1);
 			level = WAIT_FOR_ITEM;
@@ -965,7 +946,7 @@ void Search(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_fron
 					if (sensor_front > SIZE_OF_SQUARE_IN_CM)
 					{
 						//Do_turn(robot_dir);
-						length = 4;
+						length = 2;
 					}
 					else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
 					{
@@ -1064,12 +1045,12 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			break;
 		}
 		
-		// Otestade
 		case GRAB_ITEM_AND_CALC_DIJK: // i case:en
 		{
 			Find_shortest_path(p_goal_node, p_start_node);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_CLOSE_CLAW);
 			_delay_ms(500);
+			Do_turn((robot_dir + 2) % 4);
 			level = GO_TO_GOAL;
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 			break;
@@ -1089,7 +1070,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 				else
 				{
 					
-					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_TICS);//abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
+					SPI_map_send_number_of_reflex_count_to_RFID_to_sensor(abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_TICS - 2);//abs(p_robot_node->x_coordinate - p_goal_node->x_coordinate + p_robot_node->y_coordinate - p_goal_node->y_coordinate) * SIZE_OF_SQUARE_IN_CM / 4.9);
 					SPI_map_should_handle_reached_RFID();
 					while (SPI_map_should_handle_reached_RFID() == FALSE)
 					{
@@ -1116,16 +1097,7 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
 			_delay_ms(100);
 			
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-			Map_send_byte_to_PC(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-			Wait_for_90_degree_rotation(); // 90 grader
-			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_ROTATE_RIGHT);
-			Wait_for_90_degree_rotation(); // ytterligare 90 grader
-			_delay_ms(50);
-			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
-			robot_dir = (robot_dir + 2) % NUMBER_OF_LINKS;
+			Do_turn((robot_dir + 2) % 4);
 			
 			//Find_shortest_path(p_robot_node, p_robot_node);
 			//SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_FORWARD);
@@ -1318,7 +1290,7 @@ void Search_on_level_2(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t 
 					if (sensor_front > SIZE_OF_SQUARE_IN_CM)
 					{
 						//Do_turn(robot_dir);
-						length = 4;
+						length = 2;
 					}
 					else if (sensor_front_right > SIDE_SENSOR_OPEN_LIMIT)
 					{
