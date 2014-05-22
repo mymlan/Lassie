@@ -29,6 +29,19 @@ static void SPI_sensor_slave_send_id_byte(uint8_t id_byte)
 	while(!(SPSR & (1<<SPIF))){}
 }
 
+static uint8_t SPI_sensor_recieve_byte(void)
+{
+	uint8_t number_of_bytes_in_data = 1;
+	while(number_of_bytes_in_data != 0)
+	{
+		if (SPSR & (1<<SPIF))
+		{
+			number_of_bytes_in_data--;
+		}
+	}
+	return SPDR;
+}
+
 //----------------AVBROTTSVEKTORER----------------//
 //Avbrottsrutin SPI transmission complete
 ISR(SPI_STC_vect)
@@ -41,8 +54,7 @@ ISR(SPI_STC_vect)
 			break;
 		case ID_BYTE_GIVE_DISTANCE:
 		{
-			uint8_t distance = ((reflex_count*REFLEX_COUNT_DISTANCE_PER_COLOUR_FIELD) / 10);
-			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, distance);
+			SPI_sensor_send_data_byte(ID_BYTE_DISTANCE, reflex_count);
 			reflex_count = 0;
 			break;
 		}
@@ -50,6 +62,11 @@ ISR(SPI_STC_vect)
 			//ACSR |= (1<<ACD);  //Stänger av Analog Comparator (reflexsensor) // BUGG i påsättningen senare!
 			ADMUX = (1<<ADLAR)|(1<<REFS0)|(1<<MUX1);
 			next_sensor_to_be_converted = ANGULAR_RATE;
+			break;
+		case ID_BYTE_COUNT_DOWN_REFLEX_SENSOR:
+			number_of_reflex_counts_to_RFID = SPI_sensor_recieve_byte();
+			count_down_number_of_reflex_counts_to_RFID_requested = 1;
+			reflex_count = 0;
 			break;
 		default:
 			break;
@@ -60,6 +77,11 @@ ISR(SPI_STC_vect)
 void SPI_sensor_send_rotation_finished(void)
 {
 	SPI_sensor_slave_send_id_byte(ID_BYTE_ROTATION_FINISHED);
+}
+
+void SPI_sensor_send_reached_RFID(void)
+{
+	SPI_sensor_slave_send_id_byte(ID_BYTE_REACHED_RFID);
 }
 
 void SPI_sensor_send_sensor_data(uint8_t *data)

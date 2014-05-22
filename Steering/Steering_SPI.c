@@ -82,12 +82,16 @@ ISR(SPI_STC_vect)
 				case COMMAND_BACKWARD: Backward();
 					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
+					PORTA = 0x90;
 					break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
+					PORTA = 0x91;
 					break;
 				case COMMAND_TURN_RIGHT: Turn_right();
+					PORTA = 0x92;
 					break;
 				case COMMAND_TURN_LEFT: Turn_left();
+					PORTA = 0x93;
 					break;
 				case COMMAND_OPEN_CLAW: Open_claw();
 					break;
@@ -106,10 +110,10 @@ ISR(SPI_STC_vect)
 			{
 				case COMMAND_STOP: Stop();
 					last_auto_decision = NO_NEED_TO_REGULATE;
-					PORTA = 0x20; // Error
+					//PORTA = 0x20; // Error
 					break;
 				case COMMAND_FORWARD: Forward_regulated(90,100);
-					//PORTA = 0x81;
+					PORTA = 0x30;
 					last_auto_decision = REGULATED_FORWARD;
 					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 100);
@@ -122,15 +126,19 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
+					PORTA = 0x40;
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
+					PORTA = 0x41;
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_TIGHT_TURN_RIGHT: Tight_turn_right();
+					PORTA = 0x70;
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_TIGHT_TURN_LEFT: Tight_turn_left();
+					PORTA = 0x71;
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_OPEN_CLAW: Open_claw();
@@ -140,31 +148,31 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_1: Stop();
-					PORTA = 0x21; // Error
+					//PORTA = 0x21; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_2: Stop();
-					PORTA = 0x22; // Error
+					//PORTA = 0x22; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_3: Stop();
-					PORTA = 0x23; // Error
+					//PORTA = 0x23; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_4: Stop();
-					PORTA = 0x24; // Error
+					//PORTA = 0x24; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;								
 				case COMMAND_STOP_5: Stop();
-					PORTA = 0x25; // Error
+					//PORTA = 0x25; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_6: Stop();
-					PORTA = 0x26; // Error
+					//PORTA = 0x26; // Error
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				default: Stop();
-					PORTA = 0xEA;
+					//PORTA = 0xEA;
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 			}
