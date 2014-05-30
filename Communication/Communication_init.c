@@ -16,7 +16,7 @@ void Init_button_search()
 
 ISR(PCINT2_vect)
 {
-	level++;
+	level = SEARCH_FOR_GOAL;
 	SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_FORWARD);
 	COMMON_CLEAR_BIT(PCICR, PCIE2); //Stänger av avbrottet
 	COMMON_CLEAR_BIT(PCMSK2, PCINT16); //Stänger av avbrottet

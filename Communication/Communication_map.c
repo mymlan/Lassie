@@ -353,7 +353,7 @@ void Do_turn(uint8_t cardinal_direction)
 		case 3:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(100);
+			_delay_ms(150);
 			
 			// Turn right order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
@@ -390,7 +390,7 @@ void Do_turn(uint8_t cardinal_direction)
 		case 1:
 		{
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS, COMMAND_STOP);
-			_delay_ms(100);
+			_delay_ms(150);
 			// Turn left order
 			SPI_map_send_id_byte_to_sensor(ID_BYTE_START_ANGULAR_RATE_SENSOR);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_TIGHT_TURN_LEFT);
@@ -1091,12 +1091,12 @@ void Update_map(uint8_t sensor_front, uint8_t sensor_front_left, uint8_t sensor_
 			_delay_ms(100);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_OPEN_CLAW);
 			_delay_ms(100);
-			
+			/*
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_BACKWARD);
 			_delay_ms(150);
 			SPI_map_send_command_to_steering(ID_BYTE_AUTO_DECISIONS,COMMAND_STOP);
 			_delay_ms(100);
-			
+			*/
 			Do_turn((robot_dir + 2) % 4);
 			
 			//Find_shortest_path(p_robot_node, p_robot_node);
@@ -1162,6 +1162,7 @@ void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_rig
 			Create_goal(new_x_coordinate, new_y_coordinate, Number_of_traveled_blocks(length), What_is_open(sensor_front_left, sensor_front_right, sensor_front));
 		}
 		
+		Map_send_byte_to_PC(ID_BYTE_FOUND_RFID, 0x01);
 		
 		/*
 		if (!enable_node_editing)
@@ -1188,7 +1189,7 @@ void Do_this_when_rfid_found(uint8_t sensor_front_left, uint8_t sensor_front_rig
 
 void Set_enable()
 {
-	if(enable_safety > 1)
+	if(enable_safety == 0)
 	{
 		enable_node_editing = 1;
 		enable_safety = 0;

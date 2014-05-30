@@ -206,7 +206,7 @@ ISR (ADC_vect)
 			ir_sensor_data[6] = sensor_data_distance_from_right_wall;//lägger in avvikelsen på plats 7 i ir_sensor_data;
 			break;
 		case(ANGULAR_RATE):
-			if ((-21.5 < angular_rate_total) && (angular_rate_total < 21.5)) //kollar om roboten roterat 90 grader i någon riktning, positiv i vänster riktning
+			if ((-22.5 < angular_rate_total) && (angular_rate_total < 22.5)) //kollar om roboten roterat 90 grader i någon riktning, positiv i vänster riktning
 			{
 				angular_rate_value = ADCH; //läser av vinkelhastigheten
 				angular_rate_diff = (angular_rate_value - angular_rate_offset)*ANGULAR_RATE_SENSITIVITY; //beräknar förändringen av roterad vinkel sedan sedan förra avläsningen
