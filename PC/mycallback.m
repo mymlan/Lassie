@@ -12,6 +12,9 @@ switch id_byte
         set(handles.distance,'String',distance)
     case 8 %auto_decisions
         collect_and_display_steering_commands(BT, handles);
+    case 11 %found RFID
+        RFID = fread(BT,1); %Parameter som finns om man vill vidareutveckla roboten att kunna detektera flera RFID-taggar
+        set(handles.rfid_utslag, 'String', 'RFID funnen')
     case 12 %Map links
         collect_and_plot_map_links(BT, handles)
     case 13 %Map parameters
