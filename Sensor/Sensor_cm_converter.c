@@ -14,9 +14,11 @@
 //-------------VARIABLER/KONSTANTER---------------//
 // tillhörande RFID
 volatile uint8_t RFID_tag_read[10];  //Array med 10 bytes där RFID ID lagras
-volatile uint8_t RFID_tag_correct[10];  //Avläst ID på RFID läggs in här om korrekt avläsning skett
+volatile uint8_t RFID_tag_correct[10] = {50, 50, 48, 48, 53, 50, 65, 66, 54, 68};  //Avläst ID på RFID läggs in här om korrekt avläsning skett
 volatile uint8_t RFID_count = 0;  //Räknare för att kontrollera att rätt antal bytes lästs in från RFID
 volatile uint8_t RFID_start_read = 0;  //Kontrollerar startbit innan bytes lägg in på RFID_tag_read
+
+volatile int a = 0;
 
 // tillhörande vinkelhastighetssensorn
 static volatile double angular_rate_offset;
@@ -125,23 +127,27 @@ ISR(USART0_RX_vect)
 {	
 	//SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
 
-	if (RFID_count==10)  //kollar om korrekt antal bitar
+	if (RFID_count == 10)  //kollar om korrekt antal bitar
 	{
 		if (UDR0 == 13)  //kollar om korrekt stopbit
 		{
 			for (int i = 0; i <= 9; i++)
 			{
-				RFID_tag_correct[i] = RFID_tag_read[i];  //Laddar över korrekt avläst RFID ID
+				if (RFID_tag_read[i] != RFID_tag_correct[i])
+				{
+					RFID_count = 0;
+				} 
 			}
-			//Ifall vi vill kunna identifiera en specifik RFID så ska vi kolla igenom den avlästa RFIDn med ett antal kända RFID-nummer
-			/*if (RFID_tag_correct[9] == 68) 
+			
+			if (RFID_count == 10)
 			{
-				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, RFID_1);
-			}*/
+				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1); //Meddelar att RFID hittats (samt vilken RFID som hittats)
+				a = 1;
+			}
 			
 
 			
-			SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
+			  
 
 			RFID_count = 0; 
 			RFID_start_read = 0;
@@ -149,6 +155,7 @@ ISR(USART0_RX_vect)
 		else
 		{
 			RFID_count = 0;
+			RFID_start_read = 0;
 		}
 	}
 	//Lägger in avlästa bytes om korrekt startbit hittats
