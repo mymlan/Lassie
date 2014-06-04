@@ -18,8 +18,6 @@ volatile uint8_t RFID_tag_correct[10] = {50, 50, 48, 48, 53, 50, 65, 66, 54, 68}
 volatile uint8_t RFID_count = 0;  //Räknare för att kontrollera att rätt antal bytes lästs in från RFID
 volatile uint8_t RFID_start_read = 0;  //Kontrollerar startbit innan bytes lägg in på RFID_tag_read
 
-volatile int a = 0;
-
 // tillhörande vinkelhastighetssensorn
 static volatile double angular_rate_offset;
 static volatile uint8_t angular_rate_value;
@@ -125,7 +123,6 @@ ISR(PCINT2_vect)
 
 ISR(USART0_RX_vect)
 {	
-	//SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);
 
 	if (RFID_count == 10)  //kollar om korrekt antal bitar
 	{
@@ -142,12 +139,7 @@ ISR(USART0_RX_vect)
 			if (RFID_count == 10)
 			{
 				SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1); //Meddelar att RFID hittats (samt vilken RFID som hittats)
-				a = 1;
-			}
-			
-
-			
-			  
+			}		  
 
 			RFID_count = 0; 
 			RFID_start_read = 0;
@@ -167,9 +159,6 @@ ISR(USART0_RX_vect)
 	//Meddelar resten av ISR att en korrekt startbit hittats
 	if (UDR0 == 10)
 	{
-		//SPI_sensor_send_data_byte(ID_BYTE_FOUND_RFID, 1);  //Meddelar att RFID hittats (samt vilken RFID som hittats)
-		//RFID_count = 0;
-		//RFID_start_read = 0;
 		RFID_start_read = 1;
 	}
 }
