@@ -1,3 +1,9 @@
+/*
+ * Common.h
+ * Författare: denbe220, henba136, mikiv293, linka950, hugjo456, gusno119
+ * 2014-06-05
+ * version 1.0
+ */ 
 
 #define COMMON_SET_PIN(PORT, PIN) (PORT |= (1 << PIN))
 // vänterskift med en etta, sedan or med register
