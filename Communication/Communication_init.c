@@ -1,3 +1,9 @@
+/*
+ * Communication_init.c
+ * Författare: hugjo456, mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

@@ -1,4 +1,11 @@
-﻿#define F_CPU 18432000UL
+﻿/*
+ * Communication_map.c
+ * Författare: denbe220, henba136
+ * 2014-06-05
+ * version 1.0
+ */ 
+
+#define F_CPU 18432000UL
 
 #include <avr/io.h>
 #include <stdlib.h>

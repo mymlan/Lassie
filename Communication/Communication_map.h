@@ -1,4 +1,11 @@
-﻿#ifndef _COMMUNICATION_MAP_H
+﻿/*
+ * Communication_map.h
+ * Författare: denbe220, henba136
+ * 2014-06-05
+ * version 1.0
+ */ 
+
+#ifndef _COMMUNICATION_MAP_H
 #define _COMMUNICATION_MAP_H
 
 //------ C, VI LOVAR ATT DESSA STRUCTAR DEFINIERAS -------//

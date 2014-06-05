@@ -1,3 +1,9 @@
+/*
+ * Communication.c
+ * Författare: denbe220, henba136, mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */ 
 
 #define F_CPU (18432000L) //definerar klockfrekvens för att _delay_us ska funka
 
@@ -11,6 +17,7 @@
 #include "Communication_init.h"
 int test_variable_e = 0;
 
+//----------------MAIN--------------//
 int main(void)
 {
 	_delay_ms(1);
