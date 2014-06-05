@@ -1,3 +1,9 @@
+/*
+ * Steering_SPI.c 
+ * Författare: mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */
 
 #define F_CPU (18432000L)
 
@@ -47,7 +53,6 @@ static uint8_t SPI_steering_recieve_byte(void)
 ISR(SPI_STC_vect)
 {
 	uint8_t byte_from_SPI = SPDR;
-	//PORTA = byte_from_SPI;
 	switch (byte_from_SPI)
 	{
 		case ID_BYTE_IR_SENSOR_DATA:
@@ -65,7 +70,7 @@ ISR(SPI_STC_vect)
 					Backward_regulated(sensor_data[5], sensor_data[6]);
 					break;
 				default:
-					PORTA = 0xEC;
+					PORTA = 0xEC; //Spårutskrift på 7-segmetdisplay
 					break;
 			}
 			break;
@@ -82,23 +87,23 @@ ISR(SPI_STC_vect)
 				case COMMAND_BACKWARD: Backward();
 					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
-					PORTA = 0x90;
+					PORTA = 0x90; //Spårutskrift på 7-segmetdisplay
 					break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
-					PORTA = 0x91;
+					PORTA = 0x91; //Spårutskrift på 7-segmetdisplay
 					break;
 				case COMMAND_TURN_RIGHT: Turn_right();
-					PORTA = 0x92;
+					PORTA = 0x92; //Spårutskrift på 7-segmetdisplay
 					break;
 				case COMMAND_TURN_LEFT: Turn_left();
-					PORTA = 0x93;
+					PORTA = 0x93; //Spårutskrift på 7-segmetdisplay
 					break;
 				case COMMAND_OPEN_CLAW: Open_claw();
 					break;
 				case COMMAND_CLOSE_CLAW: Close_claw();
 					break;
 				default: Stop();
-					PORTA = 0xEF;
+					PORTA = 0xEF; //Spårutskrift på 7-segmetdisplay
 					break;
 			}
 			break;
@@ -110,10 +115,9 @@ ISR(SPI_STC_vect)
 			{
 				case COMMAND_STOP: Stop();
 					last_auto_decision = NO_NEED_TO_REGULATE;
-					//PORTA = 0x20; // Error
 					break;
 				case COMMAND_FORWARD: Forward_regulated(90,100);
-					PORTA = 0x30;
+					PORTA = 0x30; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = REGULATED_FORWARD;
 					break;
 				case COMMAND_BACKWARD: Backward_regulated(90, 100);
@@ -126,19 +130,19 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_ROTATE_RIGHT: Rotate_right();
-					PORTA = 0x40;
+					PORTA = 0x40; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_ROTATE_LEFT: Rotate_left();
-					PORTA = 0x41;
+					PORTA = 0x41; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_TIGHT_TURN_RIGHT: Tight_turn_right();
-					PORTA = 0x70;
+					PORTA = 0x70; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_TIGHT_TURN_LEFT: Tight_turn_left();
-					PORTA = 0x71;
+					PORTA = 0x71; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_OPEN_CLAW: Open_claw();
@@ -148,38 +152,38 @@ ISR(SPI_STC_vect)
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_1: Stop();
-					//PORTA = 0x21; // Error
+					//PORTA = 0x21; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_2: Stop();
-					//PORTA = 0x22; // Error
+					//PORTA = 0x22; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_3: Stop();
-					//PORTA = 0x23; // Error
+					//PORTA = 0x23; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_4: Stop();
-					//PORTA = 0x24; // Error
+					//PORTA = 0x24; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;								
 				case COMMAND_STOP_5: Stop();
-					//PORTA = 0x25; // Error
+					//PORTA = 0x25; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				case COMMAND_STOP_6: Stop();
-					//PORTA = 0x26; // Error
+					//PORTA = 0x26; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 				default: Stop();
-					//PORTA = 0xEA;
+					//PORTA = 0xEA; //Spårutskrift på 7-segmetdisplay
 					last_auto_decision = NO_NEED_TO_REGULATE;
 					break;
 			}
 			break;
 		}
 		default:
-			PORTA = 0xEE;
+			PORTA = 0xEE; //Spårutskrift på 7-segmetdisplay
 			break;
 	}
 }
