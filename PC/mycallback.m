@@ -1,5 +1,5 @@
 % /*
-%  * mjukvara.m
+%  * mycallback.m
 %  * Författare: linka950, denbe220
 %  * 2014-06-05
 %  * version 1.0
