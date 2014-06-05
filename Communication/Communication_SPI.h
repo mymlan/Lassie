@@ -1,3 +1,9 @@
+/*
+ * Communication_SPI.h
+ * Författare: mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */
 
 #ifndef _COMMUNICATION_SPI_H
 #define _COMMUNICATION_SPI_H

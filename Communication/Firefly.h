@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Firefly.h
+ * Författare: linka950
+ * 2014-06-05
+ * version 1.0
+ */
+
 #ifndef FIREFLY_H_
 #define FIREFLY_H_
 
