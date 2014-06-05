@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Steering_functions.h
+ * Författare: denbe220, henba136, mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */
+
 #ifndef _STEERING_FUNCTIONS_H
 #define _STEERING_FUNCTIONS_H
 

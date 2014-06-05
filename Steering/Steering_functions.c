@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Steering_functions.c 
+ * Författare: denbe220, henba136, mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */ 
+
 #define F_CPU 18432000UL
 
 #include <avr/io.h>
@@ -205,7 +211,7 @@ static void Lookup_table_K_D(uint8_t regulator_angle)
 void Steering_initialize_7_segment_display_error_pins()
 {
 	DDRA = 0xFF; // Alla port A pinnar ut.
-	PORTA = 0x00; // Inget error = 0
+	PORTA = 0x00; // Inget fel = 0
 }
 
 void Steering_initialize_pwm()
@@ -277,14 +283,14 @@ void Turn_left()
 void Tight_turn_right()
 {
 	Set_wheels_left_forward_right_backward();
-	OCR1A = pwm_left_wheel_normal_speed; // normal egentligen
+	OCR1A = pwm_left_wheel_normal_speed;
 	OCR1B = pwm_right_wheel_fast_speed;
 }
 void Tight_turn_left()
 {
 	Set_wheels_left_backward_right_forward();
 	OCR1A = pwm_left_wheel_fast_speed;
-	OCR1B = pwm_right_wheel_normal_speed; // normal egentligen
+	OCR1B = pwm_right_wheel_normal_speed;
 }
 void Open_claw()
 {
