@@ -14,16 +14,10 @@
 #include "Steering_SPI.h"
 #include "Steering_functions.h"
 
+//-------------VARIABLER/KONSTANTER---------------//
 static volatile uint8_t last_auto_decision;
 
-void SPI_steering_init(void)
-{
-	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
-	DDRB = 0x40; //Sätter MISO till utgång
-	
-	last_auto_decision = NO_NEED_TO_REGULATE;
-}
-
+//-----------------STATIC FUNKTIONER----------------//
 static void SPI_steering_recieve_sensor_data(uint8_t *sensor_data)
 {
 	uint8_t number_of_bytes_in_data = NUMBER_OF_BYTES_IR_SENSOR_DATA;
@@ -47,6 +41,15 @@ static uint8_t SPI_steering_recieve_byte(void)
 		}
 	}
 	return SPDR;
+}
+
+//----------------INITIERINGSFUNKTION----------------//
+void SPI_steering_init(void)
+{
+	SPCR = 0xC0; //Aktiverar avbrott från SPI, aktiverar SPI, sätter modul till slave.
+	DDRB = 0x40; //Sätter MISO till utgång
+	
+	last_auto_decision = NO_NEED_TO_REGULATE;
 }
 
 //Avbrottsrutin SPI transmission complete
