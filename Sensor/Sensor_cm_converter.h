@@ -1,7 +1,14 @@
+/*
+ * Sensor_cm_converter.h
+ * Författare: hugjo456, gusno119
+ * 2014-06-05
+ * version 1.0
+ */ 
+
 #ifndef _SENSOR_CM_CONVERTER_H
 #define _SENSOR_CM_CONVERTER_H
 
-uint8_t ir_sensor_data[7]; // volatile fungerar inte med send funktionen
+uint8_t ir_sensor_data[7];
 volatile uint16_t reflex_count;
 volatile uint8_t number_of_reflex_counts_to_RFID;
 volatile uint8_t count_down_number_of_reflex_counts_to_RFID_requested;

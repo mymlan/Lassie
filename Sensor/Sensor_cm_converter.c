@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Sensor_cm_converter.c 
+ * Författare: hugjo456, gusno119
+ * 2014-06-05
+ * version 1.0
+ */
+
 #define F_CPU (18432000L)
 #define Baudrate 2400  //Bits per second hos RFID
 #define Baud_Prescale ((F_CPU/(Baudrate*16UL))-1)  //Baud rate generator (prescaler) för USART
