@@ -1,4 +1,9 @@
-
+% /*
+%  * mjukvara.m
+%  * Författare: linka950, denbe220
+%  * 2014-06-05
+%  * version 1.0
+%  */ 
 
 function varargout = mjukvaru_gui(varargin)
 % MJUKVARU_GUI MATLAB code for mjukvaru_gui.fig

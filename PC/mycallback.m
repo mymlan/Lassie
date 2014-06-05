@@ -1,3 +1,9 @@
+% /*
+%  * mjukvara.m
+%  * Författare: linka950, denbe220
+%  * 2014-06-05
+%  * version 1.0
+%  */ 
 
 function mycallback(hObject, eventdata, BT, handles)
 global sensor_data;
