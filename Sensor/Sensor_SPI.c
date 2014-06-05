@@ -1,3 +1,10 @@
+/*
+ * Sensor_SPI.c
+ * Författare: mikiv293, linka950
+ * 2014-06-05
+ * version 1.0
+ */ 
+
 #define F_CPU (18432000L)
 
 #include <avr/io.h>
